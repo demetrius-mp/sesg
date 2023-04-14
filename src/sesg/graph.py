@@ -1,3 +1,4 @@
+import itertools
 from collections import defaultdict, deque
 from typing import Iterable, List, Mapping, Optional, Sequence, Tuple
 
@@ -15,7 +16,7 @@ def edges_to_adjacency_list(
         directed (bool): Wheter the edges are directed or not. Defaults to True
 
     Returns:
-        An adjacency list represented as a mapping, where each key is a node and the value is a list of nodes that are connected to the key node.
+        A mapping of node IDs to their list of neighbors.
 
     Examples:
         >>> edges = [(1, 2), (2, 3), (2, 4)]
@@ -36,6 +37,34 @@ def edges_to_adjacency_list(
     return dict(adjacency_list)
 
 
+def directed_adjacency_list_to_undirected(
+    adjacency_list: Mapping[int, Sequence[int]],
+) -> Mapping[int, Sequence[int]]:
+    """Converts a directed adjacency list to an undirected adjacency list.
+
+    Args:
+        adjacency_list (Mapping[int, Sequence[int]]): A mapping of node IDs to their list of neighbors.
+
+    Returns:
+        A mapping of node IDs to their list of neighbors in an undirected graph.
+
+    Examples:
+        >>> directed_adjacency_list_to_undirected({1: [2, 3], 2: [3, 4], 3: [4]})
+        {1: [2, 3], 2: [1, 3, 4], 3: [1, 2, 4], 4: [2, 3]}
+
+        >>> directed_adjacency_list_to_undirected({1: [], 2: [1], 3: [1, 2], 4: [2, 3]})
+        {2: [1, 3, 4], 1: [2, 3], 3: [1, 2, 4], 4: [2, 3]}
+    """  # noqa: E501
+    undirected_adjacency_list: Mapping[int, List[int]] = defaultdict(list)
+
+    for node, neighbors in adjacency_list.items():
+        for neighbor in neighbors:
+            undirected_adjacency_list[node].append(neighbor)
+            undirected_adjacency_list[neighbor].append(node)
+
+    return dict(undirected_adjacency_list)
+
+
 def breadth_first_search(
     adjacency_list: Mapping[int, Sequence[int]],
     starting_node: int,
@@ -45,7 +74,7 @@ def breadth_first_search(
 
 
     Args:
-        adjacency_list (Mapping[int, Sequence[int]]): Adjacency list that represents the graph.
+        adjacency_list (Mapping[int, Sequence[int]]): A mapping of node IDs to their list of neighbors.
         starting_node (int): Node where to start the search.
 
     Returns:
@@ -91,12 +120,11 @@ def serial_breadth_first_search(
     """Runs many breadth first searches on a graph, using all of the given starting nodes.
 
     Args:
-        adjacency_list (Mapping[int, Sequence[int]]): Adjacency list that represents the graph.
+        adjacency_list (Mapping[int, Sequence[int]]): A mapping of node IDs to their list of neighbors.
         starting_nodes (Iterable[int]): List of nodes where to start the search.
 
     Returns:
-        Sequence[int]: List of nodes connected to each one of the starting nodes by a path.
-        The list of nodes is free of duplicates.
+        Sequence[int]: List of nodes connected to each one of the starting nodes by a path. The list of nodes is free of duplicates.
 
     Examples:
         >>> adjacency_list = {
@@ -123,62 +151,69 @@ def serial_breadth_first_search(
 
 
 def create_citation_graph(
-    edges: Iterable[Tuple[int, int]],
-    titles: Sequence[str],
+    adjacency_list: Mapping[int, Sequence[int]],
+    tooltips: Mapping[int, str],
     results_list: Optional[Sequence[int]] = list(),
-    node_labels: Optional[Sequence[int]] = None,
 ) -> Digraph:
-    r"""Creates a `graphviz.Digraph` instance with the following properties:
+    """Creates a `graphviz.Digraph` instance with the following properties:
+
     - Filled nodes: nodes on the results list.
-    - Bold nodes: nodes found via BFS on the results list.
-    - Dashed nodes: nodes that are not on the results list, neither found via BSB on the results list.
+    - Bold nodes: nodes found via BFS using the results list as starting nodes.
+    - Dashed nodes: nodes that are not on the results list, neither found via BFS.
 
     Args:
-        edges (Iterable[Tuple[int, int]]): Edges of the graph. **Must** use 0-based indexing.
-        titles (Sequence[str]): List of the title of the studies, where Node `i` has title `titles[i]`, following a zero-based indexing.
-        results_list (Optional[Sequence[int]]): List of nodes found via Scopus Search. Defaults to an empty list.
-        node_labels (Optional[Sequence[int]]): Labels to use on the nodes. If set to None, will use 1-based indexing.
+        adjacency_list (Mapping[int, Sequence[int]]): A mapping of node IDs to their list of neighbors.
+        tooltips (Sequence[str]): A mapping of node IDs to their tooltip.
+        results_list (Optional[Sequence[int]]): List of nodes where to start a BFS. Defaults to an empty list.
 
     Examples:
-        >>> g = create_citation_graph(
-        ...     edges=[(0, 1), (1, 2), (1, 3), (4, 5)],
-        ...     titles=["1", "2", "3", "4", "5", "6"],
-        ... )
-        >>> g.source
-        'strict digraph {\n\t01 [shape=circle style=dashed tooltip=1]\n\t02 [shape=circle style=dashed tooltip=2]\n\t03 [shape=circle style=dashed tooltip=3]\n\t04 [shape=circle style=dashed tooltip=4]\n\t05 [shape=circle style=dashed tooltip=5]\n\t06 [shape=circle style=dashed tooltip=6]\n\t01 -> 02\n\t02 -> 03\n\t02 -> 04\n\t05 -> 06\n\tlabel="Dashed -> Not found\\nBold -> Snowballing\\nFilled -> Search"\n}\n'
+        >>> adjacency_list = {1: [2], 2: [3, 4], 3: [4, 5], 4: [6], 5: [7]}
+        >>> tooltips = {1: "Paper 1", 2: "Paper 2", 3: "Paper 3", 4: "Paper 4", 5: "Paper 5", 6: "Paper 6", 7: "Paper 7"}
+        >>> results_list = [1, 3]
+        >>> g = create_citation_graph_(adjacency_list, tooltips, results_list)
 
     Returns:
-        Digraph: A `graphviz.Digraph` instance with the said properties.
+        A graphviz dot object with the said properties.
     """  # noqa: E501
-    number_of_nodes = len(titles)
-
     if results_list is None:
         results_list = list()
 
-    if node_labels is None:
-        node_labels = list(range(1, number_of_nodes + 1))
-
     graph = Digraph(strict=True)
 
-    # adding all nodes, tagging all as **not found**
-    for i in range(number_of_nodes):
+    nodes = itertools.chain(
+        (node, *references) for node, references in adjacency_list.items()
+    )
+    nodes = itertools.chain(*nodes)
+
+    max_id = max(nodes)
+    node_padding = len(str(max_id))
+
+    def format_node(node_id: int) -> str:
+        return str(node_id).zfill(node_padding)
+
+    # adding nodes
+    # all nodes will be created as "not found" (with dashed style)
+    for node, tooltip in tooltips.items():
         graph.node(
-            f"{node_labels[i]:02}",
-            shape="circle",
+            str(node),
+            tooltip=tooltip,
             style="dashed",
-            tooltip=titles[i],
         )
 
     # adding citation edges
-    for i, j in edges:
-        graph.edge(f"{node_labels[i]:02}", f"{node_labels[j]:02}")
+    for node, neighbors in adjacency_list.items():
+        for neighbor in neighbors:
+            graph.edge(
+                format_node(node),
+                format_node(neighbor),
+            )
 
-    nodes_reachable_via_snowballing_on_results = serial_breadth_first_search(
-        adjacency_list=edges_to_adjacency_list(edges=edges),
+    nodes_found_with_bfs = serial_breadth_first_search(
+        adjacency_list=adjacency_list,
         starting_nodes=results_list,
     )
 
-    # NOTE: Since we care more about nodes that are found via search,
+    # Since we care more about nodes that are found via search,
     # first we tag the ones found via snowballing, and later,
     # the ones found via Scopus Search.
     # This way, if a same node that is found via Scopus Search, is found via snowballing,  # noqa: E501
@@ -186,23 +221,21 @@ def create_citation_graph(
 
     # tagging nodes that can be found via snowballing
     # on the studies found via search
-    for i in nodes_reachable_via_snowballing_on_results:
+    for node in nodes_found_with_bfs:
         graph.node(
-            f"{node_labels[i]:02}",
+            format_node(node),
             shape="circle",
             style="bold",
-            tooltip=titles[i],
+            tooltip=tooltips[node],
         )
 
-    # tagging nodes found via search
-    for i in results_list:
+    # tagging nodes on results_list
+    for node in results_list:
         graph.node(
-            f"{node_labels[i]:02}",
+            format_node(node),
             shape="circle",
             style="filled",
-            tooltip=titles[i],
+            tooltip=tooltips[node],
         )
-
-    graph.attr(label=r"Dashed -> Not found\nBold -> Snowballing\nFilled -> Search")
 
     return graph
