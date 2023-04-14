@@ -12,12 +12,13 @@
   },
   "explorer.fileNesting.enabled": true,
   "explorer.fileNesting.patterns": {
-    "pyproject.toml": "poetry.lock, README.md",
+    "pyproject.toml": "poetry.lock, README.md, .gitignore, mkdocs.yml",
   },
   "files.exclude": {
     ".pytest_cache": true,
     ".ruff_cache": true,
     "**/__pycache__": true,
+    ".coverage": true,
   },
   "files.associations": {
     "*.env": "properties"
