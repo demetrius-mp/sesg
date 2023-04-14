@@ -1,6 +1,6 @@
 site_name: SeSG
-repo_url: https://github.com/demetrius-mp/sesg
-repo_name: demetrius-mp/sesg
+repo_url: https://github.com/demetrius-mp/sesg-package
+repo_name: demetrius-mp/sesg-package
 edit_uri: tree/main/docs
 
 theme:
