@@ -5,25 +5,35 @@ edit_uri: tree/main/docs
 
 theme:
   name: material
+  palette:
+    - scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+    - scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
 
 markdown_extensions:
-- attr_list
+  - attr_list
 
 extra_css:
-- stylesheets/extra.css
+  - stylesheets/extra.css
 
 nav:
-- Code Reference: reference/
+  - Code Reference: reference/
 
 plugins:
-- search
-- gen-files:
-    scripts:
-    - docs/scripts/gen_ref_pages.py
-- literate-nav:
-    nav_file: SUMMARY.md
-- section-index
-- mkdocstrings:
-    handlers:
-      python:
-        paths: [src]
+  - search
+  - gen-files:
+      scripts:
+        - docs/scripts/gen_ref_pages.py
+  - literate-nav:
+      nav_file: SUMMARY.md
+  - section-index
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
