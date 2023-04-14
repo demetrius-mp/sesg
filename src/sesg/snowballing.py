@@ -14,29 +14,21 @@ def _window(
 ) -> Iterator[Tuple[T, ...]]:
     """Creates an iterator over overlapping subslices of the given size.
 
-    >>> elements = [1, 2, 3, 4, 5, 6]
-    >>> for subslice in _window(elements, 3):
-    ...     print(subslice)
-    (1, 2, 3)
-    (2, 3, 4)
-    (3, 4, 5)
-    (4, 5, 6)
-
     Args:
         seq (Iterable[T]): Sequence to iterate over.
         size (int): Size of each subslice.
 
     Yields:
-        Iterator[Tuple[T, ...]]: A subslice with the given size.
-    """
+        A subslice with the given size.
 
-    """Creates an iterator over overlapping subslices of length `n`.
-
-    Args:
-        seq: The sequence to iterate over
-        n: The size of each subslice
-    Yields:
-        A `slice` of size n
+    Examples:
+        >>> elements = [1, 2, 3, 4, 5, 6]
+        >>> for subslice in _window(elements, 3):
+        ...     print(subslice)
+        (1, 2, 3)
+        (2, 3, 4)
+        (3, 4, 5)
+        (4, 5, 6)
     """
     it = iter(seq)
     result = tuple(islice(it, size))
@@ -55,18 +47,19 @@ def _study_cites_title(
 ) -> bool:
     """Uses `thefuzz.process.extractOne` to determine if a study cites a title.
 
-    >>> _study_cites_title(
-    ...     title="regression tests for machine learning models: a systematic literature review",
-    ...     study="long text here very long REFERENCES: regression tests for machine learning models: a systematic literature review",
-    ... )
-    True
-
     Args:
         title (str): Title to search for.
         study (str): Text of the study.
 
     Returns:
-        bool: True if the study cites the title, False otherwise.
+        True if the study cites the title, False otherwise.
+
+    Examples:
+        >>> _study_cites_title(
+        ...     title="regression tests for machine learning models: a systematic literature review",
+        ...     study="long text here very long REFERENCES: regression tests for machine learning models: a systematic literature review",
+        ... )
+        True
     """
     window_size = len(title)
     options = ["".join(x) for x in _window(study, window_size)]
@@ -99,23 +92,21 @@ def _pooled_study_cites_title(
     """Replicates `_study_cites_title` behaviour, with slight modifications to work
     well with `multiprocessing.Pool`.
 
-    In the example below, we are checking if the study cites itself, so it's better to skip
-    in order to save computation.
-
-    >>> _pooled_study_cites_title(
-    ...     _PooledStudyCitesTitleArgs(
-    ...         title="regression tests for machine learning models: a systematic literature review",
-    ...         study="TITLE: regression tests for machine learning models: a systematic literature review. Abstract: abstract here",
-    ...         skip=True,
-    ...     )
-    ... )
-    False
-
     Args:
         args (_PooledStudyCitesTitleArgs): args of this function.
 
     Returns:
-        bool: False if skip is True, the result of `_study_cites_title(args["title"], args["study"])` otherwise.
+        False if skip is True, the result of `_study_cites_title(args["title"], args["study"])` otherwise.
+
+    Examples:
+        >>> _pooled_study_cites_title(
+        ...     _PooledStudyCitesTitleArgs(
+        ...         title="regression tests for machine learning models: a systematic literature review",
+        ...         study="TITLE: regression tests for machine learning models: a systematic literature review. Abstract: abstract here",
+        ...         skip=True,
+        ...     )
+        ... )
+        False
     """  # noqa: E501
     if args["skip"]:
         return False
@@ -131,14 +122,15 @@ def _preprocess_title(
     1. Turns to lower case
     1. Removes spaces and dots
 
-    >>> _preprocess_title(title=" title. HERE ")
-    'titlehere'
-
     Args:
         title (str): Title to preprocess.
 
     Returns:
-        str: Preprocessed title.
+        Preprocessed title.
+
+    Examples:
+        >>> _preprocess_title(title=" title. HERE ")
+        'titlehere'
     """
     return title.strip().lower().replace(" ", "").replace(".", "")
 
@@ -151,14 +143,15 @@ def _preprocess_study(
     1. Turns to lower case
     1. Removes line breaks, line carriages, spaces, and dots
 
-    >>> _preprocess_study(study_text=" text. \n \r\n HERE ")
-    'texthere'
-
     Args:
         study_text (str): Study's text to preprocess
 
     Returns:
-        str: Preprocessed study.
+        Preprocessed study.
+
+    Examples:
+        >>> _preprocess_study(study_text=" text. \n \r\n HERE ")
+        'texthere'
     """
     return (
         study_text.strip()
@@ -175,14 +168,15 @@ class SnowballingStudy:
     The constructor will preprocess the title and text content to the correct
     format.
 
-    >>> s = SnowballingStudy(id=1, title=" title. HERE ", text_content=" text. \n \r\n HERE ")
-    >>> s.title == "titlehere", s.text_content == "texthere"
-    (True, True)
-
     Args:
         id (int): Identifier of the study. Could be a database id, for example.
         title (str): Title of the study.
         text_content (str): Content of the study. Could be extracted from a PDF with CERMINE.
+
+    Examples:
+        >>> s = SnowballingStudy(id=1, title=" title. HERE ", text_content=" text. \n \r\n HERE ")
+        >>> s.title == "titlehere", s.text_content == "texthere"
+        (True, True)
     """  # noqa: E501
 
     id: int
@@ -206,23 +200,22 @@ def backwards_snowballing(
     """Runs backwads snowballing in the given list of studies.
     The graph returned is in the form of an Adjacency List
 
-    >>> studies: List[SnowballingStudy] = [
-    ...     SnowballingStudy(id=1, title="title 1", text_content="... REFERENCES: machine learning, a SLR"),
-    ...     SnowballingStudy(id=2, title="machine learning, a SLR", text_content="... REFERENCES: other studies"),
-    ... ]
-    >>>
-    >>> for study, references in backwards_snowballing(studies):
-    ...     refs_ids = [r.id for r in references]
-    ...     print(f"{study.id} -> {refs_ids}")
-    1 -> [2]
-    2 -> []
-
     Args:
         studies (Sequence[SnowballingStudy]): List of studies with id, title, and text content.
 
     Yields:
-        Iterator[Tuple[SnowballingStudy, Sequence[SnowballingStudy]]]: Iterator of tuples,
-        where the tuple holds a study, and the studies that are referenced.
+        Iterator of tuples, where the tuple holds a study, and the studies that are referenced.
+
+    Examples:
+        >>> studies: List[SnowballingStudy] = [
+        ...     SnowballingStudy(id=1, title="title 1", text_content="... REFERENCES: machine learning, a SLR"),
+        ...     SnowballingStudy(id=2, title="machine learning, a SLR", text_content="... REFERENCES: other studies"),
+        ... ]
+        >>>
+        >>> for study, references in backwards_snowballing(studies):
+        ...     print((study.id, [r.id for r in references]))
+        (1, [2])
+        (2, [])
     """  # noqa: E501
 
     for study_index, study in enumerate(studies):
