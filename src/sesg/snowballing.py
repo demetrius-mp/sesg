@@ -60,7 +60,7 @@ def _study_cites_title(
         ...     study="long text here very long REFERENCES: regression tests for machine learning models: a systematic literature review",
         ... )
         True
-    """
+    """  # noqa: E501
     window_size = len(title)
     options = ["".join(x) for x in _window(study, window_size)]
 

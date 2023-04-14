@@ -2,4 +2,5 @@
     * [graph](sesg/graph.md)
     * [metrics](sesg/metrics.md)
     * [scopus_client](sesg/scopus_client.md)
+    * [search_string](sesg/search_string.md)
     * [snowballing](sesg/snowballing.md)

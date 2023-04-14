@@ -55,7 +55,7 @@ class Metrics:
 
     @property
     def scopus_recall(self):
-        """Measures the recall using the number of GS studies found in Scopus, and the GS size."""
+        """Measures the recall using the number of GS studies found in Scopus, and the GS size."""  # noqa: E501
         return self.n_gs_studies_in_scopus / self.gs_size
 
     @property
