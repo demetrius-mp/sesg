@@ -1,0 +1,27 @@
+{
+  "python.languageServer": "Pylance",
+  "python.formatting.provider": "black",
+  "python.linting.enabled": false,
+  "python.analysis.typeCheckingMode": "basic",
+  "[python]": {
+    "editor.codeActionsOnSave": {
+      "source.fixAll": true,
+      "source.organizeImports": true
+    },
+    "editor.tabSize": 4
+  },
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.patterns": {
+    "pyproject.toml": "poetry.lock, README.md",
+  },
+  "files.exclude": {
+    ".pytest_cache": true,
+    ".ruff_cache": true,
+    "**/__pycache__": true,
+  },
+  "files.associations": {
+    "*.env": "properties"
+  },
+  "editor.detectIndentation": false,
+  "editor.tabSize": 2,
+}
