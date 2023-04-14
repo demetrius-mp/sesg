@@ -13,6 +13,7 @@ python = "^3.10"
 thefuzz = {extras = ["speedup"], version = "^0.19.0"}
 aiometer = "^0.4.0"
 httpx = "^0.24.0"
+graphviz = "^0.20.1"
 
 [tool.poetry.group.lint.dependencies]
 black = "^23.3.0"
