@@ -12,7 +12,17 @@ markdown_extensions:
 extra_css:
 - stylesheets/extra.css
 
+nav:
+- Code Reference: reference/
+
 plugins:
+- search
+- gen-files:
+    scripts:
+    - docs/scripts/gen_ref_pages.py
+- literate-nav:
+    nav_file: SUMMARY.md
+- section-index
 - mkdocstrings:
     handlers:
       python:

@@ -10,6 +10,11 @@
     },
     "editor.tabSize": 4
   },
+  "[yaml]": {
+    "editor.autoIndent": "advanced",
+    "editor.indentSize": "tabSize",
+    "editor.defaultFormatter": "redhat.vscode-yaml"
+  },
   "explorer.fileNesting.enabled": true,
   "explorer.fileNesting.patterns": {
     "pyproject.toml": "poetry.lock, README.md, .gitignore, mkdocs.yml",
