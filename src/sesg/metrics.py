@@ -10,14 +10,11 @@ class Metrics:
 
     Args:
         gs_size (int): Number of studies in the GS.
-        n_scopus_results (int): Total number of Scopus results. Don't set the 5_000 boundary,
-        as this class will automatically use the correct value when calculating the metrics.
+        n_scopus_results (int): Total number of Scopus results. Don't set the 5_000 boundary, as this class will automatically use the correct value when calculating the metrics.
         n_qgs_studies_in_scopus (int): Number of QGS studies that were found in Scopus.
         n_gs_studies_in_scopus (int): Number of GS studies that were found in Scopus.
-        n_gs_studies_in_scopus_and_bsb (int): Number of GS studies that were found in Scopus, and can
-        be found via backward snowballing on the start set.
-        n_gs_studies_in_scopus_and_bsb_and_fsb (int): Number of GS studies that were found in Scopus, and can
-        be found via backward or forward snowballing on the start set.
+        n_gs_studies_in_scopus_and_bsb (int): Number of GS studies that were found in Scopus, and can be found via backward snowballing on the start set.
+        n_gs_studies_in_scopus_and_bsb_and_fsb (int): Number of GS studies that were found in Scopus, and can be found via backward or forward snowballing on the start set.
 
     Examples:
         >>> metrics = Metrics(
