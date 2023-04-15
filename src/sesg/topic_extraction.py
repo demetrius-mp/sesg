@@ -33,11 +33,12 @@ def extract_topics_with_lda(
         List of topics, where a topic is a list of words.
 
     Examples:
-        >>> topics = extract_topics_with_lda(  # doctest: +SKIP
+        >>> extract_topics_with_lda(  # doctest: +SKIP
         ...     docs=["detecting code smells with machine learning", "code smells detection tools", "error detection in Java software with machine learning"],
         ...     min_document_frequency=0.1,
         ...     number_of_topics=2,
         ... )
+        [["word1 topic1", "word2 topic1"], ["word1 topic2", "word2 topic2"]]
     """  # noqa: E501
     from sklearn.decomposition import LatentDirichletAllocation
 
@@ -114,9 +115,10 @@ def extract_topics_with_bertopic(
         List of topics, where a topic is a list of words.
 
     Examples:
-        >>> topics = extract_topics_with_bertopic(  # doctest: +SKIP
+        >>> extract_topics_with_bertopic(  # doctest: +SKIP
         ...     docs=["detecting code smells with machine learning", "code smells detection tools", "error detection in Java software with machine learning"],
         ... )
+        [["word1 topic1", "word2 topic1"], ["word1 topic2", "word2 topic2"]]
     """  # noqa: E501
     from bertopic import BERTopic
 
