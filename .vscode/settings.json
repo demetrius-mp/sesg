@@ -20,7 +20,7 @@
   },
   "explorer.fileNesting.enabled": true,
   "explorer.fileNesting.patterns": {
-    "pyproject.toml": "poetry.lock, README.md, .gitignore, mkdocs.yml",
+    "pyproject.toml": "poetry.lock, README.md, .gitignore, mkdocs.yml, .python-version",
   },
   "files.exclude": {
     ".pytest_cache": true,
