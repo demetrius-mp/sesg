@@ -11,6 +11,10 @@ nav = mkdocs_gen_files_Nav()
 
 for path in sorted(Path("src").rglob("*.py")):
     module_path = path.relative_to("src").with_suffix("")
+
+    if not str(module_path).startswith("sesg"):
+        continue
+
     doc_path = path.relative_to("src").with_suffix(".md")
     full_doc_path = Path("reference", doc_path)
 
