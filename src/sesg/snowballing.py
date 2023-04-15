@@ -1,3 +1,15 @@
+"""
+Snowballing module.
+
+This module is responsible to perform the snowballing method on a set of studies.
+In details, given a set of studies with titles, and text contents, for each study,
+we try to find out whether the study cited another given study or not.
+
+To achieve this goal, we use [`thefuzz`](https://github.com/seatgeek/thefuzz) 
+with [`Levenshtein`](https://github.com/maxbachmann/Levenshtein) in order to perform
+string similarity checks.
+"""
+
 from itertools import islice
 from multiprocessing import Pool
 from typing import Iterable, Iterator, List, Tuple, TypedDict, TypeVar

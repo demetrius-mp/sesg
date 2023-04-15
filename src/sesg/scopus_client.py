@@ -1,3 +1,14 @@
+"""
+Scopus Client module.
+
+This module is responsible to provide an efficient, and error proof client for the Scopus API.
+The client is optimized to scrape the maximum number of pages that are available from Scopus API,
+which is 5_000, for normal users, at the maximum speed possible.
+
+We use [`aiometer`](https://github.com/florimondmanca/aiometer),
+and [`httpx`](https://github.com/projectdiscovery/httpx) to achieve this goal.
+"""  # noqa: E501
+
 import asyncio
 import math
 from dataclasses import dataclass
@@ -463,7 +474,13 @@ class ScopusClient:
             query (str): The query to search for.
 
         Returns:
-            Async iterator that yields either A SearchResults instance, an APIKeyExpiredError instance, or an APITimeoutError instance.
+            Async iterator that yields either
+
+                - SearchResults
+                - APIKeyExpiredError
+                - APITimeoutError
+
+                It is up to the user to check which is the type of the response.
 
         Examples:
             >>> async def use_client():

@@ -1,3 +1,11 @@
+"""
+Metrics module.
+
+This module is responsible to provide metrics of a search string performance,
+given the number of Scopus results found, number of GS studies found in the Scopus results,
+and other informations.
+"""  # noqa: E501
+
 from dataclasses import dataclass
 from typing import Any, List, Tuple
 

@@ -1,3 +1,10 @@
+"""
+Graph module.
+
+This module is responsible to perform graph operations.
+In our context, we will perform operations on a correlation (or citation) graph.
+"""
+
 import itertools
 from collections import defaultdict, deque
 from typing import List, Mapping, Optional, Tuple

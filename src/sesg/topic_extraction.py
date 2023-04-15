@@ -1,3 +1,14 @@
+"""
+Topic extraction module.
+
+This module is responsible to provide strategies to extract topics of a set
+of documents.
+
+Currently, the only available strategies are 
+[LDA (Latent Dirichlet Allocation)](https://www.jmlr.org/papers/volume3/blei03a/blei03a.pdf?ref=https://githubhelp.com),
+and [BERTopic](https://arxiv.org/abs/2203.05794).
+"""
+
 from enum import Enum
 from typing import Any, List
 

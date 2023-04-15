@@ -1,3 +1,10 @@
+"""
+Search String module.
+
+This module is responsible to mount the search string. We use BERT's token prediction
+with the goal of obtaining similar words, and use them enrich the final string.
+"""  # noqa: E501
+
 from typing import Any, List, Optional, TypedDict, Union
 
 import Levenshtein
