@@ -43,8 +43,16 @@ mkdocs-section-index = "^0.3.5"
 [tool.poetry.group.dev.dependencies]
 taskipy = "^1.10.4"
 
+
+[tool.poetry.group.experiment.dependencies]
+sqlalchemy = "^2.0.9"
+typer = {extras = ["all"], version = "^0.7.0"}
+python-dotenv = "^1.0.0"
+dacite = "^1.8.0"
+
 [tool.ruff]
 extend-select = ["I001"]
+unfixable = ["F841"]
 exclude = [".venv"]
 
 [tool.ruff.pydocstyle]
@@ -67,6 +75,6 @@ lint-fix = { cmd = "ruff src/sesg --fix", help = "Fixes all lint errors reported
 fmt = { cmd = "task lint-fix && black src/sesg", help = "Formats the package with black, after fixing lint errors." }
 docs = { cmd = "mkdocs serve", help = "Starts mkdocs development server." }
 pre_test = { cmd = "task lint", help = "Only run tests if the code does not have any lint errors." }
-test = { cmd = "pytest -s -x --cov=sesg -vv", help = "Runs pytest with coverage." }
+test = { cmd = "pytest -s -x --cov=sesg -vv src/sesg", help = "Runs pytest with coverage." }
 post_test = { cmd = "coverage html", help = "Creates coverage reports if tests are successfull." }
 show-coverage = { cmd = "google-chrome htmlcov/index.html", help = "Opens the coverage reports with google-chrome" }
