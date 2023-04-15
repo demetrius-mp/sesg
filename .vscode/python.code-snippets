@@ -1,5 +1,6 @@
 {
   "Initialize typer": {
+    "scope": "python",
     "prefix": "inittyper",
     "body": [
       "import typer",
