@@ -1,0 +1,10 @@
+{
+  "recommendations": [
+    "charliermarsh.ruff",
+    "ms-python.black-formatter",
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+    "tintinweb.graphviz-interactive-preview",
+    "redhat.vscode-yaml"
+  ]
+}
