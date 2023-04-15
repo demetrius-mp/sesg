@@ -4,3 +4,4 @@
     * [scopus_client](sesg/scopus_client.md)
     * [search_string](sesg/search_string.md)
     * [snowballing](sesg/snowballing.md)
+    * [topic_extraction](sesg/topic_extraction.md)
