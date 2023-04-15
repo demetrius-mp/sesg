@@ -137,7 +137,7 @@ def serial_breadth_first_search(
         ...     1: [2],
         ...     2: [3, 4],
         ...     4: [5, 6],
-        ...     7: [8, 9]
+        ...     7: [6, 8, 9]
         ... }
         >>> serial_breadth_first_search(adjacency_list, [4, 7])
         [4, 5, 6, 7, 8, 9]
@@ -180,6 +180,11 @@ def create_citation_graph(
         >>> tooltips = {1: "Paper 1", 2: "Paper 2", 3: "Paper 3", 4: "Paper 4", 5: "Paper 5", 6: "Paper 6", 7: "Paper 7"}
         >>> results_list = [1, 3]
         >>> g = create_citation_graph(adjacency_list, tooltips, results_list)
+        >>> g.render(  # doctest: +SKIP
+        ...     filename="graph.dot",
+        ...     directory="out",
+        ...     format="pdf",
+        ... )
     """  # noqa: E501
     if results_list is None:
         results_list = list()
