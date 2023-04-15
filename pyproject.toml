@@ -68,4 +68,5 @@ fmt = { cmd = "task lint-fix && black src/sesg", help = "Formats the package wit
 docs = { cmd = "mkdocs serve", help = "Starts mkdocs development server." }
 pre_test = { cmd = "task lint", help = "Only run tests if the code does not have any lint errors." }
 test = { cmd = "pytest -s -x --cov=sesg -vv", help = "Runs pytest with coverage." }
-post_test = {cmd = "coverage html", help = "Shows coverage reports if tests are successfull.."}
+post_test = { cmd = "coverage html", help = "Creates coverage reports if tests are successfull." }
+show-coverage = { cmd = "google-chrome htmlcov/index.html", help = "Opens the coverage reports with google-chrome" }
