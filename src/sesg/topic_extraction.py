@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Any, List, Sequence
+from typing import Any, List
 
 from sklearn.feature_extraction.text import CountVectorizer
 
@@ -18,14 +18,14 @@ class TopicExtractionStrategy(str, Enum):
 
 
 def extract_topics_with_lda(
-    docs: Sequence[str],
+    docs: List[str],
     min_document_frequency: float,
     number_of_topics: int,
-) -> Sequence[Sequence[str]]:
+) -> List[List[str]]:
     """Extracts topics from a list of documents using LDA method.
 
     Args:
-        docs (Sequence[str]): List of documents.
+        docs (List[str]): List of documents.
         min_document_frequency (float): CountVectorizer parameter - Minimum document frequency for the word to appear on the bag of words.
         number_of_topics (int): LDA parameter - Number of topics to generate.
 

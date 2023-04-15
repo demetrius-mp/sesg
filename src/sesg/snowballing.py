@@ -1,6 +1,6 @@
 from itertools import islice
 from multiprocessing import Pool
-from typing import Iterable, Iterator, List, Sequence, Tuple, TypedDict, TypeVar
+from typing import Iterable, Iterator, List, Tuple, TypedDict, TypeVar
 
 from thefuzz import process
 
@@ -195,13 +195,13 @@ class SnowballingStudy:
 
 
 def backwards_snowballing(
-    studies: Sequence[SnowballingStudy],
-) -> Iterator[Tuple[SnowballingStudy, Sequence[SnowballingStudy]]]:
+    studies: List[SnowballingStudy],
+) -> Iterator[Tuple[SnowballingStudy, List[SnowballingStudy]]]:
     """Runs backwads snowballing in the given list of studies.
     The graph returned is in the form of an Adjacency List
 
     Args:
-        studies (Sequence[SnowballingStudy]): List of studies with id, title, and text content.
+        studies (List[SnowballingStudy]): List of studies with id, title, and text content.
 
     Yields:
         Iterator of tuples, where the tuple holds a study, and the studies that are referenced.
@@ -235,7 +235,7 @@ def backwards_snowballing(
                 ],
             )
 
-        references: Sequence[SnowballingStudy] = list()
+        references: List[SnowballingStudy] = list()
 
         for result_index, is_cited in enumerate(result):
             if is_cited:

@@ -5,10 +5,9 @@ from datetime import datetime
 from functools import partial
 from json import JSONDecodeError
 from typing import (
-    AsyncIterable,
     AsyncIterator,
+    List,
     Optional,
-    Sequence,
     Union,
 )
 
@@ -23,7 +22,7 @@ class _ScopusSearchResults:
     Args:
         total_results (int): Total number of results that were found by Scopus.
         Notice that Scopus will return at most 5_000, even if it has found more than 5_000.
-        entries (Sequence[Entry]): List of studies returned by the API.
+        entries (List[Entry]): List of studies returned by the API.
     """  # noqa: E501
 
     @dataclass
@@ -37,7 +36,7 @@ class _ScopusSearchResults:
         title: str
 
     total_results: int
-    entries: Sequence[Entry]
+    entries: List[Entry]
 
 
 class _ScopusPayloadTooLargeException(Exception):
@@ -291,7 +290,7 @@ class ScopusClient:
     )
 
     __timeout: float
-    __api_keys: Sequence[str]
+    __api_keys: List[str]
     __timeout_attempts: int
 
     _private_current_api_key_index: int
@@ -315,7 +314,7 @@ class ScopusClient:
     def __init__(
         self,
         timeout: float,
-        api_keys: Sequence[str],
+        api_keys: List[str],
         timeout_attempts: int,
     ) -> None:
         self.__timeout = timeout
@@ -336,7 +335,7 @@ class ScopusClient:
             )
 
             timeout: float
-            api_keys: Sequence[str]
+            api_keys: List[str]
             query: str
             timeout_attempts: int
             scopus_client: ScopusClient
@@ -350,7 +349,7 @@ class ScopusClient:
                 scopus_client: ScopusClient,
                 timeout: float,
                 query: str,
-                api_keys: Sequence[str],
+                api_keys: List[str],
                 timeout_attempts: int,
             ) -> None:
                 self.timeout = timeout
@@ -448,7 +447,7 @@ class ScopusClient:
     def search(
         self,
         query: str,
-    ) -> AsyncIterable[
+    ) -> AsyncIterator[
         Union[
             "ScopusClient.SearchResults",
             "ScopusClient.APIKeyExpiredError",
@@ -464,7 +463,7 @@ class ScopusClient:
             query (str): The query to search for.
 
         Returns:
-            Async iterable that yields either A SearchResults instance, an APIKeyExpiredError instance, or an APITimeoutError instance.
+            Async iterator that yields either A SearchResults instance, an APIKeyExpiredError instance, or an APITimeoutError instance.
 
         Examples:
             >>> async def use_client():

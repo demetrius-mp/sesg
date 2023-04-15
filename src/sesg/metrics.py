@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any, Sequence, Tuple
+from typing import Any, List, Tuple
 
 import Levenshtein
 
@@ -109,17 +109,17 @@ def preprocess_string(string: str) -> str:
 
 
 def similarity_score(
-    small_set: Sequence[str],
-    other_set: Sequence[str],
-) -> Sequence[Tuple[int, int]]:
+    small_set: List[str],
+    other_set: List[str],
+) -> List[Tuple[int, int]]:
     """Uses `TfidfVectorizer`, `cosine_similarity`, and `Levenshtein`
     to calculate the intersection of two sets of strings.
 
     You might need to preprocess the strings with [sesg.metrics.preprocess_string][].
 
     Args:
-        small_set (Sequence[str]): Set of strings. If possible, the length of this set should be smaller than the other one.
-        other_set (Sequence[str]): Set of strings to compare against.
+        small_set (List[str]): Set of strings. If possible, the length of this set should be smaller than the other one.
+        other_set (List[str]): Set of strings to compare against.
 
     Returns:
         List of tuples, where the tuple `(i, j)` means that `small_set[i]` is similar to `other_set[j]`.
@@ -162,7 +162,7 @@ def similarity_score(
     lines: int
     lines, _ = similarity_matrix.shape
 
-    similars: Sequence[Tuple[int, int]] = []
+    similars: List[Tuple[int, int]] = []
 
     for index_of_first_set_element in range(lines):
         # contains the row of the similarity matrix for the current element

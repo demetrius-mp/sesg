@@ -1,4 +1,4 @@
-from typing import Any, Iterable, List, Optional, Sequence, TypedDict, Union
+from typing import Any, List, Optional, TypedDict, Union
 
 import Levenshtein
 
@@ -8,7 +8,7 @@ def _enrich_word(
     enrichment_text: str,
     bert_tokenizer: Any,
     bert_model: Any,
-) -> Union[Sequence[str], None]:
+) -> Union[List[str], None]:
     """Tries to find words that are similar to the target word using the enrichment text.
 
     Args:
@@ -23,7 +23,7 @@ def _enrich_word(
     import numpy as np
     import torch
 
-    selected_sentences: Sequence[str] = []
+    selected_sentences: List[str] = []
 
     # Treatment for if the selected sentence is the last sentence of the text (return only one sentence).  # noqa: E501
     for sentence in enrichment_text.split("."):
@@ -107,13 +107,13 @@ class EnrichmentStudy(TypedDict):
 
 
 def generate_enrichment_text(
-    studies_list: Iterable[EnrichmentStudy],
+    studies_list: List[EnrichmentStudy],
 ) -> str:
     r"""Generates a piece of text that consists of the concatenation of the title and abstract of each study.
     Can be used with the [`sesg.search_string.generate_search_string`][] function.
 
     Args:
-        studies_list (Iterable[EnrichmentStudy]): List of studies with title and abstract.
+        studies_list (List[EnrichmentStudy]): List of studies with title and abstract.
 
     Returns:
         The enrichment text.
@@ -139,37 +139,37 @@ def generate_enrichment_text(
 
 
 def _generate_search_string_without_similar_words(
-    list_of_topics: Sequence[Sequence[str]],
-    number_of_words_per_topic: int,
+    topics_list: List[List[str]],
+    n_words_per_topic: int,
 ) -> str:
     """Generates a search string using the given list of topics.
 
     Args:
-        list_of_topics (Sequence[Sequence[str]]): List of topics, where each topic is a list of words.
-        number_of_words_per_topic (int): Indicates how many words of each topic will be inserted into the string.
+        topics_list (List[List[str]]): List of topics, where each topic is a list of words.
+        n_words_per_topic (int): Indicates how many words of each topic will be inserted into the string.
 
     Returns:
         A search string.
     """  # noqa: E501
     string = ""
 
-    for topic_index, topic in enumerate(list_of_topics):
-        words_of_topic = topic[:number_of_words_per_topic]
+    for topic_index, topic in enumerate(topics_list):
+        words_of_topic = topic[:n_words_per_topic]
 
         string += '("'
         string += '" AND "'.join(words_of_topic)
         string += '")'
 
-        if topic_index != len(list_of_topics) - 1:
+        if topic_index != len(topics_list) - 1:
             string += " OR "
 
     return string
 
 
 def _generate_search_string_with_similar_words(
-    list_of_topics: Sequence[Sequence[str]],
-    number_of_words_per_topic: int,
-    number_of_similar_words: int,
+    topics_list: List[List[str]],
+    n_words_per_topic: int,
+    n_similar_words: int,
     enrichment_text: str,
     bert_tokenizer: Any,
     bert_model: Any,
@@ -177,9 +177,9 @@ def _generate_search_string_with_similar_words(
     """Generates a search string that will be enriched with the desired number of similar words.
 
     Args:
-        list_of_topics (Sequence[Sequence[str]]): List of topics, where each topic is a list of words.
-        number_of_words_per_topic (int): Indicates how many words of each topic will be inserted into the string.
-        number_of_similar_words (int): Number of similar words to generate for each word in each topic.
+        topics_list (List[List[str]]): List of topics, where each topic is a list of words.
+        n_words_per_topic (int): Indicates how many words of each topic will be inserted into the string.
+        n_similar_words (int): Number of similar words to generate for each word in each topic.
         enrichment_text (str): The text to use to enrich each word.
         bert_tokenizer: A BERT tokenizer.
         bert_model: A BERT model.
@@ -194,11 +194,11 @@ def _generate_search_string_with_similar_words(
 
     lancaster = LancasterStemmer()
 
-    for topic_index, topic in enumerate(list_of_topics):
+    for topic_index, topic in enumerate(topics_list):
         counter = 0
         string += "("
 
-        for topic_word in topic[:number_of_words_per_topic]:
+        for topic_word in topic[:n_words_per_topic]:
             counter = counter + 1
 
             string += '("'
@@ -267,27 +267,26 @@ def _generate_search_string_with_similar_words(
                                 )
 
                     string += '" OR "'
-                    if len(final_similar_words) < number_of_similar_words:
+                    if len(final_similar_words) < n_similar_words:
                         string += '" OR "'.join(
                             final_similar_words[m]
                             for m in range(0, len(final_similar_words))
                         )
                     else:
                         string += '" OR "'.join(
-                            final_similar_words[m]
-                            for m in range(0, number_of_similar_words)
+                            final_similar_words[m] for m in range(0, n_similar_words)
                         )
 
             string += '")'
 
-            if counter < number_of_words_per_topic:
+            if counter < n_words_per_topic:
                 string += " AND "
             else:
                 string += ""
 
         string += ")"
 
-        if topic_index < len(list_of_topics) - 1:
+        if topic_index < len(topics_list) - 1:
             string += " OR "
         else:
             string += ""
@@ -296,9 +295,9 @@ def _generate_search_string_with_similar_words(
 
 
 def generate_search_string(
-    list_of_topics: Sequence[Sequence[str]],
-    number_of_words_per_topic: int,
-    number_of_similar_words: int,
+    list_of_topics: List[List[str]],
+    n_words_per_topic: int,
+    n_similar_words: int,
     enrichment_text: str,
     bert_tokenizer: Any,
     bert_model: Any,
@@ -307,8 +306,8 @@ def generate_search_string(
 
     Args:
         list_of_topics (List[List[str]]): List of topics, where each topic is a list of words.
-        number_of_words_per_topic (int): Indicates how many words of each topic will be inserted into the string.
-        number_of_similar_words (int): Number of similar words to generate for each word in each topic.
+        n_words_per_topic (int): Indicates how many words of each topic will be inserted into the string.
+        n_similar_words (int): Number of similar words to generate for each word in each topic.
         enrichment_text (str): The text to use to enrich each word.
         bert_tokenizer: A BERT tokenizer.
         bert_model: A BERT model.
@@ -330,17 +329,17 @@ def generate_search_string(
         ...     bert_model=bert_model,
         ... )
     """  # noqa: E501
-    if number_of_similar_words == 0:
+    if n_similar_words == 0:
         return _generate_search_string_without_similar_words(
-            list_of_topics=list_of_topics,
-            number_of_words_per_topic=number_of_words_per_topic,
+            topics_list=list_of_topics,
+            n_words_per_topic=n_words_per_topic,
         )
 
     return _generate_search_string_with_similar_words(
-        list_of_topics=list_of_topics,
-        number_of_words_per_topic=number_of_words_per_topic,
+        topics_list=list_of_topics,
+        n_words_per_topic=n_words_per_topic,
         enrichment_text=enrichment_text,
-        number_of_similar_words=number_of_similar_words,
+        n_similar_words=n_similar_words,
         bert_tokenizer=bert_tokenizer,
         bert_model=bert_model,
     )
