@@ -328,13 +328,14 @@ def generate_search_string(
         >>> studies: list[EnrichmentStudy] = []
         >>> enrichment_text = generate_enrichment_text(studies)  # doctest: +SKIP
         >>> generate_search_string(  # doctest: +SKIP
-        ...     list_of_topics=[["code", "smell", "detection"], ["machine learning", "artificial", "intelligence"]],
+        ...     list_of_topics=[["topic1 word1", "topic1 word2"], ["topic2 word1", "topic2 word2"]],
         ...     number_of_words_per_topic=2,
         ...     number_of_similar_words=1,
         ...     enrichment_text=enrichment_text,
         ...     bert_tokenizer=bert_tokenizer,
         ...     bert_model=bert_model,
         ... )
+        '(("code" OR "behavior") AND ("cloning")) OR (("smells" OR "classes") AND ("code" OR "behavior"))'
     """  # noqa: E501
     if n_similar_words == 0:
         return _generate_search_string_without_similar_words(

@@ -530,14 +530,12 @@ class ScopusClient:
             APIKeyHeaders: Object with the headers information.
 
         Examples:
-            >>> async def use_client():
-            ...     scopus_client = ScopusClient(
-            ...         timeout=5,
-            ...         api_keys=["key1", "key2", ...],
-            ...         timeout_attempts=10,
-            ...     )
-            ...
-            ...     scopus_client.get_api_key_headers(1)  # will use `key2`
+            >>> scopus_client = ScopusClient(  # doctest: +SKIP
+            ...     timeout=5,
+            ...     api_keys=["key1", "key2", "key3"],
+            ...     timeout_attempts=10,
+            ... )
+            >>> scopus_client.get_api_key_headers(1)  # will use `key2`  # doctest: +SKIP
         """  # noqa: E501
         res = httpx.get(
             _SCOPUS_API_URL,
