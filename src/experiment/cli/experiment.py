@@ -29,10 +29,7 @@ def create(
             name=slr_name,
             session=session,
         )
-        gs_studies = db.get_slr_gs_studies(
-            slr_id=slr.id,
-            session=session,
-        )
+        gs_studies = slr.gs_studies
 
     if qgs_size > len(gs_studies):
         raise RuntimeError(
@@ -44,6 +41,7 @@ def create(
     with Session() as session:
         experiment = db.create_experiment(
             slr_id=slr.id,
+            slr_gs_studies=slr.gs_studies,
             experiment_name=experiment_name,
             qgs_studies=random_qgs,
             session=session,

@@ -115,20 +115,15 @@ def add_many_studies_to_slr(
 
 
 def add_study_references(
-    slr_id: int,
+    slr_gs_studies: List[m.Study],
     study_id: int,
     references: Iterable[int],
     session: Session,
 ):
-    gs_studies = get_slr_gs_studies(
-        slr_id=slr_id,
-        session=session,
-    )
-
-    if len(gs_studies) == 0:
+    if len(slr_gs_studies) == 0:
         raise RuntimeError("This SLR does not have any study.")
 
-    gs_studies_ids = [s.id for s in gs_studies]
+    gs_studies_ids = [s.id for s in slr_gs_studies]
 
     study_is_in_gs = study_id in gs_studies_ids
 
@@ -171,14 +166,14 @@ def get_slr_citation_edges(
 
 def create_experiment(
     slr_id: int,
+    slr_gs_studies: List[m.Study],
     experiment_name: str,
     qgs_studies: List[m.Study],
     session: Session,
 ):
-    gs_studies = get_slr_gs_studies(slr_id=slr_id, session=session)
-    gs_studies_ids = [s.id for s in gs_studies]
+    gs_studies_ids = [s.id for s in slr_gs_studies]
 
-    if len(gs_studies) == 0:
+    if len(slr_gs_studies) == 0:
         raise RuntimeError("This SLR does not have any study.")
 
     entity = m.Experiment(
@@ -212,33 +207,6 @@ def get_experiment_by_name(
     experiment = session.execute(stmt).scalar_one()
 
     return experiment
-
-
-def get_slr_gs_studies(
-    slr_id: int,
-    session: Session,
-):
-    stmt = select(m.Study).where(m.Study.slr_id == slr_id).order_by(m.Study.id)
-
-    gs_studies = session.execute(stmt).scalars().all()
-
-    return gs_studies
-
-
-def get_experiment_qgs_studies(
-    experiment_id: int,
-    session: Session,
-):
-    stmt = (
-        select(m.Study)
-        .join(m.Study.experiments)
-        .where(m.Experiment.id == experiment_id)
-        .order_by(m.Study.id)
-    )
-
-    qgs_studies = session.execute(stmt).scalars().all()
-
-    return qgs_studies
 
 
 def get_many_lda_parameters_by_experiment(
@@ -346,7 +314,7 @@ def create_many_search_strings(
     session.commit()
 
 
-def get_last_used_search_string(
+def get_last_used_search_string_id(
     experiment_id: int,
     topic_extraction_strategy: TopicExtractionStrategy,
     session: Session,
@@ -386,7 +354,6 @@ def get_many_search_strings(
     experiment_id: int,
     session: Session,
     topic_extraction_strategy: TopicExtractionStrategy,
-    first_id: Optional[int] = None,
 ):
     stmt = select(m.SearchString)
 
@@ -402,9 +369,6 @@ def get_many_search_strings(
         raise RuntimeError("Invalid topic extraction strategy")
 
     stmt = stmt.where(m.Experiment.id == experiment_id)
-
-    if first_id is not None:
-        stmt = stmt.where(m.SearchString.id >= first_id)
 
     stmt = stmt.order_by(m.SearchString.id)
 
@@ -440,92 +404,6 @@ def get_many_scopus_results_by_search_string(
     scopus_results = session.execute(stmt).scalars().all()
 
     return scopus_results
-
-
-def _create_metric_instance(
-    metric: MetricData,
-    session: Session,
-):
-    instance = m.Metric(
-        scopus_precision=metric["scopus_precision"],
-        scopus_recall=metric["scopus_recall"],
-        scopus_f1_score=metric["scopus_f1_score"],
-        scopus_and_bsb_recall=metric["scopus_and_bsb_recall"],
-        scopus_and_bsb_and_fsb_recall=metric["scopus_and_bsb_and_fsb_recall"],
-        search_string_id=metric["search_string_id"],
-        n_scopus_results=metric["n_scopus_results"],
-        n_qgs_studies_in_scopus=len(metric["qgs_studies_in_scopus"]),
-        n_gs_studies_in_scopus=len(metric["gs_studies_in_scopus"]),
-        n_gs_studies_in_scopus_and_bsb=len(metric["gs_studies_in_scopus_and_bsb"]),
-        n_gs_studies_in_scopus_and_bsb_and_fsb=len(
-            metric["gs_studies_in_scopus_and_bsb_and_fsb"]
-        ),
-    )
-
-    session.add(instance)
-    session.commit()
-    session.refresh(instance)
-
-    if len(metric["qgs_studies_in_scopus"]) > 0:
-        values = [
-            {"metric_id": instance.id, "study_id": study_id}
-            for study_id in metric["qgs_studies_in_scopus"]
-        ]
-
-        session.execute(
-            insert(m.metric_qgs_studies_in_scopus_association_table).values(values)
-        )
-
-    if len(metric["gs_studies_in_scopus"]) > 0:
-        values = [
-            {"metric_id": instance.id, "study_id": study_id}
-            for study_id in metric["gs_studies_in_scopus"]
-        ]
-
-        session.execute(
-            insert(m.metric_gs_studies_in_scopus_association_table).values(values)
-        )
-
-    if len(metric["gs_studies_in_scopus_and_bsb"]) > 0:
-        values = [
-            {"metric_id": instance.id, "study_id": study_id}
-            for study_id in metric["gs_studies_in_scopus_and_bsb"]
-        ]
-
-        session.execute(
-            insert(m.metric_gs_studies_in_scopus_and_bsb_association_table).values(
-                values
-            )
-        )
-
-    if len(metric["gs_studies_in_scopus_and_bsb_and_fsb"]) > 0:
-        values = [
-            {"metric_id": instance.id, "study_id": study_id}
-            for study_id in metric["gs_studies_in_scopus_and_bsb_and_fsb"]
-        ]
-
-        session.execute(
-            insert(
-                m.metric_gs_studies_in_scopus_and_bsb_and_fsb_association_table
-            ).values(values)
-        )
-
-    session.commit()
-
-    return instance
-
-
-def create_metric(
-    metric: MetricData,
-    session: Session,
-):
-    instance = _create_metric_instance(
-        metric=metric,
-        session=session,
-    )
-
-    session.add(instance)
-    session.commit()
 
 
 def create_many_metrics(

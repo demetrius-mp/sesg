@@ -95,7 +95,7 @@ async def get_results(
             print("[red]No search strings were found.")
             raise typer.Abort()
 
-        first_id = db.get_last_used_search_string(
+        first_id = db.get_last_used_search_string_id(
             experiment_id=experiment.id,
             topic_extraction_strategy=topic_extraction_strategy,
             session=session,
