@@ -30,6 +30,6 @@ Session = sessionmaker(engine)
 
 
 def create_tables():
-    from .m import Base
+    from .models import Base
 
     Base.metadata.create_all(engine)
