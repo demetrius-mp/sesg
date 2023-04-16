@@ -211,12 +211,12 @@ class SnowballingStudy:
         self.text_content = _preprocess_study(study_text=text_content)
 
 
-def backwards_snowballing(
+def backward_snowballing(
     *,
     studies: List[SnowballingStudy],
 ) -> Iterator[Tuple[SnowballingStudy, List[SnowballingStudy]]]:
-    """Runs backwads snowballing in the given list of studies.
-    The graph returned is in the form of an Adjacency List
+    """Runs backward snowballing in the given list of studies.
+    The graph returned is in the form of an Adjacency List.
 
     Args:
         studies (List[SnowballingStudy]): List of studies with id, title, and text content.

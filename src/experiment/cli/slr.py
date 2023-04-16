@@ -119,7 +119,7 @@ def snowballing(
 ):
     from sesg.snowballing import (
         SnowballingStudy,
-        backwards_snowballing,
+        backward_snowballing,
     )
 
     with Session() as session:
@@ -157,7 +157,7 @@ def snowballing(
             total=len(sb_studies),
         )
 
-        bsb_iterator = backwards_snowballing(studies=sb_studies)
+        bsb_iterator = backward_snowballing(studies=sb_studies)
 
         for i, (study, references) in enumerate(bsb_iterator):
             if len(references) > 0:
