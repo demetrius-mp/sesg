@@ -8,9 +8,9 @@ from rich import print
 from rich.progress import Progress
 from sesg.topic_extraction import TopicExtractionStrategy
 
+from experiment.config import get_config
 from experiment.database import queries as db
 from experiment.database.core import Session
-from experiment.settings import get_settings
 
 
 class AsyncTyper(typer.Typer):
@@ -46,11 +46,11 @@ async def get_results(
         case_sensitive=False,
         help="The Topic extraction method that used to generate the search strings that will be used against Scopus.",  # noqa: E501
     ),
-    settings_file_path: Path = typer.Option(
-        Path.cwd() / "settings.toml",
-        "--setings-file-path",
-        "-f",
-        help="Path to the `settings.toml` file",
+    config_file_path: Path = typer.Option(
+        Path.cwd() / "config.toml",
+        "--config-file-path",
+        "-c",
+        help="Path to the `config.toml` file.",
     ),
     timeout: int = typer.Option(
         5,
@@ -70,8 +70,8 @@ async def get_results(
 
     from experiment.database.compression import compress_scopus_titles
 
-    settings = get_settings(
-        settings_file_path=settings_file_path,
+    settings = get_config(
+        config_file_path=config_file_path,
     )
 
     print("Querying database...")

@@ -19,14 +19,14 @@ class StringFormulationParameters:
 
 
 @dataclass
-class Settings:
+class Config:
     scopus_api_keys: List[str]
     string_formulation_parameters: StringFormulationParameters
     lda_parameters: LDAParameters
 
 
-def get_settings(settings_file_path: Path) -> Settings:
-    with open(settings_file_path, "rb") as f:
+def get_config(config_file_path: Path) -> Config:
+    with open(config_file_path, "rb") as f:
         settings_dict = tomli.load(f)
 
-    return from_dict(Settings, settings_dict)
+    return from_dict(Config, settings_dict)

@@ -5,9 +5,9 @@ import typer
 from rich import print
 from rich.progress import Progress
 
+from experiment.config import get_config
 from experiment.database import queries as db
 from experiment.database.core import Session
-from experiment.settings import get_settings
 
 
 app = typer.Typer(rich_markup_mode="markdown")
@@ -92,19 +92,19 @@ def with_lda(
         ...,
         help="Name of the Experiment",
     ),
-    settings_file_path: Path = typer.Option(
-        Path.cwd() / "settings.toml",
-        "--setings-file-path",
-        "-f",
-        help="Path to the `settings.toml` file",
+    config_file_path: Path = typer.Option(
+        Path.cwd() / "config.toml",
+        "--config-file-path",
+        "-c",
+        help="Path to the `config.toml` file.",
     ),
 ):
     import itertools
 
     from sesg.topic_extraction import extract_topics_with_lda
 
-    settings = get_settings(
-        settings_file_path=settings_file_path,
+    settings = get_config(
+        config_file_path=config_file_path,
     )
 
     min_df_list = settings.lda_parameters.min_document_frequency
