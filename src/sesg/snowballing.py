@@ -21,6 +21,7 @@ T = TypeVar("T")
 
 
 def _window(
+    *,
     seq: Iterable[T],
     size: int,
 ) -> Iterator[Tuple[T, ...]]:
@@ -54,14 +55,15 @@ def _window(
 
 
 def _study_cites_title(
-    title: str,
+    *,
     study: str,
+    title: str,
 ) -> bool:
     """Uses `thefuzz.process.extractOne` to determine if a study cites a title.
 
     Args:
-        title (str): Title to search for.
         study (str): Text of the study.
+        title (str): Title to search for.
 
     Returns:
         True if the study cites the title, False otherwise.
@@ -74,7 +76,7 @@ def _study_cites_title(
         True
     """  # noqa: E501
     window_size = len(title)
-    options = ["".join(x) for x in _window(study, window_size)]
+    options = ["".join(x) for x in _window(seq=study, size=window_size)]
 
     result = process.extractOne(title, options)
 
@@ -123,10 +125,11 @@ def _pooled_study_cites_title(
     if args["skip"]:
         return False
 
-    return _study_cites_title(args["title"], args["study"])
+    return _study_cites_title(study=args["study"], title=args["title"])
 
 
 def _preprocess_title(
+    *,
     title: str,
 ) -> str:
     """Processes the title in the following order:
@@ -148,6 +151,7 @@ def _preprocess_title(
 
 
 def _preprocess_study(
+    *,
     study_text: str,
 ) -> str:
     r"""Processes the study in the following manner:
@@ -197,16 +201,18 @@ class SnowballingStudy:
 
     def __init__(
         self,
+        *,
         id: int,
         title: str,
         text_content: str,
     ) -> None:
         self.id = id
-        self.title = _preprocess_title(title)
-        self.text_content = _preprocess_study(text_content)
+        self.title = _preprocess_title(title=title)
+        self.text_content = _preprocess_study(study_text=text_content)
 
 
 def backwards_snowballing(
+    *,
     studies: List[SnowballingStudy],
 ) -> Iterator[Tuple[SnowballingStudy, List[SnowballingStudy]]]:
     """Runs backwads snowballing in the given list of studies.

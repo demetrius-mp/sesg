@@ -100,7 +100,10 @@ class Metrics:
         return self.n_gs_studies_in_scopus_and_bsb_and_fsb / self.gs_size
 
 
-def preprocess_string(string: str) -> str:
+def preprocess_string(
+    *,
+    string: str,
+) -> str:
     r"""Strips the string and turn every character to lower case.
 
     Args:
@@ -117,6 +120,7 @@ def preprocess_string(string: str) -> str:
 
 
 def similarity_score(
+    *,
     small_set: List[str],
     other_set: List[str],
 ) -> List[Tuple[int, int]]:

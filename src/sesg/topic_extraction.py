@@ -7,7 +7,7 @@ of documents.
 Currently, the only available strategies are 
 [LDA (Latent Dirichlet Allocation)](https://www.jmlr.org/papers/volume3/blei03a/blei03a.pdf?ref=https://githubhelp.com),
 and [BERTopic](https://arxiv.org/abs/2203.05794).
-"""
+"""  # noqa: E501
 
 from enum import Enum
 from typing import Any, List
@@ -29,6 +29,7 @@ class TopicExtractionStrategy(str, Enum):
 
 
 def extract_topics_with_lda(
+    *,
     docs: List[str],
     min_document_frequency: float,
     number_of_topics: int,
@@ -115,6 +116,7 @@ def extract_topics_with_lda(
 
 
 def extract_topics_with_bertopic(
+    *,
     docs: List[str],
 ) -> List[List[str]]:
     """Extracts topics from a list of documents using BERTopic.

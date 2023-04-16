@@ -13,6 +13,7 @@ from graphviz import Digraph
 
 
 def edges_to_adjacency_list(
+    *,
     edges: List[Tuple[int, int]],
     directed: bool = True,
 ) -> Mapping[int, List[int]]:
@@ -45,6 +46,7 @@ def edges_to_adjacency_list(
 
 
 def directed_adjacency_list_to_undirected(
+    *,
     adjacency_list: Mapping[int, List[int]],
 ) -> Mapping[int, List[int]]:
     """Converts a directed adjacency list to an undirected adjacency list.
@@ -73,12 +75,12 @@ def directed_adjacency_list_to_undirected(
 
 
 def breadth_first_search(
+    *,
     adjacency_list: Mapping[int, List[int]],
     starting_node: int,
 ) -> List[int]:
     """Runs breadth first search on a graph.
     Inspired by this [blog](https://www.geeksforgeeks.org/breadth-first-search-or-bfs-for-a-graph/).
-
 
     Args:
         adjacency_list (Mapping[int, List[int]]): A mapping of node IDs to their list of neighbors.
@@ -120,6 +122,7 @@ def breadth_first_search(
 
 
 def serial_breadth_first_search(
+    *,
     adjacency_list: Mapping[int, List[int]],
     starting_nodes: List[int],
 ) -> List[int]:
@@ -157,6 +160,7 @@ def serial_breadth_first_search(
 
 
 def create_citation_graph(
+    *,
     adjacency_list: Mapping[int, List[int]],
     tooltips: Mapping[int, str],
     results_list: Optional[List[int]] = list(),

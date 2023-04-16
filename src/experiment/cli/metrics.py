@@ -58,8 +58,12 @@ def extract(
             topic_extraction_strategy=topic_extraction_strategy,
         )
 
-    processed_gs_titles = [metrics.preprocess_string(s.title) for s in gs_studies]
-    processed_qgs_titles = [metrics.preprocess_string(s.title) for s in qgs_studies]
+    processed_gs_titles = [
+        metrics.preprocess_string(string=s.title) for s in gs_studies
+    ]
+    processed_qgs_titles = [
+        metrics.preprocess_string(string=s.title) for s in qgs_studies
+    ]
 
     adjacency_list = graph.edges_to_adjacency_list(
         edges=citation_edges,
@@ -82,7 +86,7 @@ def extract(
                 ss.scopus_result.compressed_titles
             )
             processed_scopus_titles = [
-                metrics.preprocess_string(r) for r in scopus_results
+                metrics.preprocess_string(string=r) for r in scopus_results
             ]
 
             qgs_studies_in_scopus = metrics.similarity_score(

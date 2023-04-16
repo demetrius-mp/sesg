@@ -73,6 +73,7 @@ class _ScopusAPIKeyExpiredException(Exception):
 
     def __init__(
         self,
+        *,
         resets_at: Optional[datetime] = None,
     ) -> None:
         self.resets_at = resets_at
@@ -83,54 +84,58 @@ _SCOPUS_API_URL = "https://api.elsevier.com/content/search/scopus"
 
 
 def _api_key_is_expired(
-    res: httpx.Response,
+    *,
+    response: httpx.Response,
 ) -> bool:
     """Checks if a Scopus API key is expired, given the response to a Scopus Request.
 
     Args:
-        res (httpx.Response): A response object obtained from a Scopus Request.
+        response (httpx.Response): A response object obtained from a Scopus Request.
 
     Returns:
-        bool: True if the API key is expired, False otherwise.
+        True if the API key is expired, False otherwise.
     """  # noqa: E501
-    remaining = res.headers.get("x-ratelimit-remaining")
+    remaining = response.headers.get("x-ratelimit-remaining")
     remaining_condition = remaining is not None and int(remaining) <= 0
 
     els_status_condition = (
-        res.headers.get("x-els-status") == "QUOTA_EXCEEDED - Quota Exceeded"
+        response.headers.get("x-els-status") == "QUOTA_EXCEEDED - Quota Exceeded"
     )
     return remaining_condition or els_status_condition
 
 
 def _get_api_key_reset_date(
-    res: httpx.Response,
+    *,
+    response: httpx.Response,
 ) -> Union[None, datetime]:
     """Given a Scopus API response, will try do determine the reset date using the response headers.
 
     Args:
-        res (httpx.Response): A Scopus API response.
+        response (httpx.Response): A Scopus API response.
 
     Returns:
-        Union[None, datetime]: A datetime representing the reset date, or None if it wasn't able to determine it.
+        A datetime representing the reset date, or None if it wasn't able to determine it.
     """  # noqa: E501
-    timestamp = res.headers.get("X-RateLimit-Reset")
+    timestamp = response.headers.get("X-RateLimit-Reset")
     if timestamp is None:
         return None
 
     return datetime.fromtimestamp(int(timestamp))
 
 
+# since this function is used with partial, we use positional
+# arguments instead of keywords arguments
 async def _fetch_or_raise_scopus_exception(
     client: httpx.AsyncClient,
     timeout: float,
-    req: httpx.Request,
+    request: httpx.Request,
 ) -> httpx.Response:
     """Fetches the given request, and if needed, raises a custom Exception.
 
     Args:
         client (httpx.AsyncClient): Async client that will fetch the request.
         timeout (int): How long to wait for the request to complete.
-        req (httpx.Request): The request to fetch.
+        request (httpx.Request): The request to fetch.
 
     Raises:
         _ScopusTimeoutException: If the request takes longer than the given `timeout`.
@@ -138,10 +143,10 @@ async def _fetch_or_raise_scopus_exception(
         API Key is expired.
 
     Returns:
-        httpx.Response: A response ready to be used.
+        A response ready to be used.
     """
     try:
-        task = client.send(req)
+        task = client.send(request)
         response = await asyncio.wait_for(
             fut=task,
             timeout=timeout,
@@ -150,14 +155,15 @@ async def _fetch_or_raise_scopus_exception(
     except (asyncio.TimeoutError, httpx.ConnectError):
         raise _ScopusTimeoutException()
 
-    if _api_key_is_expired(response):
-        resets_at = _get_api_key_reset_date(response)
+    if _api_key_is_expired(response=response):
+        resets_at = _get_api_key_reset_date(response=response)
         raise _ScopusAPIKeyExpiredException(resets_at=resets_at)
 
     return response
 
 
 def _create_scopus_search_request(
+    *,
     api_key: str,
     query: str,
     start: Optional[int] = 0,
@@ -167,10 +173,10 @@ def _create_scopus_search_request(
     Args:
         api_key (str): A Scopus API key.
         query (str): Search string to use.
-        start (int, optional): Start parameter, used for pagination. Defaults to 0.
+        start (Optional[int]): Start parameter, used for pagination. Defaults to 0.
 
     Returns:
-        httpx.Request: A request object with the given information.
+        A request object with the given information.
     """  # noqa: E501
     params = {
         "query": query,
@@ -193,19 +199,19 @@ def _create_scopus_search_request(
 
 
 def _parse_scopus_response(
-    res: httpx.Response,
+    *,
+    response: httpx.Response,
 ) -> _ScopusSearchResults:
     """Parses a Scopus API response.
 
     Args:
-        res (httpx.Response): A Scopus API response.
+        response (httpx.Response): A Scopus API response.
 
     Returns:
-        _ScopusSearchResults: An object with the information extracted from the json.
-        Will filter out entries that do not have any title.
+        An object with the information extracted from the json. Will filter out entries that do not have any title.
     """  # noqa: E501
     try:
-        json = res.json()
+        json = response.json()
     except JSONDecodeError:
         raise _ScopusPayloadTooLargeException()
 
@@ -226,6 +232,7 @@ def _parse_scopus_response(
 
 
 async def _scopus_search(
+    *,
     api_key: str,
     query: str,
     timeout: float,
@@ -245,7 +252,7 @@ async def _scopus_search(
         _ScopusAPIKeyExpiredException: If the response indicates that the API Key is expired.
 
     Yields:
-        AsyncIterator[_ScopusSearchResults]: Async iterator that yields each page found.
+        Async iterator that yields each page found.
     """  # noqa: E501
     client = httpx.AsyncClient()
 
@@ -257,11 +264,11 @@ async def _scopus_search(
 
     response = await _fetch_or_raise_scopus_exception(
         client=client,
-        req=first_request,
+        request=first_request,
         timeout=timeout,
     )
 
-    results = _parse_scopus_response(response)
+    results = _parse_scopus_response(response=response)
 
     yield results
 
@@ -282,7 +289,7 @@ async def _scopus_search(
         max_at_once=7,
     ) as results:
         async for response in results:
-            results = _parse_scopus_response(response)
+            results = _parse_scopus_response(response=response)
 
             yield results
 
@@ -324,6 +331,7 @@ class ScopusClient:
 
     def __init__(
         self,
+        *,
         timeout: float,
         api_keys: List[str],
         timeout_attempts: int,
@@ -357,6 +365,7 @@ class ScopusClient:
 
             def __init__(
                 self,
+                *,
                 scopus_client: ScopusClient,
                 timeout: float,
                 query: str,
@@ -457,6 +466,7 @@ class ScopusClient:
 
     def search(
         self,
+        *,
         query: str,
     ) -> AsyncIterator[
         Union[
@@ -519,6 +529,7 @@ class ScopusClient:
 
     def get_api_key_headers(
         self,
+        *,
         index: int,
     ) -> APIKeyHeaders:
         """Returns the response headers of a request made with the API key at the given index.
@@ -527,7 +538,7 @@ class ScopusClient:
             index (int): Index on the list of the API key that will be used.
 
         Returns:
-            APIKeyHeaders: Object with the headers information.
+            Object with the headers information.
 
         Examples:
             >>> scopus_client = ScopusClient(  # doctest: +SKIP

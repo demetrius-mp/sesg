@@ -11,6 +11,7 @@ import Levenshtein
 
 
 def _enrich_word(
+    *,
     word: str,
     enrichment_text: str,
     bert_tokenizer: Any,
@@ -114,6 +115,7 @@ class EnrichmentStudy(TypedDict):
 
 
 def generate_enrichment_text(
+    *,
     studies_list: List[EnrichmentStudy],
 ) -> str:
     r"""Generates a piece of text that consists of the concatenation of the title and abstract of each study.
@@ -146,6 +148,7 @@ def generate_enrichment_text(
 
 
 def _generate_search_string_without_similar_words(
+    *,
     topics_list: List[List[str]],
     n_words_per_topic: int,
 ) -> str:
@@ -174,6 +177,7 @@ def _generate_search_string_without_similar_words(
 
 
 def _generate_search_string_with_similar_words(
+    *,
     topics_list: List[List[str]],
     n_words_per_topic: int,
     n_similar_words: int,
@@ -213,8 +217,8 @@ def _generate_search_string_with_similar_words(
 
             if " " not in topic_word:
                 list_of_similar_words = _enrich_word(
-                    topic_word,
-                    enrichment_text,
+                    word=topic_word,
+                    enrichment_text=enrichment_text,
                     bert_tokenizer=bert_tokenizer,
                     bert_model=bert_model,
                 )
@@ -302,6 +306,7 @@ def _generate_search_string_with_similar_words(
 
 
 def generate_search_string(
+    *,
     list_of_topics: List[List[str]],
     n_words_per_topic: int,
     n_similar_words: int,
@@ -354,6 +359,7 @@ def generate_search_string(
 
 
 def set_pub_year(
+    *,
     string: str,
     min_year: Optional[int] = None,
     max_year: Optional[int] = None,

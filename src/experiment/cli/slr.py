@@ -157,7 +157,9 @@ def snowballing(
             total=len(sb_studies),
         )
 
-        for i, (study, references) in enumerate(backwards_snowballing(sb_studies)):
+        bsb_iterator = backwards_snowballing(studies=sb_studies)
+
+        for i, (study, references) in enumerate(bsb_iterator):
             if len(references) > 0:
                 db.add_study_references(
                     slr_gs_studies=slr.gs_studies,
