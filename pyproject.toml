@@ -61,6 +61,7 @@ convention = "google"
 
 [tool.ruff.isort]
 lines-after-imports = 2
+known-first-party = ["experiment"]
 
 [build-system]
 requires = ["poetry-core"]

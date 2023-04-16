@@ -2,11 +2,12 @@ from pathlib import Path
 from typing import List
 
 import typer
+from rich import print
+from rich.progress import Progress
+
 from experiment.database import queries as db
 from experiment.database.core import Session
 from experiment.settings import get_settings
-from rich import print
-from rich.progress import Progress
 
 
 app = typer.Typer(rich_markup_mode="markdown")

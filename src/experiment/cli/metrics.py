@@ -1,11 +1,12 @@
 from typing import List
 
 import typer
-from experiment.database import queries as db
-from experiment.database.core import Session
 from rich import print
 from rich.progress import Progress
 from sesg.topic_extraction import TopicExtractionStrategy
+
+from experiment.database import queries as db
+from experiment.database.core import Session
 
 
 app = typer.Typer(rich_markup_mode="markdown")
@@ -28,8 +29,9 @@ def extract(
         help="The Topic extraction method that was used to generate the search strings that will be used against Scopus.",  # noqa: E501
     ),
 ):
-    from experiment.database.compression import decompress_scopus_titles
     from sesg import graph, metrics
+
+    from experiment.database.compression import decompress_scopus_titles
 
     print("Querying database...")
 

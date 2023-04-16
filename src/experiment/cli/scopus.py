@@ -4,12 +4,13 @@ from pathlib import Path
 from typing import List
 
 import typer
-from experiment.database import queries as db
-from experiment.database.core import Session
-from experiment.settings import get_settings
 from rich import print
 from rich.progress import Progress
 from sesg.topic_extraction import TopicExtractionStrategy
+
+from experiment.database import queries as db
+from experiment.database.core import Session
+from experiment.settings import get_settings
 
 
 class AsyncTyper(typer.Typer):
@@ -64,9 +65,10 @@ async def get_results(
         help="How much times in a row to redo a timed out request.",
     ),
 ):
-    from experiment.database.compression import compress_scopus_titles
     from sesg.scopus_client import ScopusClient
     from sesg.search_string import set_pub_year
+
+    from experiment.database.compression import compress_scopus_titles
 
     settings = get_settings(
         settings_file_path=settings_file_path,

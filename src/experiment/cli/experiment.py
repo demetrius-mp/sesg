@@ -1,7 +1,8 @@
 import typer
+from rich import print
+
 from experiment.database import queries as db
 from experiment.database.core import Session
-from rich import print
 
 
 app = typer.Typer(rich_markup_mode="markdown")

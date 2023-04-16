@@ -3,12 +3,13 @@ from pathlib import Path
 from typing import Any, List
 
 import typer
-from experiment.database import queries as db
-from experiment.database.core import Session
-from experiment.settings import get_settings
 from rich import print
 from rich.progress import Progress
 from sesg.topic_extraction import TopicExtractionStrategy
+
+from experiment.database import queries as db
+from experiment.database.core import Session
+from experiment.settings import get_settings
 
 
 app = typer.Typer(rich_markup_mode="markdown")
