@@ -95,7 +95,7 @@ def _breadth_first_search(
         ...     2: [3, 4],
         ...     4: [5, 6]
         ... }
-        >>> breadth_first_search(adjacency_list=adjacency_list, starting_node=2)
+        >>> _breadth_first_search(adjacency_list=adjacency_list, starting_node=2)
         [2, 4, 6, 5, 3]
     """  # noqa: E501
     reachable_nodes: List[int] = []
