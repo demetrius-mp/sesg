@@ -51,6 +51,7 @@ dacite = "^1.8.0"
 tomli = "^2.0.1"
 rich = "12.6.0"
 tomli-w = "^1.0.0"
+transformers = "^4.28.1"
 
 [tool.ruff]
 extend-select = ["I001"]
