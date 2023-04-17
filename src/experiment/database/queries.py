@@ -78,6 +78,35 @@ def create_slr(
     return entity
 
 
+def create_slr_with_gs(
+    name: str,
+    session: Session,
+    gs_studies: Iterable[StudyData],
+    min_publication_year: Optional[int] = None,
+    max_publication_year: Optional[int] = None,
+):
+    entity = m.SLR(
+        name=name,
+        min_publication_year=min_publication_year,
+        max_publication_year=max_publication_year,
+    )
+
+    entity.gs_studies = [
+        m.Study(
+            title=study["title"],
+            abstract=study["abstract"],
+            keywords=study["keywords"],
+        )
+        for study in gs_studies
+    ]
+
+    session.add(entity)
+    session.commit()
+    session.refresh(entity)
+
+    return entity
+
+
 def get_slr_by_name(
     name: str,
     session: Session,

@@ -5,13 +5,98 @@ from typing import List, Optional
 
 import typer
 from dacite import from_dict
+from rich import print
 from rich.progress import Progress
+from rich.prompt import Confirm
 
 from experiment.database import queries as db
 from experiment.database.core import Session
 
 
 app = typer.Typer(rich_markup_mode="markdown")
+
+
+@dataclass
+class SLRJSONData:
+    @dataclass
+    class SLRJSONStudyData:
+        id: int
+        title: str
+        abstract: str
+        keywords: str
+
+    name: str
+    gs: List[SLRJSONStudyData]
+    min_publication_year: Optional[int]
+    max_publication_year: Optional[int]
+
+
+@app.command()
+def create_from_json(
+    json_file_path: Path = typer.Argument(
+        ...,
+        help="Path to a `slr.json` file",
+        dir_okay=False,
+        file_okay=True,
+        exists=True,
+    ),
+):
+    with open(json_file_path, "r") as f:
+        data = json.load(f)
+        slr_json = from_dict(SLRJSONData, data)
+
+    print("Confirm that the data is correct:")
+    slr_confirm_data = {
+        "name": slr_json.name,
+        "min_publication_year": slr_json.min_publication_year,
+        "ma_publication_year": slr_json.max_publication_year,
+    }
+
+    print(slr_confirm_data)
+
+    confirmed = Confirm.ask(
+        "Is the SLR data correct?",
+        default=True,
+    )
+
+    if not confirmed:
+        raise typer.Abort()
+
+    for study in slr_json.gs:
+        study_confirm_data = {
+            "title": study.title,
+            "keywords": study.keywords,
+        }
+
+        print(study_confirm_data)
+
+    confirmed = Confirm.ask(
+        "Is the SLR GS correct?",
+        default=True,
+    )
+
+    if not confirmed:
+        raise typer.Abort()
+
+    with Session() as session:
+        slr = db.create_slr_with_gs(
+            name=slr_json.name,
+            min_publication_year=slr_json.min_publication_year,
+            max_publication_year=slr_json.max_publication_year,
+            session=session,
+            gs_studies=[
+                {
+                    "abstract": study.abstract,
+                    "keywords": study.keywords,
+                    "title": study.title,
+                }
+                for study in slr_json.gs
+            ],
+        )
+
+        print(f"Created {slr}")
+
+    print(f"Created `{slr_json}`")
 
 
 @app.command()
