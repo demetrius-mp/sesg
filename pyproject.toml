@@ -80,4 +80,5 @@ docs = { cmd = "mkdocs serve", help = "Starts mkdocs development server." }
 pre_test = { cmd = "task lint", help = "Only run tests if the code does not have any lint errors." }
 test = { cmd = "pytest -s -x --cov=sesg -vv src/sesg", help = "Runs pytest with coverage." }
 post_test = { cmd = "coverage html", help = "Creates coverage reports if tests are successfull." }
-show-coverage = { cmd = "google-chrome htmlcov/index.html", help = "Opens the coverage reports with google-chrome" }
+show-coverage = { cmd = "google-chrome htmlcov/index.html", help = "Opens the coverage reports with google-chrome." }
+export-dependencies = { cmd = "python scripts/export_dependencies.py", help = "Exports dependencies to a requirements.txt format, one file for each group of depencies." }

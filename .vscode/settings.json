@@ -29,7 +29,8 @@
     ".coverage": true,
   },
   "files.associations": {
-    "*.env": "properties"
+    "*.env": "properties",
+    "requirements-*.txt": "pip-requirements"
   },
   "editor.detectIndentation": false,
   "editor.tabSize": 2,
