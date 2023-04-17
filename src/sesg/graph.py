@@ -215,7 +215,7 @@ def create_citation_graph(
             style="dashed",
         )
 
-    # adding citation edges
+    # adding edges
     for node, neighbors in adjacency_list.items():
         for neighbor in neighbors:
             graph.edge(
@@ -228,14 +228,14 @@ def create_citation_graph(
         starting_nodes=results_list,
     )
 
-    # Since we care more about nodes that are found via search,
-    # first we tag the ones found via snowballing, and later,
-    # the ones found via Scopus Search.
-    # This way, if a same node that is found via Scopus Search, is found via snowballing,  # noqa: E501
-    # in the final graph, it will be tagged as found via Scopus search
+    # Since we care more about nodes that are on the results list,
+    # first we tag the ones found via BFS, and later,
+    # the ones on the results list.
+    # This way, if a same node that is on the results list, is also found via BFS,  # noqa: E501
+    # in the final graph, it will be tagged as it is on the results list.
 
-    # tagging nodes that can be found via snowballing
-    # on the studies found via search
+    # tagging nodes that can be found via BFS
+    # on the nodes of the results list
     for node in nodes_found_with_bfs:
         graph.node(
             format_node(node),
