@@ -74,7 +74,7 @@ def directed_adjacency_list_to_undirected(
     return dict(undirected_adjacency_list)
 
 
-def breadth_first_search(
+def _breadth_first_search(
     *,
     adjacency_list: Mapping[int, List[int]],
     starting_node: int,
@@ -148,7 +148,7 @@ def serial_breadth_first_search(
     reachable_nodes: List[int] = []
 
     for starting_node in starting_nodes:
-        result = breadth_first_search(
+        result = _breadth_first_search(
             adjacency_list=adjacency_list,
             starting_node=starting_node,
         )
