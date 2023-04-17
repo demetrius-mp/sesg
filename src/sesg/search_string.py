@@ -133,7 +133,7 @@ def generate_enrichment_text(
         ...     EnrichmentStudy(title="title2", abstract="abstract2 \r\ntext"),
         ...     EnrichmentStudy(title="title3", abstract="abstract3"),
         ... ]
-        >>> generate_enrichment_text(studies)
+        >>> generate_enrichment_text(studies_list=studies)
         'title1 abstract1\ntitle2 abstract2 #.text\ntitle3 abstract3\n'
     """  # noqa: E501
     enrichment_text = ""
@@ -331,7 +331,7 @@ def generate_search_string(
         >>> bert_tokenizer: Any = BertTokenizer.from_pretrained("bert-base-uncased")  # doctest: +SKIP
         >>> bert_model: Any = BertForMaskedLM.from_pretrained("bert-base-uncased")  # doctest: +SKIP
         >>> studies: list[EnrichmentStudy] = []
-        >>> enrichment_text = generate_enrichment_text(studies)  # doctest: +SKIP
+        >>> enrichment_text = generate_enrichment_text(studies_list=studies)  # doctest: +SKIP
         >>> generate_search_string(  # doctest: +SKIP
         ...     list_of_topics=[["topic1 word1", "topic1 word2"], ["topic2 word1", "topic2 word2"]],
         ...     number_of_words_per_topic=2,
@@ -375,7 +375,7 @@ def set_pub_year(
         A search string with PUBYEAR boundaries.
 
     Examples:
-        >>> set_pub_year('title("machine" and "learning")', max_year=2018)
+        >>> set_pub_year(string='title("machine" and "learning")', max_year=2018)
         'title("machine" and "learning") AND PUBYEAR < 2018'
     """  # noqa: E501
     if min_year is not None:

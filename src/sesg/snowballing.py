@@ -36,7 +36,7 @@ def _window(
 
     Examples:
         >>> elements = [1, 2, 3, 4, 5, 6]
-        >>> for subslice in _window(elements, 3):
+        >>> for subslice in _window(seq=elements, size=3):
         ...     print(subslice)
         (1, 2, 3)
         (2, 3, 4)
@@ -230,7 +230,7 @@ def backward_snowballing(
         ...     SnowballingStudy(id=2, title="machine learning, a SLR", text_content="... REFERENCES: other studies"),
         ... ]
         >>>
-        >>> for study, references in backwards_snowballing(studies):
+        >>> for study, references in backward_snowballing(studies=studies):
         ...     print((study.id, [r.id for r in references]))
         (1, [2])
         (2, [])

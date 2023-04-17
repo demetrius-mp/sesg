@@ -29,9 +29,9 @@ def edges_to_adjacency_list(
     Examples:
         >>> edges = [(1, 2), (2, 3), (2, 4)]
         >>>
-        >>> edges_to_adjacency_list(edges)
+        >>> edges_to_adjacency_list(edges=edges)
         {1: [2], 2: [3, 4]}
-        >>> edges_to_adjacency_list(edges, directed=False)
+        >>> edges_to_adjacency_list(edges=edges, directed=False)
         {1: [2], 2: [1, 3, 4], 3: [2], 4: [2]}
     """  # noqa: E501
     adjacency_list: Mapping[int, List[int]] = defaultdict(list)
@@ -58,10 +58,10 @@ def directed_adjacency_list_to_undirected(
         A mapping of node IDs to their list of neighbors in an undirected graph.
 
     Examples:
-        >>> directed_adjacency_list_to_undirected({1: [2, 3], 2: [3, 4], 3: [4]})
+        >>> directed_adjacency_list_to_undirected(adjacency_list={1: [2, 3], 2: [3, 4], 3: [4]})
         {1: [2, 3], 2: [1, 3, 4], 3: [1, 2, 4], 4: [2, 3]}
 
-        >>> directed_adjacency_list_to_undirected({2: [1], 3: [1, 2], 4: [2, 3]})
+        >>> directed_adjacency_list_to_undirected(adjacency_list={2: [1], 3: [1, 2], 4: [2, 3]})
         {2: [1, 3, 4], 1: [2, 3], 3: [1, 2, 4], 4: [2, 3]}
     """  # noqa: E501
     undirected_adjacency_list: Mapping[int, List[int]] = defaultdict(list)
@@ -95,7 +95,7 @@ def breadth_first_search(
         ...     2: [3, 4],
         ...     4: [5, 6]
         ... }
-        >>> breadth_first_search(adjacency_list, 2)
+        >>> breadth_first_search(adjacency_list=adjacency_list, starting_node=2)
         [2, 4, 6, 5, 3]
     """  # noqa: E501
     reachable_nodes: List[int] = []
@@ -142,7 +142,7 @@ def serial_breadth_first_search(
         ...     4: [5, 6],
         ...     7: [6, 8, 9]
         ... }
-        >>> serial_breadth_first_search(adjacency_list, [4, 7])
+        >>> serial_breadth_first_search(adjacency_list=adjacency_list, starting_nodes=[4, 7])
         [4, 5, 6, 7, 8, 9]
     """  # noqa: E501
     reachable_nodes: List[int] = []
@@ -183,7 +183,7 @@ def create_citation_graph(
         >>> adjacency_list = {1: [2], 2: [3, 4], 3: [4, 5], 4: [6], 5: [7]}
         >>> tooltips = {1: "Paper 1", 2: "Paper 2", 3: "Paper 3", 4: "Paper 4", 5: "Paper 5", 6: "Paper 6", 7: "Paper 7"}
         >>> results_list = [1, 3]
-        >>> g = create_citation_graph(adjacency_list, tooltips, results_list)
+        >>> g = create_citation_graph(adjacency_list=adjacency_list, tooltips=tooltips, results_list=results_list)
         >>> g.render(  # doctest: +SKIP
         ...     filename="graph.dot",
         ...     directory="out",

@@ -113,7 +113,7 @@ def preprocess_string(
         The preprocessed string.
 
     Examples:
-        >>> preprocess_string(" A string Here.  \n")
+        >>> preprocess_string(string=" A string Here.  \n")
         'a string here.'
     """
     return string.strip().lower()
@@ -140,8 +140,8 @@ def similarity_score(
         >>> small_set = ["machine learning", "databases", "search strings"]
         >>> other_set = ["Databases, an introduction", "Machine Learning", "Search String"]
         >>> similarity_score(
-        ...     small_set=[preprocess_string(s) for s in small_set],
-        ...     other_set=[preprocess_string(s) for s in other_set]
+        ...     small_set=[preprocess_string(string=s) for s in small_set],
+        ...     other_set=[preprocess_string(string=s) for s in other_set]
         ... )
         [(0, 1), (2, 2)]
     """  # noqa: E501
