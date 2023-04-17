@@ -9,7 +9,7 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "3.10.10"
+python = ">=3.10,<3.11"
 bertopic = "^0.14.1"
 thefuzz = {extras = ["speedup"], version = "^0.19.0"}
 aiometer = "^0.4.0"
