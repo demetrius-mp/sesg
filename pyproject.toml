@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "sesg"
-version = "0.1.0"
+version = "0.0.1"
 description = ""
 authors = ["Demetrius Panovitch <demetrius.mp789@gmail.com>"]
 readme = "README.md"
