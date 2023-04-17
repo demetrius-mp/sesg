@@ -210,7 +210,7 @@ def create_citation_graph(
     # all nodes will be created as "not found" (with dashed style)
     for node, tooltip in tooltips.items():
         graph.node(
-            str(node),
+            format_node(node),
             tooltip=tooltip,
             style="dashed",
         )
