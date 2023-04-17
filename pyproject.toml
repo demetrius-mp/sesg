@@ -7,6 +7,18 @@ readme = "README.md"
 packages = [
   {include = "sesg", from = "src"}
 ]
+classifiers = [
+  "Programming Language :: Python :: 3.10",
+  "Development Status :: 3 - Alpha",
+  "Natural Language :: English",
+  "Intended Audience :: Science/Research",
+]
+
+[tool.poetry.urls]
+Documentation = "https://sesg-package.readthedocs.io/en/latest/"
+"Source Code" = "https://github.com/demetrius-mp/sesg-package"
+"Issue Tracker" = "https://github.com/demetrius-mp/sesg-package/issues"
+
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.11"
