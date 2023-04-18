@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "sesg"
-version = "0.0.5"
+version = "0.0.6"
 description = "SeSG is a tool developed to help Systematic Literature Review researchers, specifically at the step of building a search string."
 authors = ["Demetrius Panovitch <demetrius.mp789@gmail.com>"]
 license = "GPL-3.0-only"
@@ -33,6 +33,7 @@ levenshtein = "^0.20.9"
 torch = "^2.0.0"
 nltk = "^3.8.1"
 numpy = "1.23.5"
+umap-learn = "^0.5.3"
 
 [tool.poetry.group.lint.dependencies]
 black = "^23.3.0"

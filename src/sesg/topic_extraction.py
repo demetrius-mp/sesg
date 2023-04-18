@@ -118,11 +118,17 @@ def extract_topics_with_lda(
 def extract_topics_with_bertopic(
     *,
     docs: List[str],
+    top_n_words: int,
+    min_topic_size: int,
+    umap_n_neighbors: int,
 ) -> List[List[str]]:
     """Extracts topics from a list of documents using BERTopic.
 
     Args:
         docs (List[str]): List of documents.
+        top_n_words (int): Number of words per topic to extract. Setting this too high can negatively impact topic embeddings as topics are typically best represented by at most 10 words.
+        min_topic_size (int): Minimum size of the topic. Increasing this value will lead to a lower number of clusters/topics.
+        umap_n_neighbors (int): Number of neighboring sample points used when making the manifold approximation. Increasing this value typically results in a more global view of the embedding structure whilst smaller values result in a more local view. Increasing this value often results in larger clusters being created.
 
     Returns:
         List of topics, where a topic is a list of words.
@@ -134,17 +140,28 @@ def extract_topics_with_bertopic(
         [["word1 topic1", "word2 topic1"], ["word1 topic2", "word2 topic2"]]
     """  # noqa: E501
     from bertopic import BERTopic
+    from umap.umap_ import UMAP
 
     vectorizer_model = CountVectorizer(
         stop_words="english",
         ngram_range=(1, 3),
     )
 
+    umap_model = UMAP(
+        n_neighbors=umap_n_neighbors,
+        n_components=5,
+        min_dist=0.0,
+        metric="cosine",
+        low_memory=False,
+    )
+
     topic_model = BERTopic(
         language="english",
         verbose=True,
-        min_topic_size=2,
+        top_n_words=top_n_words,
+        min_topic_size=min_topic_size,
         vectorizer_model=vectorizer_model,
+        umap_model=umap_model,
     )
 
     topic_model.fit_transform(docs)
