@@ -299,14 +299,6 @@ class ScopusClient:
     and automatically rotates API keys once one of them expires.
     """  # noqa: E501
 
-    __slots__ = (
-        "__timeout",
-        "__api_keys",
-        "__timeout_attempts",
-        "__ResultsIterator",
-        "_private_current_api_key_index",
-    )
-
     __timeout: float
     __api_keys: List[str]
     __timeout_attempts: int
@@ -342,17 +334,6 @@ class ScopusClient:
         self._private_current_api_key_index = 0
 
         class ResultsIterator:
-            __slots__ = (
-                "timeout",
-                "api_keys",
-                "query",
-                "timeout_attempts",
-                "scopus_client",
-                "current_page",
-                "iterator",
-                "current_attempt",
-            )
-
             timeout: float
             api_keys: List[str]
             query: str
