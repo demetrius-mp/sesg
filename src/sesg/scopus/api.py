@@ -69,7 +69,7 @@ class APIKeyExpiredError(Exception):
 
 
 class PayloadTooLargeError(Exception):
-    """The response has a status code of 413. Probably the search string is too long."""
+    """The response has a status code of 400. Probably the search string is too long."""
 
 
 def _api_key_is_expired(
@@ -146,7 +146,7 @@ async def _fetch(
         resets_at = _get_api_key_reset_date(response=response)
         raise APIKeyExpiredError(resets_at=resets_at)
 
-    if response.status_code == 413:
+    if response.status_code == 400:
         raise PayloadTooLargeError()
 
     return response
