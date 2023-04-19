@@ -9,7 +9,9 @@ We use [`aiometer`](https://github.com/florimondmanca/aiometer),
 and [`httpx`](https://github.com/projectdiscovery/httpx) to achieve this goal.
 """  # noqa: E501
 
-from typing import AsyncIterator, List, Union
+from dataclasses import dataclass
+from datetime import datetime
+from typing import AsyncIterator, List, Optional, Union
 
 from . import api
 
@@ -18,16 +20,36 @@ class OutOfAPIKeysError(Exception):
     """Used all API keys available."""
 
 
-class ExceededTimeoutRetries(Exception):
+class ExceededTimeoutRetriesError(Exception):
     """Exceeded the number of timeout retries in a row."""
 
 
+@dataclass
 class APIKeyExpiredResponse:
-    """Represents an API key expired response from the [`ScopusClient`][sesg.scopus.client.ScopusClient]"""  # noqa: E501
+    """Represents an API key expired response from the [`ScopusClient`][sesg.scopus.client.ScopusClient]
+
+    Args:
+        api_key (str): The expired API key.
+        api_key_index (int): The index of the expired API key on the list of API keys passed to [`ScopusClient`][sesg.scopus.client.ScopusClient].
+        resets_at (Optional[datetime]): Datetime object represents when the API key will be resetted.
+    """  # noqa: E501
+
+    api_key: str
+    api_key_index: int
+    resets_at: Optional[datetime]
 
 
+@dataclass
 class TimeoutResponse:
-    """Represents a timed out response from the [`ScopusClient`][sesg.scopus.client.ScopusClient]"""  # noqa: E501
+    """Represents a timed out response from the [`ScopusClient`][sesg.scopus.client.ScopusClient]
+
+    Args:
+        timed_out_page (int): The page where the timeout occured.
+        timeout_retry (int): The current timeout retry attempt for a same request.
+    """  # noqa: E501
+
+    timed_out_page: int
+    timeout_retry: int
 
 
 class ScopusClient:
@@ -76,12 +98,12 @@ class ScopusClient:
 
     @property
     def current_page(self) -> int:
-        """Current page being fetched."""
+        """Current page being fetched. Starts at 1, being at most 200."""
         return self.__current_page
 
     @property
     def current_query(self) -> str:
-        """Current query being searched."""
+        """Current query being used."""
         return self.__current_query
 
     @property
@@ -104,17 +126,23 @@ class ScopusClient:
 
     async def __anext__(self):
         try:
-            data = await self.__iterator.__anext__()
+            response = await self.__iterator.__anext__()
 
             self.__current_page += 1
             self.__current_timeout_retry = 0
 
-            return data
+            return response
 
         except api.PayloadTooLargeError as e:
             raise e
 
-        except api.APIKeyExpiredError:
+        except api.APIKeyExpiredError as e:
+            response = APIKeyExpiredResponse(
+                api_key=self.current_api_key,
+                api_key_index=self.current_api_key_index,
+                resets_at=e.resets_at,
+            )
+
             self.__current_timeout_retry = 0
             self.__iterator = self.__restart_iterator_with_current_state()
             self.__current_api_key_index += 1
@@ -122,16 +150,21 @@ class ScopusClient:
             if self.__current_api_key_index == len(self.__api_keys):
                 raise OutOfAPIKeysError()
 
-            return APIKeyExpiredResponse()
+            return response
 
         except api.TimeoutError:
             if self.__current_timeout_retry == self.__timeout_retries - 1:
-                raise ExceededTimeoutRetries()
+                raise ExceededTimeoutRetriesError()
+
+            response = TimeoutResponse(
+                timed_out_page=self.current_page,
+                timeout_retry=self.current_timeout_retry,
+            )
 
             self.__current_timeout_retry += 1
             self.__iterator = self.__restart_iterator_with_current_state()
 
-            return TimeoutResponse()
+            return response
 
     def __aiter__(self):
         self.__current_page = 0
@@ -152,8 +185,19 @@ class ScopusClient:
     ]:
         """Performs Scopus API requests in a timeout-proof, and API key expiry-prof manner.
 
+        !!! note
+
+            Notice that the exceptions on the **Raises**
+            section occurs during iteration time, not at function call time.
+
         Args:
             query (str): The query to search for.
+
+        Raises:
+            ExceededTimeoutRetriesError: If exceeds the number of timeout retries in a row.
+            OutOfAPIKeysError: If used al API keys available.
+            PayloadTooLargeError: If the response status code is 413. Probably indicates that the search string is too large.
+            BadRequestError: If the response status code is 400. Probably indicates that the search string is too large.
 
         Returns:
             An AsyncIterator that yields one of the below:
@@ -178,19 +222,3 @@ class ScopusClient:
         self.__current_query = query
 
         return self.__aiter__()
-
-
-async def m():
-    client = ScopusClient(api_keys=[], timeout=7, timeout_retries=10)
-
-    async for data in client.search("machie"):
-        if isinstance(data, TimeoutResponse):
-            print(f"Timed out on page {client.current_page}")
-
-        elif isinstance(data, APIKeyExpiredResponse):
-            print(
-                f"API Key {client.current_api_key_index + 1} of {len(client.api_keys)} is expired."  # noqa: E501
-            )
-        else:
-            # here data is of type [`SuccessResponse`][sesg.scopus.api.SuccessResponse]
-            print(data.entries)

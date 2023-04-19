@@ -29,9 +29,9 @@ class SuccessResponse:
     """A successfull Scopus Response
 
     Args:
-        number_of_results (int): Number of results for this query.
+        number_of_results (int): Number of results for this query. Notice that even if it displays more than 5000 results, Scopus will limit to retrieve only 5000.
         number_of_pages (int): Number of pages that needs to be fetched to get all results. Limited to 200 due to Scopus API 5000 entries limit.
-        current_page (int): Current page being fetched.
+        current_page (int): Current page being fetched. Starts at 1, being at most 200.
         entries (List[Entry]): Studies returned from the API.
     """  # noqa: E501
 
@@ -41,9 +41,11 @@ class SuccessResponse:
 
         Args:
             title (str): The title of the study.
+            cited_by_count (Optional[int]): How many studies cites this one.
         """
 
         title: str
+        cited_by_count: Optional[int]
 
     number_of_results: int
     number_of_pages: int
@@ -56,7 +58,11 @@ class TimeoutError(Exception):
 
 
 class APIKeyExpiredError(Exception):
-    """The API key is expired, meaning it has been used over 20000 times in less than a week"""  # noqa: E501
+    """The API key is expired, meaning it has been used over 20000 times in less than a week.
+
+    Args:
+        resets_at (Optional[datetime]): Datetime object represents when the API key will be resetted.
+    """  # noqa: E501
 
     resets_at: Optional[datetime]
 
@@ -69,7 +75,11 @@ class APIKeyExpiredError(Exception):
 
 
 class PayloadTooLargeError(Exception):
-    """The response has a status code of 400 or 413. Probably the search string is too long."""  # noqa: E501
+    """The response has a status code of 413. Probably the search string is too long."""  # noqa: E501
+
+
+class BadRequestError(Exception):
+    """The response has a status code of 400."""  # noqa: E501
 
 
 def _api_key_is_expired(
@@ -198,7 +208,7 @@ def _parse_response(
         response (httpx.Response): A Scopus API response.
 
     Returns:
-        A SuccessResponse instance
+        A SuccessResponse instance.
     """  # noqa: E501
     json = response.json()
 
@@ -210,6 +220,7 @@ def _parse_response(
     entries = [
         SuccessResponse.Entry(
             title=entry["dc:title"],
+            cited_by_count=entry.get("citedby-count", None),
         )
         for entry in json["search-results"]["entry"]
         if "dc:title" in entry
@@ -233,6 +244,11 @@ async def search(
     """Performs Scopus API calls, in a manner that will return
     all available results, which is at most 5000.
 
+    !!! note
+
+        Notice that the exceptions on the **Raises**
+        section occurs during iteration time, not at function call time.
+
     Args:
         api_key (str): Valid Scopus API key.
         query (str): Query to search for.
@@ -242,7 +258,9 @@ async def search(
     Raises:
         TimeoutError: If the request takes longer than the given `timeout`.
         APIKeyExpiredError: If the response has a header indicating that the API Key is expired.
-        PayloadTooLargeError: If the response status code is 413. Indicates that the search string is too large.
+        PayloadTooLargeError: If the response status code is 413. Probably indicates that the search string is too large.
+        BadRequestError: If the response status code is 400. Probably indicates that the search string is too large.
+
 
     Yields:
         Async iterator that yields each page found.
