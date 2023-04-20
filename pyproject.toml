@@ -60,6 +60,7 @@ taskipy = "^1.10.4"
 extend-select = ["I001"]
 unfixable = ["F841"]
 exclude = [".venv"]
+ignore-init-module-imports = true
 
 [tool.ruff.pydocstyle]
 convention = "google"
