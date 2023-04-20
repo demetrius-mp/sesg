@@ -86,7 +86,11 @@ def _api_key_is_expired(
     *,
     response: httpx.Response,
 ) -> bool:
-    """Checks if a Scopus API key is expired, given the response of a Scopus Request.
+    """Checks if a Scopus API key is expired using the response status code.
+    Reference: https://dev.elsevier.com/api_key_settings.html.
+    Since there is no way to differ from a **quota exceeded** to a
+    **throttling rate** error, we assume that if the status code is 429,
+    the API key is expired.
 
     Args:
         response (httpx.Response): A Scopus API response.
@@ -94,13 +98,10 @@ def _api_key_is_expired(
     Returns:
         True if the API key is expired, False otherwise.
     """  # noqa: E501
-    remaining = response.headers.get("x-ratelimit-remaining")
-    remaining_condition = remaining is not None and int(remaining) <= 0
+    if response.status_code == 429:
+        return True
 
-    els_status_condition = (
-        response.headers.get("x-els-status") == "QUOTA_EXCEEDED - Quota Exceeded"
-    )
-    return remaining_condition or els_status_condition
+    return False
 
 
 def _get_api_key_reset_date(
