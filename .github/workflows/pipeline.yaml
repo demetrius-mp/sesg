@@ -1,0 +1,26 @@
+name: Pipeline
+on: [push, pull_request]
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3.5.2
+      
+      - name: Install poetry
+        run: pipx install poetry
+      
+      - name: Install python
+        uses: actions/setup-python@v4
+        with:
+          python-version-file: '.python-version'
+          cache: 'poetry'
+      
+      - name: Install dev and lint dependencies
+        run: poetry install --only dev,lint
+      
+      - name: Lints and formats the package
+        run: poetry run poe format
+
+      - name: Exports package requirements by groups.
+        run: poetry run poe export-dependencies
