@@ -51,19 +51,6 @@ def main():
 
     print("Exported all dependencies by group.")
 
-    # # exporting package requirements
-    # subprocess.run(
-    #     "poetry export -o requirements/requirements.txt --without-hashes --without-urls",  # noqa: E501
-    #     shell=True,
-    # )
-
-    # # exporting groups requirements
-    # for group in groups_names:
-    #     subprocess.run(
-    #         f"poetry export --only={group} -o requirements/requirements-{group}.txt --without-hashes --without-urls",  # noqa: E501
-    #         shell=True,
-    #     )
-
 
 if __name__ == "__main__":
     main()
