@@ -18,7 +18,7 @@ sequence = [
 ]
 
 [tool.poe.tasks.format]
-help = "Formats the package with toml-sort, ruff, docformatter, and black."
+help = "Formats the package with toml-sort, ruff, and black."
 sequence = ["toml-sort", "ruff", "black"]
 
 [tool.poe.tasks.publish-package]
