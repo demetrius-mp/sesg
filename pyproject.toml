@@ -25,7 +25,7 @@ sequence = [
 ]
 
 [tool.poe.tasks.format]
-help = "Formats the package with ruff, docformatter, black, and toml-sort."
+help = "Formats the package with toml-sort, ruff, docformatter, and black."
 sequence = ["toml-sort", "ruff", "docformatter", "black"]
 
 [tool.poe.tasks.publish-package]
@@ -110,6 +110,7 @@ extend-select = ["I001"]
 unfixable = ["F841"]
 exclude = [".venv"]
 ignore-init-module-imports = true
+fix = true
 
 [tool.ruff.isort]
 lines-after-imports = 2
