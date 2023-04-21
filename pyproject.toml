@@ -55,6 +55,7 @@ mkdocs-section-index = "^0.3.5"
 
 [tool.poetry.group.dev.dependencies]
 taskipy = "^1.10.4"
+python-dotenv = "^1.0.0"
 
 [tool.ruff]
 extend-select = ["I001"]
@@ -87,3 +88,4 @@ test = { cmd = "pytest -s -x --cov=sesg -vv src/sesg", help = "Runs pytest with 
 post_test = { cmd = "coverage html", help = "Creates coverage reports if tests are successfull." }
 show-coverage = { cmd = "google-chrome htmlcov/index.html", help = "Opens the coverage reports with google-chrome." }
 export-dependencies = { cmd = "python scripts/export_dependencies.py", help = "Exports dependencies to a requirements.txt format, one file for each group of depencies." }
+publish-package = { cmd = "python scripts/publish-package.py", help = "Builds the package and publishes to PyPI." }
