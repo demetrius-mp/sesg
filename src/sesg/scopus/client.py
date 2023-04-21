@@ -219,7 +219,7 @@ class ScopusClient:
 
         Examples:
             >>> client = ScopusClient(api_keys=[], timeout=7, timeout_retries=10)
-            >>> async for data in client.search("machie"):
+            >>> async for data in client.search("machine"):  # doctest: +SKIP
             ...     if isinstance(data, TimeoutResponse):
             ...         print(f"Timed out on page {client.current_page}")
             ...
