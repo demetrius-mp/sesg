@@ -38,11 +38,11 @@ umap-learn = "^0.5.3"
 [tool.poetry.group.lint.dependencies]
 black = "^23.3.0"
 ruff = "^0.0.261"
+docformatter = {extras = ["tomli"], version = "^1.6.0"}
 
 [tool.poetry.group.test.dependencies]
 pytest = "^7.3.0"
 pytest-cov = "^4.0.0"
-
 
 [tool.poetry.group.doc.dependencies]
 mkdocs-material = "^9.1.6"
@@ -51,7 +51,6 @@ mkdocstrings-python = "^0.9.0"
 mkdocs-gen-files = "^0.4.0"
 mkdocs-literate-nav = "^0.6.0"
 mkdocs-section-index = "^0.3.5"
-
 
 [tool.poetry.group.dev.dependencies]
 taskipy = "^1.10.4"
@@ -71,9 +70,12 @@ convention = "google"
 lines-after-imports = 2
 known-first-party = ["experiment"]
 
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+[tool.docformatter]
+recursive = true
+pre-summary-newline = true
+in-place = true
+exclude = ["__pycache__/"]
+
 
 [tool.pytest.ini_options]
 pythonpath = "."
@@ -82,12 +84,24 @@ addopts = "--doctest-modules"
 [tool.taskipy.tasks]
 lint = { cmd = "ruff src/sesg", help = "Lints the package with ruff." }
 lint-fix = { cmd = "ruff src/sesg --fix", help = "Fixes all lint errors reported by ruff." }
-fmt = { cmd = "task lint-fix && black src/sesg", help = "Formats the package with black, after fixing lint errors." }
+fmt-docstrings = { cmd = "docformatter src/", help = "Formats docstrings" }
+
+pre_fmt = "task lint-fix && task fmt-docstrings"
+fmt = { cmd = "black src/sesg", help = "Formats the package with black." }
+
+pre_docs = { cmd = "task fmt-docstrings" }
 docs = { cmd = "mkdocs serve", help = "Starts mkdocs development server." }
-pre_test = { cmd = "task lint", help = "Only run tests if the code does not have any lint errors." }
+
+pre_test = "task lint"
 test = { cmd = "pytest -s -x --cov=sesg -vv src/sesg", help = "Runs pytest with coverage." }
-post_test = { cmd = "coverage html", help = "Creates coverage reports if tests are successfull." }
+post_test = "coverage html"
+
 show-coverage = { cmd = "google-chrome htmlcov/index.html", help = "Opens the coverage reports with google-chrome." }
 export-dependencies = { cmd = "python scripts/export-dependencies.py", help = "Exports dependencies to a requirements.txt format, one file for each group of depencies." }
-pre_publish-package = { cmd = "task export-dependencies", help = "Exports dependencies before publishing the package." }
+
+pre_publish-package = "task export-dependencies"
 publish-package = { cmd = "python scripts/publish-package.py", help = "Builds the package and publishes to PyPI." }
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
