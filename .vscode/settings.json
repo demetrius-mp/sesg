@@ -30,7 +30,7 @@
   },
   "files.associations": {
     "*.env": "properties",
-    "requirements-*.txt": "pip-requirements"
+    "*.piprequirements": "pip-requirements"
   },
   "editor.detectIndentation": false,
   "editor.tabSize": 2,
