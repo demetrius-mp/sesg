@@ -2,9 +2,9 @@ fail_fast: true
 repos:
   - repo: local
     hooks:
-      - id: export-dependencies
-        name: Exports the package dependencies by groups.
-        entry: poetry run poe export-dependencies
+      - id: format
+        name: Formats the package using ruff, docformatter, toml-sort, and black.
+        entry: poetry run poe format
         language: system
         types: [python]
         stages: [push]
@@ -12,33 +12,10 @@ repos:
 
   - repo: local
     hooks:
-      - id: toml-sort
-        name: toml-sort
-        entry: poetry run toml-sort
+      - id: export-dependencies
+        name: Exports package dependencies by groups.
+        entry: poetry run poe export-dependencies
         language: system
         types: [python]
-        files: pyproject.toml
-
-  - repo: local
-    hooks:
-      - id: ruff
-        name: ruff
-        entry: poetry run ruff
-        language: system
-        types: [python]
-
-  - repo: local
-    hooks:
-      - id: docformatter
-        name: docformatter
-        entry: poetry run docformatter
-        language: system
-        types: [python]
-
-  - repo: local
-    hooks:
-      - id: black
-        name: black
-        entry: poetry run black
-        language: system
-        types: [python]
+        stages: [push]
+        pass_filenames: false
