@@ -2,12 +2,6 @@
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
-[tool.docformatter]
-recursive = true
-pre-summary-newline = true
-in-place = true
-exclude = ["__pycache__/"]
-
 [tool.poe.tasks]
 # code style
 ruff = {cmd = "ruff src/", help = "Lints the project, fixing errors."}
@@ -123,27 +117,6 @@ lines-after-imports = 2
 
 [tool.ruff.pydocstyle]
 convention = "google"
-
-[tool.taskipy.tasks]
-# group fmt
-lint = {cmd = "ruff src/sesg", help = "Lints the package with ruff."}
-lint-fix = {cmd = "ruff src/sesg --fix", help = "Fixes all lint errors reported by ruff."}
-fmt-docstrings = {cmd = "docformatter src/", help = "Formats docstrings."}
-sort-pyproject = {cmd = "toml-sort pyproject.toml", help = "Sorts pyproject.toml file."}
-pre_fmt = "task lint-fix && task fmt-docstrings && task sort-pyproject"
-fmt = {cmd = "black src/sesg", help = "Formats the package with black."}
-# group docs
-pre_docs = {cmd = "task fmt-docstrings"}
-docs = {cmd = "mkdocs serve", help = "Starts mkdocs development server."}
-# group test
-pre_test = "task lint"
-test = {cmd = "pytest -s -x --cov=sesg -vv src/sesg", help = "Runs pytest with coverage."}
-post_test = "coverage html"
-show-coverage = {cmd = "google-chrome htmlcov/index.html", help = "Opens the coverage reports with google-chrome."}
-# group package
-export-dependencies = {cmd = "python scripts/export-dependencies.py", help = "Exports dependencies to a requirements.txt format, one file for each group of depencies."}
-pre_publish-package = "task export-dependencies"
-publish-package = {cmd = "python scripts/publish-package.py", help = "Builds the package and publishes to PyPI."}
 
 [tool.tomlsort]
 in_place = true
