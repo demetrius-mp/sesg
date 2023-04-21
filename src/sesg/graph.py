@@ -1,5 +1,4 @@
-"""
-Graph module.
+"""Graph module.
 
 This module is responsible to perform graph operations. In our context,
 we will perform operations on a correlation (or citation) graph.
@@ -17,8 +16,7 @@ def edges_to_adjacency_list(
     edges: List[Tuple[int, int]],
     directed: bool = True,
 ) -> Mapping[int, List[int]]:
-    """
-    Given a list of edges, return an adjacency list.
+    """Given a list of edges, return an adjacency list.
 
     Args:
         edges (List[Tuple[int, int]]): A list of tuples, where each tuple represents an edge in the graph. Each tuple contains two integers representing the nodes that the edge connects.
@@ -50,8 +48,7 @@ def directed_adjacency_list_to_undirected(
     *,
     adjacency_list: Mapping[int, List[int]],
 ) -> Mapping[int, List[int]]:
-    """
-    Converts a directed adjacency list to an undirected adjacency list.
+    """Converts a directed adjacency list to an undirected adjacency list.
 
     Args:
         adjacency_list (Mapping[int, List[int]]): A mapping of node IDs to their list of neighbors.
@@ -81,10 +78,7 @@ def _breadth_first_search(
     adjacency_list: Mapping[int, List[int]],
     starting_node: int,
 ) -> List[int]:
-    """
-    Runs breadth first search on a graph. Inspired by this
-    [blog](https://www.geeksforgeeks.org/breadth-first-search-or-bfs-for-a-
-    graph/).
+    """Runs breadth first search on a graph. Inspired by this [blog](https://www.geeksforgeeks.org/breadth-first-search-or-bfs-for-a-graph/).
 
     Args:
         adjacency_list (Mapping[int, List[int]]): A mapping of node IDs to their list of neighbors.
@@ -130,9 +124,7 @@ def serial_breadth_first_search(
     adjacency_list: Mapping[int, List[int]],
     starting_nodes: List[int],
 ) -> List[int]:
-    """
-    Runs many breadth first searches on a graph, using all of the given
-    starting nodes.
+    """Runs many breadth first searches on a graph, using all of the given starting nodes.
 
     Args:
         adjacency_list (Mapping[int, List[int]]): A mapping of node IDs to their list of neighbors.
@@ -171,8 +163,7 @@ def create_citation_graph(
     tooltips: Mapping[int, str],
     results_list: Optional[List[int]] = list(),
 ) -> Digraph:
-    """
-    Creates a `graphviz.Digraph` instance with the following properties:
+    """Creates a `graphviz.Digraph` instance with the following properties.
 
     - Filled nodes: nodes on the results list.
     - Bold nodes: nodes found via BFS using the results list as starting nodes.

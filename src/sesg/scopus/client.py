@@ -1,5 +1,4 @@
-"""
-Scopus Client module.
+"""Scopus Client module.
 
 This module is responsible to provide an efficient, and error proof client for the Scopus API.
 The client is optimized to scrape the maximum number of pages that are available from Scopus API,
@@ -26,9 +25,7 @@ class ExceededTimeoutRetriesError(Exception):
 
 @dataclass
 class APIKeyExpiredResponse:
-    """
-    Represents an API key expired response from the
-    [`ScopusClient`][sesg.scopus.client.ScopusClient]
+    """Represents an API key expired response from the [`ScopusClient`][sesg.scopus.client.ScopusClient].
 
     Args:
         api_key (str): The expired API key.
@@ -43,9 +40,7 @@ class APIKeyExpiredResponse:
 
 @dataclass
 class TimeoutResponse:
-    """
-    Represents a timed out response from the
-    [`ScopusClient`][sesg.scopus.client.ScopusClient]
+    """Represents a timed out response from the [`ScopusClient`][sesg.scopus.client.ScopusClient].
 
     Args:
         timed_out_page (int): The page where the timeout occured.
@@ -57,15 +52,7 @@ class TimeoutResponse:
 
 
 class ScopusClient:
-    """
-    A Scopus API Client with automatic retry on timeout, and automatic API key
-    swapping on expiry.
-
-    Args:
-        timeout (float): Time in seconds to wait before assuming the request timed out.
-        timeout_retries (int): Number of times to retry a timed out request in a row.
-        api_keys (List[str]): List with Scopus API keys.
-    """
+    """A Scopus API Client with automatic retry on timeout, and automatic API key swapping on expiry."""  # noqa: E501
 
     __timeout: float
     __api_keys: List[str]
@@ -83,6 +70,13 @@ class ScopusClient:
         timeout: float,
         timeout_retries: int,
     ) -> None:
+        """Creates a ScopusClient.
+
+        Args:
+            api_keys (List[str]): List with Scopus API keys.
+            timeout (float): Time in seconds to wait before assuming the request timed out.
+            timeout_retries (int): Number of times to retry a timed out request in a row.
+        """  # noqa: E501
         self.__timeout = timeout
         self.__api_keys = api_keys
         self.__timeout_retries = timeout_retries
@@ -103,8 +97,7 @@ class ScopusClient:
 
     @property
     def current_page(self) -> int:
-        """
-        Current page being fetched.
+        """Current page being fetched.
 
         Starts at 1, being at most 200.
         """
@@ -133,7 +126,24 @@ class ScopusClient:
             page=self.__current_page,
         )
 
-    async def __anext__(self):
+    async def __anext__(
+        self,
+    ) -> Union[api.SuccessResponse, APIKeyExpiredResponse, TimeoutResponse,]:
+        """Returns the next result of the search iterator.
+
+        Raises:
+            ExceededTimeoutRetriesError: If exceeds the number of timeout retries in a row.
+            OutOfAPIKeysError: If used al API keys available.
+            PayloadTooLargeError: If the response status code is 413. Probably indicates that the search string is too large.
+            BadRequestError: If the response status code is 400. Probably indicates that the search string is malformed.
+
+        Returns:
+            One of the below:
+
+                - A succesfull response
+                - An API key expired response
+                - A Timed out response
+        """  # noqa: E501
         try:
             response = await self.__iterator.__anext__()
 
@@ -142,7 +152,7 @@ class ScopusClient:
 
             return response
 
-        except api.PayloadTooLargeError as e:
+        except (api.PayloadTooLargeError, api.BadRequestError) as e:
             raise e
 
         except api.APIKeyExpiredError as e:
@@ -176,6 +186,7 @@ class ScopusClient:
             return response
 
     def __aiter__(self):
+        """Returns an async iterator over the results of the current query."""
         self.__current_page = 0
         self.__current_timeout_retry = 0
         self.__iterator = self.__restart_iterator_with_current_state()
@@ -192,9 +203,7 @@ class ScopusClient:
             TimeoutResponse,
         ]
     ]:
-        """
-        Performs Scopus API requests in a timeout-proof, and API key expiry-
-        prof manner.
+        """Performs Scopus API requests in a timeout-proof, and API key expiry-prof manner.
 
         !!! note
 

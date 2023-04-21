@@ -1,5 +1,4 @@
-"""
-Snowballing module.
+"""Snowballing module.
 
 This module is responsible to perform the snowballing method on a set of studies.
 In details, given a set of studies with titles, and text contents, for each study,
@@ -25,8 +24,7 @@ def _window(
     seq: Iterable[T],
     size: int,
 ) -> Iterator[Tuple[T, ...]]:
-    """
-    Creates an iterator over overlapping subslices of the given size.
+    """Creates an iterator over overlapping subslices of the given size.
 
     Args:
         seq (Iterable[T]): Sequence to iterate over.
@@ -60,8 +58,7 @@ def _study_cites_title(
     study: str,
     title: str,
 ) -> bool:
-    """
-    Uses `thefuzz.process.extractOne` to determine if a study cites a title.
+    """Uses `thefuzz.process.extractOne` to determine if a study cites a title.
 
     Args:
         study (str): Text of the study.
@@ -89,9 +86,7 @@ def _study_cites_title(
 
 
 class _PooledStudyCitesTitleArgs(TypedDict):
-    """
-    Data container for the `_pooled_study_cites_title` function, with the goal
-    of improving type safety.
+    """Data container for the `_pooled_study_cites_title` function, with the goal of improving type safety.
 
     Args:
         title (str): Title to search for
@@ -107,9 +102,7 @@ class _PooledStudyCitesTitleArgs(TypedDict):
 def _pooled_study_cites_title(
     args: _PooledStudyCitesTitleArgs,
 ) -> bool:
-    """
-    Replicates `_study_cites_title` behaviour, with slight modifications to
-    work well with `multiprocessing.Pool`.
+    """Replicates `_study_cites_title` behaviour, with slight modifications to work well with `multiprocessing.Pool`.
 
     Args:
         args (_PooledStudyCitesTitleArgs): args of this function.
@@ -137,7 +130,8 @@ def _preprocess_title(
     *,
     title: str,
 ) -> str:
-    """Processes the title in the following order:
+    """Processes the title in the following manner.
+
     1. Removes leading and trailing whitespaces
     1. Turns to lower case
     1. Removes spaces and dots
@@ -159,7 +153,8 @@ def _preprocess_study(
     *,
     study_text: str,
 ) -> str:
-    r"""Processes the study in the following manner:
+    r"""Processes the study in the following manner.
+
     1. Removes leading and trailing whitespaces
     1. Turns to lower case
     1. Removes line breaks, line carriages, spaces, and dots
@@ -185,15 +180,9 @@ def _preprocess_study(
 
 
 class SnowballingStudy:
-    r"""
-    Represents a study that will be included in backward snowballing. The
-    constructor will preprocess the title and text content to the correct
-    format.
+    r"""Represents a study that will be included in backward snowballing.
 
-    Args:
-        id (int): Identifier of the study. Could be a database id, for example.
-        title (str): Title of the study.
-        text_content (str): Content of the study. Could be extracted from a PDF with CERMINE.
+    The constructor will preprocess the title and text content to the correct format.
 
     Examples:
         >>> s = SnowballingStudy(id=1, title=" title. HERE ", text_content=" text. \n \r\n HERE ")
@@ -201,9 +190,9 @@ class SnowballingStudy:
         (True, True)
     """  # noqa: E501
 
-    id: int
-    title: str
-    text_content: str
+    __id: int
+    __title: str
+    __text_content: str
 
     def __init__(
         self,
@@ -212,18 +201,38 @@ class SnowballingStudy:
         title: str,
         text_content: str,
     ) -> None:
-        self.id = id
-        self.title = _preprocess_title(title=title)
-        self.text_content = _preprocess_study(study_text=text_content)
+        """Creates an instance of a SnowballingStudy.
+
+        Args:
+            id (int): Identifier of the study. Could be a database id, for example.
+            title (str): Title of the study.
+            text_content (str): Content of the study. Could be extracted from a PDF with CERMINE.
+        """  # noqa: E501
+        self.__id = id
+        self.__title = _preprocess_title(title=title)
+        self.__text_content = _preprocess_study(study_text=text_content)
+
+    @property
+    def id(self) -> int:
+        """ID of the study."""
+        return self.__id
+
+    @property
+    def title(self) -> str:
+        """Title of the study."""
+        return self.__title
+
+    @property
+    def text_content(self) -> str:
+        """Text content of the study."""
+        return self.__text_content
 
 
 def backward_snowballing(
     *,
     studies: List[SnowballingStudy],
 ) -> Iterator[Tuple[SnowballingStudy, List[SnowballingStudy]]]:
-    """
-    Runs backward snowballing in the given list of studies. The graph returned
-    is in the form of an Adjacency List.
+    """Runs backward snowballing in the given list of studies.
 
     Args:
         studies (List[SnowballingStudy]): List of studies with id, title, and text content.
@@ -242,7 +251,6 @@ def backward_snowballing(
         (1, [2])
         (2, [])
     """  # noqa: E501
-
     for study_index, study in enumerate(studies):
         with Pool() as p:
             # if `result[j]` is True then the current study cites title `j`
@@ -254,7 +262,7 @@ def backward_snowballing(
                         # so we skip and set it as False
                         "skip": study_index == reference_index,
                         "study": study.text_content,
-                        "title": reference.title,
+                        "title": reference.__title,
                     }
                     for reference_index, reference in enumerate(studies)
                 ],
