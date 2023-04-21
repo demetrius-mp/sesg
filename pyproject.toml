@@ -16,9 +16,9 @@ classifiers = [
 ]
 
 [tool.poetry.urls]
-Documentation = "https://sesg-package.readthedocs.io/en/latest/"
-"Source Code" = "https://github.com/demetrius-mp/sesg-package"
-"Issue Tracker" = "https://github.com/demetrius-mp/sesg-package/issues"
+Documentation = "https://sesg.readthedocs.io/en/latest/"
+"Source Code" = "https://github.com/demetrius-mp/sesg"
+"Issue Tracker" = "https://github.com/demetrius-mp/sesg/issues"
 
 
 [tool.poetry.dependencies]
