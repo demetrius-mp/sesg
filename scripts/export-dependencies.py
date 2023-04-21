@@ -17,11 +17,15 @@ def export_dependencies_from_group(
             shell=True,
         )
 
+        print("  - Exported package requirements")
+
     else:
+        # exporting group requirements
         subprocess.run(
             f"poetry export --only={group} -o requirements/{group}.piprequirements --without-hashes --without-urls",  # noqa: E501
             shell=True,
         )
+        print(f"  - Exported {group} requirements")
 
 
 def main():
@@ -43,13 +47,15 @@ def main():
     groups = pyproject["tool"]["poetry"]["group"]
     groups_names: List[str] = [name for name in groups]
 
+    print("Exporting dependencies by group.")
+
     with Pool() as pool:
         pool.map(
             export_dependencies_from_group,
             [None, *groups_names],
         )
 
-    print("Exported all dependencies by group.")
+    print()
 
 
 if __name__ == "__main__":
