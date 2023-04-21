@@ -9,18 +9,3 @@ repos:
     rev: 23.3.0
     hooks:
       - id: black
-  - repo: local
-    hooks:
-      - id: export-dependencies
-        name: Exports dependencies groups to requirements files.
-        entry: python scripts/export-dependencies.py
-        language: system
-        types: [python]
-        stages: [post-commit]
-
-      - id: publish-package
-        name: Publishes the package to PyPI.
-        entry: python scripts/publish-package.py
-        language: system
-        types: [python]
-        stages: [push]
