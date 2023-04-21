@@ -114,7 +114,6 @@ fix = true
 
 [tool.ruff.isort]
 lines-after-imports = 2
-known-first-party = ["experiment"]
 
 [tool.ruff.pydocstyle]
 convention = "google"
