@@ -24,5 +24,10 @@
       ""
     ],
     "description": "Initialize a typer CLI application"
+  },
+  "Disable black formatting": {
+    "scope": "python",
+    "prefix": "fmtoff",
+    "body": "# fmt: off"
   }
 }
