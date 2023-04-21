@@ -8,7 +8,7 @@ studies found in the Scopus results, and other informations.
 from dataclasses import dataclass
 from typing import Any, List, Tuple
 
-import Levenshtein
+from rapidfuzz.distance import Levenshtein
 
 
 @dataclass
@@ -178,7 +178,13 @@ def similarity_score(
         first_set_element = small_set[index_of_first_set_element]
         second_set_element = other_set[index_of_closest_element_in_second_set]
 
-        if Levenshtein.distance(first_set_element, second_set_element) < 10:
+        distance = Levenshtein.distance(
+            first_set_element,
+            second_set_element,
+            score_cutoff=10,
+        )
+
+        if distance < 10:
             similars.append(
                 (index_of_first_set_element, index_of_closest_element_in_second_set)
             )

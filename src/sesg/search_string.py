@@ -7,7 +7,7 @@ enrich the final string.
 
 from typing import Any, List, Optional, TypedDict, Union
 
-import Levenshtein
+from rapidfuzz.distance import Levenshtein
 
 
 def _enrich_word(
