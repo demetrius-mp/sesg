@@ -1,3 +1,13 @@
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.docformatter]
+recursive = true
+pre-summary-newline = true
+in-place = true
+exclude = ["__pycache__/"]
+
 [tool.poetry]
 name = "sesg"
 version = "0.0.12"
@@ -12,14 +22,8 @@ classifiers = [
   "Programming Language :: Python :: 3.10",
   "Development Status :: 3 - Alpha",
   "Natural Language :: English",
-  "Intended Audience :: Science/Research",
+  "Intended Audience :: Science/Research"
 ]
-
-[tool.poetry.urls]
-Documentation = "https://sesg.readthedocs.io/en/latest/"
-"Source Code" = "https://github.com/demetrius-mp/sesg"
-"Issue Tracker" = "https://github.com/demetrius-mp/sesg/issues"
-
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.11"
@@ -35,14 +39,10 @@ nltk = "^3.8.1"
 numpy = "1.23.5"
 umap-learn = "^0.5.3"
 
-[tool.poetry.group.lint.dependencies]
-black = "^23.3.0"
-ruff = "^0.0.261"
-docformatter = {extras = ["tomli"], version = "^1.6.0"}
-
-[tool.poetry.group.test.dependencies]
-pytest = "^7.3.0"
-pytest-cov = "^4.0.0"
+[tool.poetry.group.dev.dependencies]
+taskipy = "^1.10.4"
+python-dotenv = "^1.0.0"
+pre-commit = "^3.2.2"
 
 [tool.poetry.group.doc.dependencies]
 mkdocs-material = "^9.1.6"
@@ -52,10 +52,24 @@ mkdocs-gen-files = "^0.4.0"
 mkdocs-literate-nav = "^0.6.0"
 mkdocs-section-index = "^0.3.5"
 
-[tool.poetry.group.dev.dependencies]
-taskipy = "^1.10.4"
-python-dotenv = "^1.0.0"
-pre-commit = "^3.2.2"
+[tool.poetry.group.lint.dependencies]
+black = "^23.3.0"
+ruff = "^0.0.261"
+docformatter = {extras = ["tomli"], version = "^1.6.0"}
+toml-sort = "^0.23.0"
+
+[tool.poetry.group.test.dependencies]
+pytest = "^7.3.0"
+pytest-cov = "^4.0.0"
+
+[tool.poetry.urls]
+Documentation = "https://sesg.readthedocs.io/en/latest/"
+"Source Code" = "https://github.com/demetrius-mp/sesg"
+"Issue Tracker" = "https://github.com/demetrius-mp/sesg/issues"
+
+[tool.pytest.ini_options]
+pythonpath = "."
+addopts = "--doctest-modules"
 
 [tool.ruff]
 extend-select = ["I001"]
@@ -63,45 +77,28 @@ unfixable = ["F841"]
 exclude = [".venv"]
 ignore-init-module-imports = true
 
-[tool.ruff.pydocstyle]
-convention = "google"
-
 [tool.ruff.isort]
 lines-after-imports = 2
 known-first-party = ["experiment"]
 
-[tool.docformatter]
-recursive = true
-pre-summary-newline = true
-in-place = true
-exclude = ["__pycache__/"]
-
-
-[tool.pytest.ini_options]
-pythonpath = "."
-addopts = "--doctest-modules"
+[tool.ruff.pydocstyle]
+convention = "google"
 
 [tool.taskipy.tasks]
-lint = { cmd = "ruff src/sesg", help = "Lints the package with ruff." }
-lint-fix = { cmd = "ruff src/sesg --fix", help = "Fixes all lint errors reported by ruff." }
-fmt-docstrings = { cmd = "docformatter src/", help = "Formats docstrings" }
-
+lint = {cmd = "ruff src/sesg", help = "Lints the package with ruff."}
+lint-fix = {cmd = "ruff src/sesg --fix", help = "Fixes all lint errors reported by ruff."}
+fmt-docstrings = {cmd = "docformatter src/", help = "Formats docstrings"}
 pre_fmt = "task lint-fix && task fmt-docstrings"
-fmt = { cmd = "black src/sesg", help = "Formats the package with black." }
-
-pre_docs = { cmd = "task fmt-docstrings" }
-docs = { cmd = "mkdocs serve", help = "Starts mkdocs development server." }
-
+fmt = {cmd = "black src/sesg", help = "Formats the package with black."}
+pre_docs = {cmd = "task fmt-docstrings"}
+docs = {cmd = "mkdocs serve", help = "Starts mkdocs development server."}
 pre_test = "task lint"
-test = { cmd = "pytest -s -x --cov=sesg -vv src/sesg", help = "Runs pytest with coverage." }
+test = {cmd = "pytest -s -x --cov=sesg -vv src/sesg", help = "Runs pytest with coverage."}
 post_test = "coverage html"
-
-show-coverage = { cmd = "google-chrome htmlcov/index.html", help = "Opens the coverage reports with google-chrome." }
-export-dependencies = { cmd = "python scripts/export-dependencies.py", help = "Exports dependencies to a requirements.txt format, one file for each group of depencies." }
-
+show-coverage = {cmd = "google-chrome htmlcov/index.html", help = "Opens the coverage reports with google-chrome."}
+export-dependencies = {cmd = "python scripts/export-dependencies.py", help = "Exports dependencies to a requirements.txt format, one file for each group of depencies."}
 pre_publish-package = "task export-dependencies"
-publish-package = { cmd = "python scripts/publish-package.py", help = "Builds the package and publishes to PyPI." }
+publish-package = {cmd = "python scripts/publish-package.py", help = "Builds the package and publishes to PyPI."}
 
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+[tool.tomlsort]
+in_place = true
