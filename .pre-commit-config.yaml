@@ -1,23 +1,9 @@
 fail_fast: true
 repos:
-  - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: "v0.0.262"
+  - repo: local
     hooks:
-      - id: ruff
-        args: [--fix, --exit-non-zero-on-fix]
-
-  - repo: https://github.com/psf/black
-    rev: 23.3.0
-    hooks:
-      - id: black
-
-  - repo: https://github.com/PyCQA/docformatter
-    rev: v1.6.0
-    hooks:
-      - id: docformatter
-        additional_dependencies: [tomli]
-
-  - repo: https://github.com/pappasam/toml-sort
-    rev: v0.23.0
-    hooks:
-      - id: toml-sort-fix
+      - id: format
+        name: Formats the package using ruff, docformatter, toml-sort, and black.
+        entry: poetry run task fmt
+        language: system
+        types: [python]
