@@ -79,7 +79,7 @@ class PayloadTooLargeError(Exception):
 
 
 class BadRequestError(Exception):
-    """The response has a status code of 400."""  # noqa: E501
+    """The response has a status code of 400. Probably the search is malformed."""  # noqa: E501
 
 
 def _api_key_is_expired(
@@ -157,7 +157,10 @@ async def _fetch(
         resets_at = _get_api_key_reset_date(response=response)
         raise APIKeyExpiredError(resets_at=resets_at)
 
-    if response.status_code in (400, 413):
+    if response.status_code == 400:
+        raise BadRequestError()
+
+    if response.status_code == 413:
         raise PayloadTooLargeError()
 
     return response
@@ -260,7 +263,7 @@ async def search(
         TimeoutError: If the request takes longer than the given `timeout`.
         APIKeyExpiredError: If the response has a header indicating that the API Key is expired.
         PayloadTooLargeError: If the response status code is 413. Probably indicates that the search string is too large.
-        BadRequestError: If the response status code is 400. Probably indicates that the search string is too large.
+        BadRequestError: If the response status code is 400. Probably indicates that the search string is malformed.
 
 
     Yields:

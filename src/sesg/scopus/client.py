@@ -197,7 +197,7 @@ class ScopusClient:
             ExceededTimeoutRetriesError: If exceeds the number of timeout retries in a row.
             OutOfAPIKeysError: If used al API keys available.
             PayloadTooLargeError: If the response status code is 413. Probably indicates that the search string is too large.
-            BadRequestError: If the response status code is 400. Probably indicates that the search string is too large.
+            BadRequestError: If the response status code is 400. Probably indicates that the search string is malformed.
 
         Returns:
             An AsyncIterator that yields one of the below:
