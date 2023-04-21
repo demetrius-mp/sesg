@@ -1,0 +1,26 @@
+fail_fast: true
+repos:
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: "v0.0.262"
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+  - repo: https://github.com/psf/black
+    rev: 23.3.0
+    hooks:
+      - id: black
+  - repo: local
+    hooks:
+      - id: export-dependencies
+        name: Exports dependencies groups to requirements files.
+        entry: python scripts/export-dependencies.py
+        language: system
+        types: [python]
+        stages: [post-commit]
+
+      - id: publish-package
+        name: Publishes the package to PyPI.
+        entry: python scripts/publish-package.py
+        language: system
+        types: [python]
+        stages: [push]
