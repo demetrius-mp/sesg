@@ -1,4 +1,9 @@
-"""Generate the code reference pages. Refer to https://mkdocstrings.github.io/recipes/#prevent-selection-of-prompts-and-output-in-python-code-blocks"""
+"""
+Generate the code reference pages.
+
+Refer to
+https://mkdocstrings.github.io/recipes/#prevent-selection-of-prompts-and-output-in-python-code-blocks
+"""
 
 from pathlib import Path
 

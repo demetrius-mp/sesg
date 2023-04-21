@@ -1,3 +1,1 @@
-"""
-SeSG (Search String Generator) module.
-"""
+"""SeSG (Search String Generator) module."""

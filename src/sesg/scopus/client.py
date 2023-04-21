@@ -26,7 +26,9 @@ class ExceededTimeoutRetriesError(Exception):
 
 @dataclass
 class APIKeyExpiredResponse:
-    """Represents an API key expired response from the [`ScopusClient`][sesg.scopus.client.ScopusClient]
+    """
+    Represents an API key expired response from the
+    [`ScopusClient`][sesg.scopus.client.ScopusClient]
 
     Args:
         api_key (str): The expired API key.
@@ -41,7 +43,9 @@ class APIKeyExpiredResponse:
 
 @dataclass
 class TimeoutResponse:
-    """Represents a timed out response from the [`ScopusClient`][sesg.scopus.client.ScopusClient]
+    """
+    Represents a timed out response from the
+    [`ScopusClient`][sesg.scopus.client.ScopusClient]
 
     Args:
         timed_out_page (int): The page where the timeout occured.
@@ -53,8 +57,9 @@ class TimeoutResponse:
 
 
 class ScopusClient:
-    """A Scopus API Client with automatic retry on timeout, and automatic
-    API key swapping on expiry.
+    """
+    A Scopus API Client with automatic retry on timeout, and automatic API key
+    swapping on expiry.
 
     Args:
         timeout (float): Time in seconds to wait before assuming the request timed out.
@@ -98,7 +103,11 @@ class ScopusClient:
 
     @property
     def current_page(self) -> int:
-        """Current page being fetched. Starts at 1, being at most 200."""
+        """
+        Current page being fetched.
+
+        Starts at 1, being at most 200.
+        """
         return self.__current_page
 
     @property
@@ -113,7 +122,7 @@ class ScopusClient:
 
     @property
     def current_timeout_retry(self) -> int:
-        """The current retry for the same timed out request"""
+        """The current retry for the same timed out request."""
         return self.__current_timeout_retry
 
     def __restart_iterator_with_current_state(self):
@@ -183,7 +192,9 @@ class ScopusClient:
             TimeoutResponse,
         ]
     ]:
-        """Performs Scopus API requests in a timeout-proof, and API key expiry-prof manner.
+        """
+        Performs Scopus API requests in a timeout-proof, and API key expiry-
+        prof manner.
 
         !!! note
 

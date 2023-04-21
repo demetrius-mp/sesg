@@ -26,7 +26,8 @@ SCOPUS_API_URL = "https://api.elsevier.com/content/search/scopus"
 
 @dataclass
 class SuccessResponse:
-    """A successfull Scopus Response
+    """
+    A successfull Scopus Response.
 
     Args:
         number_of_results (int): Number of results for this query. Notice that even if it displays more than 5000 results, Scopus will limit to retrieve only 5000.
@@ -37,7 +38,8 @@ class SuccessResponse:
 
     @dataclass
     class Entry:
-        """A study entry returned from the API.
+        """
+        A study entry returned from the API.
 
         Args:
             title (str): The title of the study.
@@ -58,7 +60,9 @@ class TimeoutError(Exception):
 
 
 class APIKeyExpiredError(Exception):
-    """The API key is expired, meaning it has been used over 20000 times in less than a week.
+    """
+    The API key is expired, meaning it has been used over 20000 times in less
+    than a week.
 
     Args:
         resets_at (Optional[datetime]): Datetime object represents when the API key will be resetted.
@@ -75,11 +79,19 @@ class APIKeyExpiredError(Exception):
 
 
 class PayloadTooLargeError(Exception):
-    """The response has a status code of 413. Probably the search string is too long."""  # noqa: E501
+    """
+    The response has a status code of 413.
+
+    Probably the search string is too long.
+    """  # noqa: E501
 
 
 class BadRequestError(Exception):
-    """The response has a status code of 400. Probably the search is malformed."""  # noqa: E501
+    """
+    The response has a status code of 400.
+
+    Probably the search is malformed.
+    """  # noqa: E501
 
 
 def _api_key_is_expired(
@@ -108,7 +120,9 @@ def _get_api_key_reset_date(
     *,
     response: httpx.Response,
 ) -> Union[None, datetime]:
-    """Given a Scopus API response, will try do determine the reset date using the response headers.
+    """
+    Given a Scopus API response, will try do determine the reset date using the
+    response headers.
 
     Args:
         response (httpx.Response): A Scopus API response.
@@ -128,7 +142,8 @@ async def _fetch(
     timeout: float,
     request: httpx.Request,
 ) -> httpx.Response:
-    """Fetches the given request, and if needed, raises a custom Exception.
+    """
+    Fetches the given request, and if needed, raises a custom Exception.
 
     Args:
         client (httpx.AsyncClient): Async client that will fetch the request.
@@ -172,7 +187,8 @@ def _create_request(
     query: str,
     start: Optional[int] = 0,
 ) -> httpx.Request:
-    """Creates a `httpx.Request` for Scopus API.
+    """
+    Creates a `httpx.Request` for Scopus API.
 
     Args:
         api_key (str): A Scopus API key.
@@ -206,7 +222,8 @@ def _parse_response(
     *,
     response: httpx.Response,
 ) -> SuccessResponse:
-    """Parses a Scopus API response.
+    """
+    Parses a Scopus API response.
 
     Args:
         response (httpx.Response): A Scopus API response.
@@ -245,8 +262,9 @@ async def search(
     timeout: float,
     page: int,
 ) -> AsyncIterator[SuccessResponse]:
-    """Performs Scopus API calls, in a manner that will return
-    all available results, which is at most 5000.
+    """
+    Performs Scopus API calls, in a manner that will return all available
+    results, which is at most 5000.
 
     !!! note
 

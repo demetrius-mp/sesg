@@ -4,7 +4,7 @@ Topic extraction module.
 This module is responsible to provide strategies to extract topics of a set
 of documents.
 
-Currently, the only available strategies are 
+Currently, the only available strategies are
 [LDA (Latent Dirichlet Allocation)](https://www.jmlr.org/papers/volume3/blei03a/blei03a.pdf?ref=https://githubhelp.com),
 and [BERTopic](https://arxiv.org/abs/2203.05794).
 """  # noqa: E501
@@ -16,7 +16,8 @@ from sklearn.feature_extraction.text import CountVectorizer
 
 
 class TopicExtractionStrategy(str, Enum):
-    """Enum defining the available topic extraction strategies.
+    """
+    Enum defining the available topic extraction strategies.
 
     Examples:
         >>> lda_strategy = TopicExtractionStrategy.lda
@@ -34,7 +35,8 @@ def extract_topics_with_lda(
     min_document_frequency: float,
     number_of_topics: int,
 ) -> List[List[str]]:
-    """Extracts topics from a list of documents using LDA method.
+    """
+    Extracts topics from a list of documents using LDA method.
 
     Args:
         docs (List[str]): List of documents.
@@ -122,7 +124,8 @@ def extract_topics_with_bertopic(
     min_topic_size: int,
     umap_n_neighbors: int,
 ) -> List[List[str]]:
-    """Extracts topics from a list of documents using BERTopic.
+    """
+    Extracts topics from a list of documents using BERTopic.
 
     Args:
         docs (List[str]): List of documents.

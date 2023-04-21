@@ -1,9 +1,9 @@
 """
 Metrics module.
 
-This module is responsible to provide metrics of a search string performance,
-given the number of Scopus results found, number of GS studies found in the Scopus results,
-and other informations.
+This module is responsible to provide metrics of a search string
+performance, given the number of Scopus results found, number of GS
+studies found in the Scopus results, and other informations.
 """  # noqa: E501
 
 from dataclasses import dataclass
@@ -14,7 +14,8 @@ import Levenshtein
 
 @dataclass
 class Metrics:
-    """Data container for metrics calculations.
+    """
+    Data container for metrics calculations.
 
     Args:
         gs_size (int): Number of studies in the GS.
@@ -47,13 +48,15 @@ class Metrics:
 
     @property
     def n_scopus_results_with_limit(self):
-        """Limits the number of results up to 5000"""
+        """Limits the number of results up to 5000."""
         return min(5000, self.n_scopus_results)
 
     @property
     def scopus_precision(self):
-        """Measures the precision using the number of GS studies found in Scopus,
+        """
+        Measures the precision using the number of GS studies found in Scopus,
         and the number of Scopus Results with an upper limit of 5000.
+
         If no Scopus result were found, will return 0.
         """
         if self.n_scopus_results_with_limit == 0:
@@ -63,15 +66,18 @@ class Metrics:
 
     @property
     def scopus_recall(self):
-        """Measures the recall using the number of GS studies found in Scopus, and the GS size."""  # noqa: E501
+        """Measures the recall using the number of GS studies found in Scopus,
+        and the GS size."""  # noqa: E501
         return self.n_gs_studies_in_scopus / self.gs_size
 
     @property
     def scopus_f1_score(self):
-        """Measures the F1-Score using `scopus_precision` and `scopus_recall`.
+        """
+        Measures the F1-Score using `scopus_precision` and `scopus_recall`.
+
         If the recall and the precision are both 0 (which happens when
-        no GS studies were found in Scopus results, and when no
-        Scopus results were found, respectively), will return 0.
+        no GS studies were found in Scopus results, and when no Scopus
+        results were found, respectively), will return 0.
         """
         precision = self.scopus_precision
         recall = self.scopus_recall
@@ -86,17 +92,15 @@ class Metrics:
 
     @property
     def scopus_and_bsb_recall(self):
-        """Measures the recall using the number of GS studies found in Scopus
-        + number of studies found with Backward Snowballing,
-        and the GS size."""
+        """Measures the recall using the number of GS studies found in Scopus +
+        number of studies found with Backward Snowballing, and the GS size."""
         return self.n_gs_studies_in_scopus_and_bsb / self.gs_size
 
     @property
     def scopus_and_bsb_and_fsb_recall(self):
-        """Measures the recall using the number of GS studies found in Scopus
-        + number of studies found with Backward Snowballing,
-        + number of studies found with Forward Snowballing,
-        and the GS size."""
+        """Measures the recall using the number of GS studies found in Scopus +
+        number of studies found with Backward Snowballing, + number of studies
+        found with Forward Snowballing, and the GS size."""
         return self.n_gs_studies_in_scopus_and_bsb_and_fsb / self.gs_size
 
 
@@ -104,7 +108,8 @@ def preprocess_string(
     *,
     string: str,
 ) -> str:
-    r"""Strips the string and turn every character to lower case.
+    r"""
+    Strips the string and turn every character to lower case.
 
     Args:
         string: The string to preprocess.
@@ -124,8 +129,9 @@ def similarity_score(
     small_set: List[str],
     other_set: List[str],
 ) -> List[Tuple[int, int]]:
-    """Uses `TfidfVectorizer`, `cosine_similarity`, and `Levenshtein`
-    to calculate the intersection of two sets of strings.
+    """
+    Uses `TfidfVectorizer`, `cosine_similarity`, and `Levenshtein` to calculate
+    the intersection of two sets of strings.
 
     You might need to preprocess the strings with [sesg.metrics.preprocess_string][].
 

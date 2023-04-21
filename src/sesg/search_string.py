@@ -1,8 +1,9 @@
 """
 Search String module.
 
-This module is responsible to mount the search string. We use BERT's token prediction
-with the goal of obtaining similar words, and use them enrich the final string.
+This module is responsible to mount the search string. We use BERT's
+token prediction with the goal of obtaining similar words, and use them
+enrich the final string.
 """  # noqa: E501
 
 from typing import Any, List, Optional, TypedDict, Union
@@ -17,7 +18,9 @@ def _enrich_word(
     bert_tokenizer: Any,
     bert_model: Any,
 ) -> Union[List[str], None]:
-    """Tries to find words that are similar to the target word using the enrichment text.
+    """
+    Tries to find words that are similar to the target word using the
+    enrichment text.
 
     Args:
         word (str): Word to which other similar ones will be generated.
@@ -95,7 +98,9 @@ def _enrich_word(
 
 
 class EnrichmentStudy(TypedDict):
-    """Data container for a study that will be used to generate an enrichment text.
+    """
+    Data container for a study that will be used to generate an enrichment
+    text.
 
     Attributes:
         title (str): Title of the study.
@@ -118,8 +123,10 @@ def generate_enrichment_text(
     *,
     studies_list: List[EnrichmentStudy],
 ) -> str:
-    r"""Generates a piece of text that consists of the concatenation of the title and abstract of each study.
-    Can be used with the [`sesg.search_string.generate_search_string`][] function.
+    r"""
+    Generates a piece of text that consists of the concatenation of the title
+    and abstract of each study. Can be used with the
+    [`sesg.search_string.generate_search_string`][] function.
 
     Args:
         studies_list (List[EnrichmentStudy]): List of studies with title and abstract.
@@ -152,7 +159,8 @@ def _generate_search_string_without_similar_words(
     topics_list: List[List[str]],
     n_words_per_topic: int,
 ) -> str:
-    """Generates a search string using the given list of topics.
+    """
+    Generates a search string using the given list of topics.
 
     Args:
         topics_list (List[List[str]]): List of topics, where each topic is a list of words.
@@ -185,7 +193,9 @@ def _generate_search_string_with_similar_words(
     bert_tokenizer: Any,
     bert_model: Any,
 ) -> str:
-    """Generates a search string that will be enriched with the desired number of similar words.
+    """
+    Generates a search string that will be enriched with the desired number of
+    similar words.
 
     Args:
         topics_list (List[List[str]]): List of topics, where each topic is a list of words.
@@ -314,7 +324,8 @@ def generate_search_string(
     bert_tokenizer: Any,
     bert_model: Any,
 ) -> str:
-    """Generates a search string.
+    """
+    Generates a search string.
 
     Args:
         list_of_topics (List[List[str]]): List of topics, where each topic is a list of words.
@@ -364,7 +375,9 @@ def set_pub_year(
     min_year: Optional[int] = None,
     max_year: Optional[int] = None,
 ) -> str:
-    """Given a search string, will append `PUBYEAR >` and `PUBYEAR <` boundaries as needed.
+    """
+    Given a search string, will append `PUBYEAR >` and `PUBYEAR <` boundaries
+    as needed.
 
     Args:
         string (str): A search string.

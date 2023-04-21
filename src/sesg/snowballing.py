@@ -5,7 +5,7 @@ This module is responsible to perform the snowballing method on a set of studies
 In details, given a set of studies with titles, and text contents, for each study,
 we try to find out whether the study cited another given study or not.
 
-To achieve this goal, we use [`thefuzz`](https://github.com/seatgeek/thefuzz) 
+To achieve this goal, we use [`thefuzz`](https://github.com/seatgeek/thefuzz)
 with [`Levenshtein`](https://github.com/maxbachmann/Levenshtein) in order to perform
 string similarity checks.
 """
@@ -25,7 +25,8 @@ def _window(
     seq: Iterable[T],
     size: int,
 ) -> Iterator[Tuple[T, ...]]:
-    """Creates an iterator over overlapping subslices of the given size.
+    """
+    Creates an iterator over overlapping subslices of the given size.
 
     Args:
         seq (Iterable[T]): Sequence to iterate over.
@@ -59,7 +60,8 @@ def _study_cites_title(
     study: str,
     title: str,
 ) -> bool:
-    """Uses `thefuzz.process.extractOne` to determine if a study cites a title.
+    """
+    Uses `thefuzz.process.extractOne` to determine if a study cites a title.
 
     Args:
         study (str): Text of the study.
@@ -87,7 +89,9 @@ def _study_cites_title(
 
 
 class _PooledStudyCitesTitleArgs(TypedDict):
-    """Data container for the `_pooled_study_cites_title` function, with the goal of improving type safety.
+    """
+    Data container for the `_pooled_study_cites_title` function, with the goal
+    of improving type safety.
 
     Args:
         title (str): Title to search for
@@ -103,8 +107,9 @@ class _PooledStudyCitesTitleArgs(TypedDict):
 def _pooled_study_cites_title(
     args: _PooledStudyCitesTitleArgs,
 ) -> bool:
-    """Replicates `_study_cites_title` behaviour, with slight modifications to work
-    well with `multiprocessing.Pool`.
+    """
+    Replicates `_study_cites_title` behaviour, with slight modifications to
+    work well with `multiprocessing.Pool`.
 
     Args:
         args (_PooledStudyCitesTitleArgs): args of this function.
@@ -180,8 +185,9 @@ def _preprocess_study(
 
 
 class SnowballingStudy:
-    r"""Represents a study that will be included in backward snowballing.
-    The constructor will preprocess the title and text content to the correct
+    r"""
+    Represents a study that will be included in backward snowballing. The
+    constructor will preprocess the title and text content to the correct
     format.
 
     Args:
@@ -215,8 +221,9 @@ def backward_snowballing(
     *,
     studies: List[SnowballingStudy],
 ) -> Iterator[Tuple[SnowballingStudy, List[SnowballingStudy]]]:
-    """Runs backward snowballing in the given list of studies.
-    The graph returned is in the form of an Adjacency List.
+    """
+    Runs backward snowballing in the given list of studies. The graph returned
+    is in the form of an Adjacency List.
 
     Args:
         studies (List[SnowballingStudy]): List of studies with id, title, and text content.
