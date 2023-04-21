@@ -262,7 +262,7 @@ def backward_snowballing(
                         # so we skip and set it as False
                         "skip": study_index == reference_index,
                         "study": study.text_content,
-                        "title": reference.__title,
+                        "title": reference.title,
                     }
                     for reference_index, reference in enumerate(studies)
                 ],
