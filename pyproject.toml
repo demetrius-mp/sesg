@@ -8,6 +8,40 @@ pre-summary-newline = true
 in-place = true
 exclude = ["__pycache__/"]
 
+[tool.poe.tasks]
+# code style
+ruff = {cmd = "ruff src/ --fix", help = "Lints the project, fixing errors."}
+docformatter = {cmd = "docformatter src/", help = "Formats docstrings."}
+black = {cmd = "black src/", help = "Formats the code."}
+toml-sort = {cmd = "toml-sort pyproject.toml", help = "Sorts pyproject.toml file."}
+# packaging
+export-dependencies = {script = "scripts.export-dependencies:main", help = "Exports dependencies to a requirements.txt format, one file for each group of depencies."}
+
+[tool.poe.tasks.docs]
+help = "Starts mkdocs development server."
+sequence = [
+  {ref = "docformatter"},
+  {cmd = "mkdocs serve"}
+]
+
+[tool.poe.tasks.format]
+help = "Formats the package with ruff, docformatter, black, and toml-sort."
+sequence = ["toml-sort", "ruff", "docformatter", "black"]
+
+[tool.poe.tasks.publish-package]
+help = "Builds the package and publishes to PyPI."
+sequence = [
+  {ref = "export-dependencies"},
+  {script = "scripts.publish-package:main"}
+]
+
+[tool.poe.tasks.test]
+help = "Run tests against the package."
+sequence = [
+  {cmd = "pytest -s -x --cov=sesg -vv src/sesg"},
+  {cmd = "coverage html"}
+]
+
 [tool.poetry]
 name = "sesg"
 version = "0.0.12"
@@ -40,9 +74,9 @@ numpy = "1.23.5"
 umap-learn = "^0.5.3"
 
 [tool.poetry.group.dev.dependencies]
-taskipy = "^1.10.4"
 python-dotenv = "^1.0.0"
 pre-commit = "^3.2.2"
+poethepoet = "^0.19.0"
 
 [tool.poetry.group.doc.dependencies]
 mkdocs-material = "^9.1.6"

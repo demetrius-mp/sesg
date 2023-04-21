@@ -4,6 +4,7 @@ repos:
     hooks:
       - id: format
         name: Formats the package using ruff, docformatter, toml-sort, and black.
-        entry: poetry run task fmt
+        entry: poetry run poe format
         language: system
         types: [python]
+        pass_filenames: false
