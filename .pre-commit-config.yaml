@@ -7,7 +7,6 @@ repos:
         entry: poetry run poe format
         language: system
         types: [python]
-        stages: [push]
         pass_filenames: false
 
   - repo: local
@@ -17,5 +16,4 @@ repos:
         entry: poetry run poe export-dependencies
         language: system
         types: [python]
-        stages: [push]
         pass_filenames: false

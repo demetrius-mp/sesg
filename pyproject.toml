@@ -24,9 +24,6 @@ sequence = [
   {cmd = "mkdocs serve"}
 ]
 
-
-
-
 [tool.poe.tasks.format]
 help = "Formats the package with toml-sort, ruff, docformatter, and black."
 sequence = ["toml-sort", "ruff", "docformatter", "black"]
