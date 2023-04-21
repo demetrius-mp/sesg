@@ -88,4 +88,5 @@ test = { cmd = "pytest -s -x --cov=sesg -vv src/sesg", help = "Runs pytest with 
 post_test = { cmd = "coverage html", help = "Creates coverage reports if tests are successfull." }
 show-coverage = { cmd = "google-chrome htmlcov/index.html", help = "Opens the coverage reports with google-chrome." }
 export-dependencies = { cmd = "python scripts/export-dependencies.py", help = "Exports dependencies to a requirements.txt format, one file for each group of depencies." }
+pre_publish-package = { cmd = "task export-dependencies", help = "Exports dependencies before publishing the package." }
 publish-package = { cmd = "python scripts/publish-package.py", help = "Builds the package and publishes to PyPI." }
