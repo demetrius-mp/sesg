@@ -16,6 +16,7 @@ from .client import (
     OutOfAPIKeysError,
     ScopusClient,
     TimeoutResponse,
+    create_clients_with_disjoint_api_keys,
 )
 
 
@@ -28,4 +29,5 @@ __all__ = (
     "ScopusClient",
     "SuccessResponse",
     "TimeoutResponse",
+    "create_clients_with_disjoint_api_keys",
 )
