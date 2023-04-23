@@ -30,7 +30,9 @@ extra_css:
   - stylesheets/extra.css
 
 nav:
+  - Home: index.md
   - Code Reference: reference/
+  - Recipes: recipes/
 
 plugins:
   - search
