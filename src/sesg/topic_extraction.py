@@ -160,7 +160,7 @@ def extract_topics_with_bertopic(
 
     topic_model = BERTopic(
         language="english",
-        verbose=True,
+        verbose=False,
         hdbscan_model=cluster_model,  # type: ignore
         vectorizer_model=vectorizer_model,
         umap_model=umap_model,
