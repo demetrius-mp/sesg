@@ -37,7 +37,7 @@ sequence = [
 
 [tool.poetry]
 name = "sesg"
-version = "0.0.15"
+version = "0.0.16"
 description = "SeSG is a tool developed to help Systematic Literature Review researchers, specifically at the step of building a search string."
 authors = ["Demetrius Panovitch <demetrius.mp789@gmail.com>"]
 license = "GPL-3.0-only"
