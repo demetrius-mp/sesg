@@ -13,7 +13,7 @@ import math
 from dataclasses import dataclass
 from datetime import datetime
 from functools import partial
-from typing import AsyncIterator, List, Optional, Union
+from typing import Any, AsyncIterator, List, Optional, Union
 
 import aiometer
 import httpx
@@ -47,6 +47,7 @@ class SuccessResponse:
         scopus_id: str
         title: str
         cited_by_count: Optional[int]
+        _rest: Any
 
     number_of_results: int
     number_of_pages: int
@@ -239,6 +240,7 @@ def _parse_response(
             title=entry["dc:title"],
             scopus_id=entry["dc:identifier"],
             cited_by_count=entry.get("citedby-count", None),
+            _rest=entry,
         )
         for entry in json["search-results"]["entry"]
         if "dc:title" in entry
