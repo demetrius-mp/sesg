@@ -39,10 +39,12 @@ class SuccessResponse:
         """A study entry returned from the API.
 
         Args:
+            scopus_id (str): The ID of the study determined by Scopus.
             title (str): The title of the study.
             cited_by_count (Optional[int]): How many studies cites this one.
         """
 
+        scopus_id: str
         title: str
         cited_by_count: Optional[int]
 
@@ -235,6 +237,7 @@ def _parse_response(
     entries = [
         SuccessResponse.Entry(
             title=entry["dc:title"],
+            scopus_id=entry["dc:identifier"],
             cited_by_count=entry.get("citedby-count", None),
         )
         for entry in json["search-results"]["entry"]
