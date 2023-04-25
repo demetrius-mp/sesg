@@ -13,7 +13,7 @@ import math
 from dataclasses import dataclass
 from datetime import datetime
 from functools import partial
-from typing import Any, AsyncIterator, List, Optional, Union
+from typing import Any, AsyncIterator, List, Literal, Optional, Union
 
 import aiometer
 import httpx
@@ -53,6 +53,21 @@ class SuccessResponse:
     number_of_pages: int
     current_page: int
     entries: List[Entry]
+
+
+@dataclass
+class ParsedHeaders:
+    """Data container holding some useful headers of a Scopus response.
+
+    Args:
+        x_ratelimit_remaining (Optional[int]): How much requests the API key have left.
+        x_ratelimit_reset (Optional[int]): Timestamp represeting when the API key will reset it's quota.
+        x_els_status (Literal["OK", "QUOTA_EXCEEDED - Quota Exceeded"]): The status of the API key.
+    """  # noqa: E501
+
+    x_ratelimit_remaining: Optional[int]
+    x_ratelimit_reset: Optional[int]
+    x_els_status: Literal["OK", "QUOTA_EXCEEDED - Quota Exceeded"]
 
 
 class TimeoutError(Exception):
@@ -252,6 +267,27 @@ def _parse_response(
         current_page=current_page,
         entries=entries,
     )
+
+
+def parse_headers(
+    *,
+    headers: httpx.Headers,
+) -> ParsedHeaders:
+    """Parses the headers of a Scopus response.
+
+    Args:
+        headers (httpx.Headers): Headers of the response.
+
+    Returns:
+        A dataclass holding some of the Scopus response headers.
+    """
+    parsed_headers = ParsedHeaders(
+        x_els_status=headers.get("x-els-status"),
+        x_ratelimit_remaining=headers.get("x-ratelimit-remaining", None),
+        x_ratelimit_reset=headers.get("x-ratelimit-reset", None),
+    )
+
+    return parsed_headers
 
 
 async def search(
