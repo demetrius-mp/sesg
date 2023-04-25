@@ -62,12 +62,12 @@ class ParsedHeaders:
     Args:
         x_ratelimit_remaining (Optional[int]): How much requests the API key have left.
         x_ratelimit_reset (Optional[int]): Timestamp represeting when the API key will reset it's quota.
-        x_els_status (Literal["OK", "QUOTA_EXCEEDED - Quota Exceeded"]): The status of the API key.
+        x_els_status (Optional[Literal["OK", "QUOTA_EXCEEDED - Quota Exceeded"]]): The status of the API key.
     """  # noqa: E501
 
     x_ratelimit_remaining: Optional[int]
     x_ratelimit_reset: Optional[int]
-    x_els_status: Literal["OK", "QUOTA_EXCEEDED - Quota Exceeded"]
+    x_els_status: Optional[Literal["OK", "QUOTA_EXCEEDED - Quota Exceeded"]]
 
 
 class TimeoutError(Exception):
