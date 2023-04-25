@@ -123,6 +123,16 @@ class ScopusClient:
         """The current retry for the same timed out request."""
         return self.__current_timeout_retry
 
+    @property
+    def timeout(self) -> float:
+        """The `timeout` parameter."""
+        return self.__timeout
+
+    @property
+    def timeout_retries(self) -> float:
+        """The `timeout_retries` parameter."""
+        return self.__timeout_retries
+
     def __restart_iterator_with_current_state(self):
         return api.search(
             api_key=self.current_api_key,
