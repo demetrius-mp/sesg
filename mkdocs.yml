@@ -32,7 +32,6 @@ extra_css:
 nav:
   - Home: index.md
   - Code Reference: reference/
-  - Recipes: recipes/
 
 plugins:
   - search
