@@ -10,8 +10,7 @@ and [`httpx`](https://github.com/projectdiscovery/httpx) to achieve this goal.
 
 from dataclasses import dataclass
 from datetime import datetime
-from functools import partial
-from typing import AsyncIterator, List, Optional, Union
+from typing import AsyncIterator, List, Optional, Tuple, Union
 
 import aiometer
 import httpx
@@ -260,7 +259,7 @@ class ScopusClient:
 
     async def get_all_api_keys_status(
         self,
-    ) -> AsyncIterator[api.ParsedHeaders]:
+    ) -> AsyncIterator[Tuple[int, api.ParsedHeaders]]:
         """Gets the status of every API key.
 
         Yields:
@@ -276,18 +275,21 @@ class ScopusClient:
             for api_key in self.api_keys
         ]
 
+        async def augmented_fetch(req: httpx.Request, index: int):
+            return index, await api._fetch(client, self.timeout, req)
+
         async with aiometer.amap(
-            partial(api._fetch, client, self.__timeout),
-            requests,
+            lambda x: augmented_fetch(x[1], x[0]),
+            list(enumerate(requests)),
             max_per_second=7,
             max_at_once=7,
         ) as result:
-            async for response in result:
+            async for index, response in result:
                 headers = api.parse_headers(
                     headers=response.headers,
                 )
 
-                yield headers
+                yield index, headers
 
 
 def create_clients_with_disjoint_api_keys(
