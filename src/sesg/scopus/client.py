@@ -14,7 +14,6 @@ from typing import AsyncIterator, List, Optional, Tuple, Union
 
 import aiometer
 import httpx
-from more_itertools import divide
 
 from . import api
 
@@ -290,46 +289,3 @@ class ScopusClient:
                 )
 
                 yield index, headers
-
-
-def create_clients_with_disjoint_api_keys(
-    *,
-    api_keys: List[str],
-    timeout: float,
-    timeout_retries: int,
-    n_clients: int,
-) -> List[ScopusClient]:
-    """Creates `n_clients` ScopusClient instances, where each client will use a disjoint set API keys.
-
-    If the number of API keys is not divisible by `n_clients`, some clients will have fewer API keys than the others.
-
-    Args:
-        api_keys (List[str]): List with Scopus API keys.
-        timeout (float): Time in seconds to wait before assuming the request timed out.
-        timeout_retries (int): Number of times to retry a timed out request in a row.
-        n_clients (int): Number of clients to create
-
-    Raises:
-        ValueError: If the number of clients is greater than the number of API keys.
-
-    Returns:
-        A list with the created clients.
-    """  # noqa: E501
-    if n_clients > len(api_keys):
-        # fmt: off
-        raise ValueError("Number of clients must be smaller than the number of API keys.")  # noqa: E501
-
-    api_keys_groups = divide(n_clients, api_keys)
-
-    clients_list: List[ScopusClient] = list()
-
-    for group in api_keys_groups:
-        client = ScopusClient(
-            api_keys=list(group),
-            timeout=timeout,
-            timeout_retries=timeout_retries,
-        )
-
-        clients_list.append(client)
-
-    return clients_list
