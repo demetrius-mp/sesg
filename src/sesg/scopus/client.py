@@ -8,6 +8,7 @@ We use [`aiometer`](https://github.com/florimondmanca/aiometer),
 and [`httpx`](https://github.com/projectdiscovery/httpx) to achieve this goal.
 """  # noqa: E501
 
+import asyncio
 from dataclasses import dataclass
 from datetime import datetime
 from typing import AsyncIterator, List, Optional, Tuple, Union
@@ -274,18 +275,20 @@ class ScopusClient:
             for api_key in self.api_keys
         ]
 
-        async def augmented_fetch(req: httpx.Request, index: int):
-            return index, await api._fetch(client, self.timeout, req)
+        async def custom_fetch(req: httpx.Request, index: int):
+            task = client.send(req)
+            response = await asyncio.wait_for(
+                fut=task,
+                timeout=self.timeout,
+            )
+
+            return index, api.parse_headers(headers=response.headers)
 
         async with aiometer.amap(
-            lambda x: augmented_fetch(x[1], x[0]),
+            lambda x: custom_fetch(x[1], x[0]),
             list(enumerate(requests)),
             max_per_second=7,
             max_at_once=7,
         ) as result:
-            async for index, response in result:
-                headers = api.parse_headers(
-                    headers=response.headers,
-                )
-
+            async for index, headers in result:
                 yield index, headers
