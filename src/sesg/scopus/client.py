@@ -270,7 +270,7 @@ class ScopusClient:
         requests = [
             api._create_request(
                 api_key=api_key,
-                query="",
+                query="machine learning",
             )
             for api_key in self.api_keys
         ]
