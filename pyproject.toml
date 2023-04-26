@@ -113,6 +113,7 @@ lines-after-imports = 2
 
 [tool.ruff.per-file-ignores]
 "scripts/*" = ["D"]
+"tests/*" = ["D"]
 
 [tool.ruff.pydocstyle]
 convention = "google"
