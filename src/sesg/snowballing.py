@@ -253,19 +253,21 @@ def backward_snowballing(
     """  # noqa: E501
     for study_index, study in enumerate(studies):
         with Pool() as p:
+            func_args: List[_PooledStudyCitesTitleArgs] = [
+                {
+                    # when `study_index == reference_index`, we are checking if study a cites itself,  # noqa: E501
+                    # so we skip and set it as False
+                    "skip": study_index == reference_index,
+                    "study": study.text_content,
+                    "title": reference.title,
+                }
+                for reference_index, reference in enumerate(studies)
+            ]
+
             # if `result[j]` is True then the current study cites title `j`
             result: List[bool] = p.map(
                 _pooled_study_cites_title,
-                [
-                    {
-                        # when `i == j`, we are checking if study `i` cites itself,
-                        # so we skip and set it as False
-                        "skip": study_index == reference_index,
-                        "study": study.text_content,
-                        "title": reference.title,
-                    }
-                    for reference_index, reference in enumerate(studies)
-                ],
+                func_args,
             )
 
         references: List[SnowballingStudy] = list()
