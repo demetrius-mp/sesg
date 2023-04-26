@@ -28,8 +28,8 @@ class TopicExtractionStrategy(str, Enum):
 
 
 def extract_topics_with_lda(
-    *,
     docs: List[str],
+    *,
     min_document_frequency: float,
     number_of_topics: int,
 ) -> List[List[str]]:
@@ -115,8 +115,8 @@ def extract_topics_with_lda(
 
 
 def extract_topics_with_bertopic(
-    *,
     docs: List[str],
+    *,
     kmeans_n_clusters: int,
     umap_n_neighbors: int,
 ) -> List[List[str]]:

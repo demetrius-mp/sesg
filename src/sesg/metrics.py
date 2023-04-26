@@ -96,7 +96,6 @@ class Metrics:
 
 
 def preprocess_string(
-    *,
     string: str,
 ) -> str:
     r"""Strips the string and turn every character to lower case.
@@ -108,7 +107,7 @@ def preprocess_string(
         The preprocessed string.
 
     Examples:
-        >>> preprocess_string(string=" A string Here.  \n")
+        >>> preprocess_string(" A string Here.  \n")
         'a string here.'
     """
     return string.strip().lower()

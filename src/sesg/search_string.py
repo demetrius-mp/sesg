@@ -11,8 +11,8 @@ from rapidfuzz.distance import Levenshtein
 
 
 def _enrich_word(
-    *,
     word: str,
+    *,
     enrichment_text: str,
     bert_tokenizer: Any,
     bert_model: Any,

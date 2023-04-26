@@ -20,8 +20,8 @@ T = TypeVar("T")
 
 
 def _window(
-    *,
     seq: Iterable[T],
+    *,
     size: int,
 ) -> Iterator[Tuple[T, ...]]:
     """Creates an iterator over overlapping subslices of the given size.
@@ -35,7 +35,7 @@ def _window(
 
     Examples:
         >>> elements = [1, 2, 3, 4, 5, 6]
-        >>> for subslice in _window(seq=elements, size=3):
+        >>> for subslice in _window(elements, size=3):
         ...     print(subslice)
         (1, 2, 3)
         (2, 3, 4)
@@ -69,13 +69,13 @@ def _study_cites_title(
 
     Examples:
         >>> _study_cites_title(
-        ...     title="regression tests for machine learning models: a systematic literature review",
         ...     study="long text here very long REFERENCES: regression tests for machine learning models: a systematic literature review",
+        ...     title="regression tests for machine learning models: a systematic literature review",
         ... )
         True
     """  # noqa: E501
     window_size = len(title)
-    options = ["".join(x) for x in _window(seq=study, size=window_size)]
+    options = ["".join(x) for x in _window(study, size=window_size)]
 
     result = process.extractOne(title, options)
 
@@ -127,7 +127,6 @@ def _pooled_study_cites_title(
 
 
 def _preprocess_title(
-    *,
     title: str,
 ) -> str:
     """Processes the title in the following manner.
@@ -143,15 +142,14 @@ def _preprocess_title(
         Preprocessed title.
 
     Examples:
-        >>> _preprocess_title(title=" title. HERE ")
+        >>> _preprocess_title(" title. HERE ")
         'titlehere'
     """
     return title.strip().lower().replace(" ", "").replace(".", "")
 
 
 def _preprocess_study(
-    *,
-    study_text: str,
+    study: str,
 ) -> str:
     r"""Processes the study in the following manner.
 
@@ -160,17 +158,17 @@ def _preprocess_study(
     1. Removes line breaks, line carriages, spaces, and dots
 
     Args:
-        study_text (str): Study's text to preprocess
+        study (str): Study's text to preprocess
 
     Returns:
         Preprocessed study.
 
     Examples:
-        >>> _preprocess_study(study_text=" text. \n \r\n HERE ")
+        >>> _preprocess_study(" text. \n \r\n HERE ")
         'texthere'
     """
     return (
-        study_text.strip()
+        study.strip()
         .lower()
         .replace("\n", "")
         .replace("\r", "")
@@ -209,8 +207,8 @@ class SnowballingStudy:
             text_content (str): Content of the study. Could be extracted from a PDF with CERMINE.
         """  # noqa: E501
         self.__id = id
-        self.__title = _preprocess_title(title=title)
-        self.__text_content = _preprocess_study(study_text=text_content)
+        self.__title = _preprocess_title(title)
+        self.__text_content = _preprocess_study(text_content)
 
     @property
     def id(self) -> int:
@@ -229,7 +227,6 @@ class SnowballingStudy:
 
 
 def backward_snowballing(
-    *,
     studies: List[SnowballingStudy],
 ) -> Iterator[Tuple[SnowballingStudy, List[SnowballingStudy]]]:
     """Runs backward snowballing in the given list of studies.
@@ -246,7 +243,7 @@ def backward_snowballing(
         ...     SnowballingStudy(id=2, title="machine learning, a SLR", text_content="... REFERENCES: other studies"),
         ... ]
         >>>
-        >>> for study, references in backward_snowballing(studies=studies):
+        >>> for study, references in backward_snowballing(studies):
         ...     print((study.id, [r.id for r in references]))
         (1, [2])
         (2, [])

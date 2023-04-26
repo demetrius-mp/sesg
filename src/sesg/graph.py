@@ -12,8 +12,8 @@ from graphviz import Digraph
 
 
 def edges_to_adjacency_list(
-    *,
     edges: List[Tuple[int, int]],
+    *,
     directed: bool = True,
 ) -> Mapping[int, List[int]]:
     """Given a list of edges, return an adjacency list.
@@ -28,9 +28,9 @@ def edges_to_adjacency_list(
     Examples:
         >>> edges = [(1, 2), (2, 3), (2, 4)]
         >>>
-        >>> edges_to_adjacency_list(edges=edges)
+        >>> edges_to_adjacency_list(edges)
         {1: [2], 2: [3, 4]}
-        >>> edges_to_adjacency_list(edges=edges, directed=False)
+        >>> edges_to_adjacency_list(edges, directed=False)
         {1: [2], 2: [1, 3, 4], 3: [2], 4: [2]}
     """  # noqa: E501
     adjacency_list: Mapping[int, List[int]] = defaultdict(list)
@@ -45,7 +45,6 @@ def edges_to_adjacency_list(
 
 
 def directed_adjacency_list_to_undirected(
-    *,
     adjacency_list: Mapping[int, List[int]],
 ) -> Mapping[int, List[int]]:
     """Converts a directed adjacency list to an undirected adjacency list.
@@ -57,10 +56,10 @@ def directed_adjacency_list_to_undirected(
         A mapping of node IDs to their list of neighbors in an undirected graph.
 
     Examples:
-        >>> directed_adjacency_list_to_undirected(adjacency_list={1: [2, 3], 2: [3, 4], 3: [4]})
+        >>> directed_adjacency_list_to_undirected({1: [2, 3], 2: [3, 4], 3: [4]})
         {1: [2, 3], 2: [1, 3, 4], 3: [1, 2, 4], 4: [2, 3]}
 
-        >>> directed_adjacency_list_to_undirected(adjacency_list={2: [1], 3: [1, 2], 4: [2, 3]})
+        >>> directed_adjacency_list_to_undirected({2: [1], 3: [1, 2], 4: [2, 3]})
         {2: [1, 3, 4], 1: [2, 3], 3: [1, 2, 4], 4: [2, 3]}
     """  # noqa: E501
     undirected_adjacency_list: Mapping[int, List[int]] = defaultdict(list)
