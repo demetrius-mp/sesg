@@ -27,6 +27,7 @@
     ".ruff_cache": true,
     "**/__pycache__": true,
     ".coverage": true,
+    "coverage.xml": true,
   },
   "files.associations": {
     "*.env": "properties",
