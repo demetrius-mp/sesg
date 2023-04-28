@@ -16,11 +16,19 @@ jobs:
           python-version-file: '.python-version'
           cache: 'poetry'
       
-      - name: Install dev and lint dependencies
-        run: poetry install --only dev,lint
+      - name: Install dependencies
+        run: poetry install --without doc
       
       - name: Lints and formats the package
         run: poetry run poe format
+
+      - name: Run tests
+        run: poetry run poe test
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Exports package requirements by groups.
         run: poetry run poe export-dependencies
