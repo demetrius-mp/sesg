@@ -76,10 +76,18 @@ def test_set_pubyear(
 
 def test_generate_search_string_without_similar_words_with_1_topic_and_3_words_per_topic(
     topics_list: list[list[str]],
+    enrichment_text: str,
+    language_models,
 ):
-    result = search_string._generate_search_string_without_similar_words(
-        topics_list=topics_list[:1],
+    bert_tokenizer, bert_model = language_models
+
+    result = search_string.generate_search_string(
+        list_of_topics=topics_list[:1],
         n_words_per_topic=3,
+        bert_model=bert_model,
+        bert_tokenizer=bert_tokenizer,
+        enrichment_text=enrichment_text,
+        n_similar_words=0,
     )
 
     expected = '("software" AND "measurement" AND "gqm")'
@@ -88,11 +96,17 @@ def test_generate_search_string_without_similar_words_with_1_topic_and_3_words_p
 
 
 def test_generate_search_string_without_similar_words_with_2_topics_and_5_words_per_topic(
-    topics_list: list[list[str]],
+    topics_list: list[list[str]], enrichment_text: str, language_models
 ):
-    result = search_string._generate_search_string_without_similar_words(
-        topics_list=topics_list,
+    bert_tokenizer, bert_model = language_models
+
+    result = search_string.generate_search_string(
+        list_of_topics=topics_list,
         n_words_per_topic=5,
+        bert_model=bert_model,
+        bert_tokenizer=bert_tokenizer,
+        enrichment_text=enrichment_text,
+        n_similar_words=0,
     )
 
     expected = '("software" AND "measurement" AND "gqm" AND "strategies" AND "goals") OR ("process" AND "software" AND "strategic" AND "strategies" AND "improvement")'
@@ -107,9 +121,9 @@ def test_generate_search_string_with_1_similar_word_and_2_topics_and_3_words_per
 ):
     bert_tokenizer, bert_model = language_models
 
-    result = search_string._generate_search_string_with_similar_words(
+    result = search_string.generate_search_string(
         n_similar_words=1,
-        topics_list=topics_list,
+        list_of_topics=topics_list,
         bert_model=bert_model,
         bert_tokenizer=bert_tokenizer,
         n_words_per_topic=3,
