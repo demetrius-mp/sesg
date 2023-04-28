@@ -160,7 +160,7 @@ def create_citation_graph(
     *,
     adjacency_list: Mapping[int, List[int]],
     tooltips: Mapping[int, str],
-    results_list: Optional[List[int]] = list(),
+    results_list: Optional[List[int]] = None,
 ) -> Digraph:
     """Creates a `graphviz.Digraph` instance with the following properties.
 
@@ -171,7 +171,7 @@ def create_citation_graph(
     Args:
         adjacency_list (Mapping[int, List[int]]): A mapping of node IDs to their list of neighbors.
         tooltips (List[str]): A mapping of node IDs to their tooltip.
-        results_list (Optional[List[int]]): List of nodes where to start a BFS. Defaults to an empty list.
+        results_list (Optional[List[int]]): List of nodes where to start a BFS. If none, will be set to an empty list.
 
     Returns:
         A graphviz dot object with the said properties.
