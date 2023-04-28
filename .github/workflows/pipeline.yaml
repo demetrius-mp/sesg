@@ -2,7 +2,7 @@ name: Pipeline
 on: [push, pull_request]
 
 jobs:
-  format:
+  ci:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3.5.2
