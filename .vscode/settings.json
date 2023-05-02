@@ -18,6 +18,8 @@
     "editor.indentSize": "tabSize",
     "editor.defaultFormatter": "redhat.vscode-yaml"
   },
+  "autoDocstring.docstringFormat": "google",
+  "autoDocstring.customTemplatePath": ".vscode/autodocstringtemplate.mustache",
   "explorer.fileNesting.enabled": true,
   "explorer.fileNesting.patterns": {
     "pyproject.toml": "poetry.lock, README.md, .gitignore, mkdocs.yml, .python-version, .readthedocs.yaml, LICENSE, .pre-commit-config.yaml",
