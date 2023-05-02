@@ -9,8 +9,6 @@ black = {cmd = "black src/", help = "Formats the code."}
 toml-sort = {cmd = "toml-sort pyproject.toml", help = "Sorts pyproject.toml file."}
 # packaging
 export-dependencies = {script = "scripts.export-dependencies:main", help = "Exports dependencies to a requirements.txt format, one file for each group of depencies."}
-# test = {cmd = "pytest -s -x --cov=sesg -vv src/sesg/ tests/", help="Runs pytest tests"}
-# coverage = {cmd = "coverage html", help="Generates coverage reports"}
 
 [tool.poe.tasks.docs]
 help = "Starts mkdocs development server."
