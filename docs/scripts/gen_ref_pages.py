@@ -1,5 +1,4 @@
-"""
-Generate the code reference pages.
+"""Generate the code reference pages.
 
 Refer to
 https://mkdocstrings.github.io/recipes/#prevent-selection-of-prompts-and-output-in-python-code-blocks
@@ -12,6 +11,10 @@ from mkdocs_gen_files.nav import Nav as mkdocs_gen_files_Nav
 
 
 nav = mkdocs_gen_files_Nav()
+
+
+def is_private_module(parts: list[str]):
+    return any((s.startswith("_") for s in parts))
 
 
 for path in sorted(Path("src").rglob("*.py")):
@@ -31,6 +34,9 @@ for path in sorted(Path("src").rglob("*.py")):
         full_doc_path = full_doc_path.with_name("index.md")
 
     elif parts[-1] == "__main__":
+        continue
+
+    if is_private_module(parts):
         continue
 
     nav[parts] = doc_path.as_posix()  # type: ignore
