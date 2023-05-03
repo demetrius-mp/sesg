@@ -113,7 +113,7 @@ lines-after-imports = 2
 
 [tool.ruff.per-file-ignores]
 "scripts/*" = ["D"]
-"tests/*" = ["D", "E501"]
+"tests/*" = ["D", "E501", "F811", "F401"]
 "docs/scripts/*" = ["D"]
 
 [tool.ruff.pydocstyle]
