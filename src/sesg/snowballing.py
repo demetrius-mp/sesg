@@ -238,7 +238,7 @@ def backward_snowballing(
         Iterator of tuples, where the tuple holds a study, and the studies that are referenced.
 
     Examples:
-        >>> studies: List[SnowballingStudy] = [
+        >>> studies: list[SnowballingStudy] = [
         ...     SnowballingStudy(id=1, title="title 1", text_content="... REFERENCES: machine learning, a SLR"),
         ...     SnowballingStudy(id=2, title="machine learning, a SLR", text_content="... REFERENCES: other studies"),
         ... ]

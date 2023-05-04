@@ -50,7 +50,7 @@ def directed_adjacency_list_to_undirected(
     """Converts a directed adjacency list to an undirected adjacency list.
 
     Args:
-        adjacency_list (dict[int, List[int]]): A dict mapping node IDs to their list of neighbors.
+        adjacency_list (dict[int, list[int]]): A dict mapping node IDs to their list of neighbors.
 
     Returns:
         A mapping of node IDs to their list of neighbors in an undirected graph.
