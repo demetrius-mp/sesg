@@ -6,7 +6,7 @@ studies found in the Scopus results, and other informations.
 """  # noqa: E501
 
 from dataclasses import dataclass
-from typing import Any, List, Tuple
+from typing import Any
 
 from rapidfuzz.distance import Levenshtein
 
@@ -115,16 +115,16 @@ def preprocess_string(
 
 def similarity_score(
     *,
-    small_set: List[str],
-    other_set: List[str],
-) -> List[Tuple[int, int]]:
+    small_set: list[str],
+    other_set: list[str],
+) -> list[tuple[int, int]]:
     """Uses `TfidfVectorizer`, `cosine_similarity`, and `Levenshtein` to calculate the intersection of two sets of strings.
 
     You might need to preprocess the strings with [sesg.metrics.preprocess_string][].
 
     Args:
-        small_set (List[str]): Set of strings. If possible, the length of this set should be smaller than the other one.
-        other_set (List[str]): Set of strings to compare against.
+        small_set (list[str]): Set of strings. If possible, the length of this set should be smaller than the other one.
+        other_set (list[str]): Set of strings to compare against.
 
     Returns:
         List of tuples, where the tuple `(i, j)` means that `small_set[i]` is similar to `other_set[j]`.
@@ -166,7 +166,7 @@ def similarity_score(
     lines: int
     lines, _ = similarity_matrix.shape
 
-    similars: List[Tuple[int, int]] = []
+    similars: list[tuple[int, int]] = []
 
     for index_of_first_set_element in range(lines):
         # contains the row of the similarity matrix for the current element

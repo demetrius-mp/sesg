@@ -13,7 +13,7 @@ import math
 from dataclasses import dataclass
 from datetime import datetime
 from functools import partial
-from typing import Any, AsyncIterator, List, Literal, Optional, Union
+from typing import Any, AsyncIterator, Literal, Optional
 
 import aiometer
 import httpx
@@ -31,7 +31,7 @@ class SuccessResponse:
         number_of_results (int): Number of results for this query. Notice that even if it displays more than 5000 results, Scopus will limit to retrieve only 5000.
         number_of_pages (int): Number of pages that needs to be fetched to get all results. Limited to 200 due to Scopus API 5000 entries limit.
         current_page (int): Current page being fetched. Starts at 1, being at most 200.
-        entries (List[Entry]): Studies returned from the API.
+        entries (list[Entry]): Studies returned from the API.
     """  # noqa: E501
 
     @dataclass
@@ -52,7 +52,7 @@ class SuccessResponse:
     number_of_results: int
     number_of_pages: int
     current_page: int
-    entries: List[Entry]
+    entries: list[Entry]
 
 
 @dataclass
@@ -136,7 +136,7 @@ def _api_key_is_expired(
 def _get_api_key_reset_date(
     *,
     response: httpx.Response,
-) -> Union[None, datetime]:
+) -> datetime | None:
     """Given a Scopus API response, will try do determine the reset date using the response headers.
 
     Args:

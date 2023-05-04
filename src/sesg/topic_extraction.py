@@ -9,7 +9,7 @@ and [BERTopic](https://arxiv.org/abs/2203.05794).
 """  # noqa: E501
 
 from enum import Enum
-from typing import Any, List
+from typing import Any
 
 from sklearn.feature_extraction.text import CountVectorizer
 
@@ -28,20 +28,20 @@ class TopicExtractionStrategy(str, Enum):
 
 
 def extract_topics_with_lda(
-    docs: List[str],
+    docs: list[str],
     *,
     min_document_frequency: float,
     number_of_topics: int,
-) -> List[List[str]]:
+) -> list[list[str]]:
     """Extracts topics from a list of documents using LDA method.
 
     Args:
-        docs (List[str]): List of documents.
+        docs (list[str]): List of documents.
         min_document_frequency (float): CountVectorizer parameter - Minimum document frequency for the word to appear on the bag of words.
         number_of_topics (int): LDA parameter - Number of topics to generate.
 
     Returns:
-        List of topics, where a topic is a list of words.
+        list of topics, where a topic is a list of words.
 
     Examples:
         >>> extract_topics_with_lda(  # doctest: +SKIP
@@ -107,7 +107,7 @@ def extract_topics_with_lda(
     # in ascending order
     # since we want the most latent topics, we reverse the list with `[::-1]`
 
-    topics: List[List[str]] = [
+    topics: list[list[str]] = [
         [feature_names[i] for i in topic.argsort()[::-1]] for topic in lda.components_
     ]
 
@@ -115,15 +115,15 @@ def extract_topics_with_lda(
 
 
 def extract_topics_with_bertopic(
-    docs: List[str],
+    docs: list[str],
     *,
     kmeans_n_clusters: int,
     umap_n_neighbors: int,
-) -> List[List[str]]:
+) -> list[list[str]]:
     """Extracts topics from a list of documents using BERTopic.
 
     Args:
-        docs (List[str]): List of documents.
+        docs (list[str]): List of documents.
         kmeans_n_clusters (int): The number of clusters to form as well as the number of centroids to generate.
         umap_n_neighbors (int): Number of neighboring sample points used when making the manifold approximation. Increasing this value typically results in a more global view of the embedding structure whilst smaller values result in a more local view. Increasing this value often results in larger clusters being created.
 
@@ -173,7 +173,7 @@ def extract_topics_with_bertopic(
     # and the value is a list of tuples
     # the tuple is composed of a word (or token), and its score
 
-    topics: List[List[str]] = [
+    topics: list[list[str]] = [
         [word for word, _ in topic_group]  # type: ignore
         for topic_group in topic_model.get_topics().values()
     ]

@@ -8,8 +8,6 @@ This module provides a way of generating similar words, and filtering them to re
 """  # noqa: E501
 
 
-from typing import Any, List, Union
-
 from nltk.stem import LancasterStemmer
 from rapidfuzz.distance import Levenshtein
 
@@ -76,7 +74,7 @@ def _stemmed_similar_word_is_valid(
 def _stemmed_similar_word_is_duplicate(
     *,
     stemmed_similar_word: str,
-    stemmed_similar_words_list: List[str],
+    stemmed_similar_words_list: list[str],
 ) -> bool:
     """Checks if the stemmed similar word is a duplicate.
 
@@ -84,7 +82,7 @@ def _stemmed_similar_word_is_duplicate(
 
     Args:
         stemmed_similar_word (str): The stemmed similar word.
-        stemmed_similar_words_list (List[str]): List of stemmed words to check against.
+        stemmed_similar_words_list (list[str]): List of stemmed words to check against.
 
     Returns:
         True if the stemmed similar word is a duplicate, False otherwise.
@@ -101,9 +99,9 @@ def get_bert_similar_words(
     word: str,
     *,
     enrichment_text: str,
-    bert_tokenizer: Any,
-    bert_model: Any,
-) -> Union[List[str], None]:
+    bert_tokenizer,
+    bert_model,
+) -> list[str] | None:
     """Tries to find words that are similar to the target word using the enrichment text.
 
     Args:
@@ -122,7 +120,7 @@ def get_bert_similar_words(
     if " " in word:
         return None
 
-    selected_sentences: List[str] = []
+    selected_sentences: list[str] = []
 
     # Treatment for if the selected sentence is the last sentence of the text (return only one sentence).  # noqa: E501
     for sentence in enrichment_text.split("."):
@@ -188,24 +186,24 @@ def get_bert_similar_words(
 def get_relevant_similar_words(
     word: str,
     *,
-    bert_similar_words_list: List[str],
-) -> List[str]:
+    bert_similar_words_list: list[str],
+) -> list[str]:
     """Filters out similar words that are not relevant.
 
     Args:
         word (str): The word that was used to generate the similar ones.
-        bert_similar_words_list (List[str]): List with the similar words found by BERT.
+        bert_similar_words_list (list[str]): List with the similar words found by BERT.
 
     Returns:
         List of words that are not close to each other.
     """
     stemmed_word: str = _lancaster.stem(word)
-    stemmed_similar_words_list: List[str] = [
+    stemmed_similar_words_list: list[str] = [
         _lancaster.stem(w) for w in bert_similar_words_list
     ]
 
-    relevant_similar_words: List[str] = list()
-    stemmed_relevant_similar_words: List[str] = list()
+    relevant_similar_words: list[str] = list()
+    stemmed_relevant_similar_words: list[str] = list()
 
     zipped = zip(stemmed_similar_words_list, bert_similar_words_list)
 

@@ -4,7 +4,7 @@ This module provides an interface to generate a search string based on a list of
 allowing variations on the number of words per topic to use, and number of similar words to generate for each word of each topic.
 """  # noqa: E501
 
-from typing import Any, Iterable, List, Literal, TypedDict
+from typing import Iterable, Literal, TypedDict
 
 from .similar_words import get_bert_similar_words, get_relevant_similar_words
 
@@ -40,7 +40,7 @@ def _join_tokens_with_operator(
 
 
 def _join_topics_without_similar_words(
-    topics_list: List[List[str]],
+    topics_list: list[list[str]],
 ) -> str:
     """Joins the topics in the list, creating a search string.
 
@@ -50,12 +50,12 @@ def _join_topics_without_similar_words(
     Each topic is a list of words (or tokens).
 
     Args:
-        topics_list (List[List[str]]): List of topics to join.
+        topics_list (list[list[str]]): List of topics to join.
 
     Returns:
         A valid search string.
     """  # noqa: E501
-    topics_part: List[str] = list()
+    topics_part: list[str] = list()
     for topic_words_list in topics_list:
         s = _join_tokens_with_operator("AND", topic_words_list, use_double_quotes=True)
         topics_part.append(s)
@@ -66,7 +66,7 @@ def _join_topics_without_similar_words(
 
 
 def _join_topics_with_similar_words(
-    topics_list: List[List[List[str]]],
+    topics_list: list[list[list[str]]],
 ) -> str:
     """Joins the topics in the list, creating a search string.
 
@@ -76,14 +76,14 @@ def _join_topics_with_similar_words(
     Each topic is a list of words that are considered similar.
 
     Args:
-        topics_list (List[List[List[str]]]): List of topics to join.
+        topics_list (list[list[list[str]]]): List of topics to join.
 
     Returns:
         A valid search string.
     """  # noqa: E501
-    topics_part: List[str] = list()
+    topics_part: list[str] = list()
     for topic in topics_list:
-        similar_words_part: List[str] = list()
+        similar_words_part: list[str] = list()
         for similar_words in topic:
             s = _join_tokens_with_operator("OR", similar_words, use_double_quotes=True)
             similar_words_part.append(s)
@@ -118,14 +118,14 @@ class EnrichmentStudy(TypedDict):
 
 def generate_enrichment_text(
     *,
-    studies_list: List[EnrichmentStudy],
+    studies_list: list[EnrichmentStudy],
 ) -> str:
     r"""Generates a piece of text that consists of the concatenation of the title and abstract of each study.
 
     Can be used with the [`sesg.search_string.generate_search_string`][] function.
 
     Args:
-        studies_list (List[EnrichmentStudy]): List of studies with title and abstract.
+        studies_list (list[EnrichmentStudy]): List of studies with title and abstract.
 
     Returns:
         The enrichment text.
@@ -152,13 +152,13 @@ def generate_enrichment_text(
 
 def _reduce_number_of_words_per_topic(
     *,
-    topics_list: List[List[str]],
+    topics_list: list[list[str]],
     n_words_per_topic: int,
-) -> List[List[str]]:
+) -> list[list[str]]:
     """Reduces the number of words in each topic.
 
     Args:
-        topics_list (List[List[str]]): List with the topics.
+        topics_list (list[list[str]]): List with the topics.
         n_words_per_topic (int): Number of words to keep in each topic.
 
     Returns:
@@ -171,13 +171,13 @@ def _reduce_number_of_words_per_topic(
 
 def _generate_search_string_without_similar_words(
     *,
-    topics_list: List[List[str]],
+    topics_list: list[list[str]],
     n_words_per_topic: int,
 ) -> str:
     """Generates a search string by reducing the number of topics, and joining the reduced topics.
 
     Args:
-        topics_list (List[List[str]]): List of topics to use.
+        topics_list (list[list[str]]): List of topics to use.
         n_words_per_topic (int): Number of words to keep in each topic.
 
     Returns:
@@ -195,12 +195,12 @@ def _generate_search_string_without_similar_words(
 
 def _generate_search_string_with_similar_words(
     *,
-    topics_list: List[List[str]],
+    topics_list: list[list[str]],
     n_words_per_topic: int,
     n_similar_words: int,
     enrichment_text: str,
-    bert_tokenizer: Any,
-    bert_model: Any,
+    bert_tokenizer,
+    bert_model,
 ) -> str:
     """Generates a search string with the following steps.
 
@@ -209,7 +209,7 @@ def _generate_search_string_with_similar_words(
     1. Filters out similar words that have a high string equality (meaning a low Levenshtein Distance).
 
     Args:
-        topics_list (List[List[str]]): List of topics to use.
+        topics_list (list[list[str]]): List of topics to use.
         n_words_per_topic (int): Number of words to keep in each topic.
         n_similar_words (int): Number of similar words to generate for each word in each topic.
         enrichment_text (str): The text to use to enrich each word.
@@ -224,11 +224,11 @@ def _generate_search_string_with_similar_words(
         n_words_per_topic=n_words_per_topic,
     )
 
-    topics_with_similar_words: List[List[List[str]]] = list()
+    topics_with_similar_words: list[list[list[str]]] = list()
     for topic in topics_list:
-        topic_part: List[List[str]] = list()
+        topic_part: list[list[str]] = list()
         for token in topic:
-            relevant_similar_words: List[str] = [token]
+            relevant_similar_words: list[str] = [token]
 
             bert_similar_words = get_bert_similar_words(
                 token,
@@ -257,17 +257,17 @@ def _generate_search_string_with_similar_words(
 
 def generate_search_string(
     *,
-    topics_list: List[List[str]],
+    topics_list: list[list[str]],
     n_words_per_topic: int,
     n_similar_words: int,
     enrichment_text: str,
-    bert_tokenizer: Any,
-    bert_model: Any,
+    bert_tokenizer,
+    bert_model,
 ) -> str:
     """Generates a search string that will be enriched with the desired number of similar words.
 
     Args:
-        topics_list (List[List[str]]): List of topics to use.
+        topics_list (list[list[str]]): List of topics to use.
         n_words_per_topic (int): Number of words to keep in each topic.
         n_similar_words (int): Number of similar words to generate for each word in each topic.
         enrichment_text (str): The text to use to enrich each word.

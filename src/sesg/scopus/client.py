@@ -11,7 +11,7 @@ and [`httpx`](https://github.com/projectdiscovery/httpx) to achieve this goal.
 import asyncio
 from dataclasses import dataclass
 from datetime import datetime
-from typing import AsyncIterator, List, Optional, Tuple, Union
+from typing import AsyncIterator, Optional
 
 import aiometer
 import httpx
@@ -59,7 +59,7 @@ class ScopusClient:
     """A Scopus API Client with automatic retry on timeout, and automatic API key swapping on expiry."""  # noqa: E501
 
     __timeout: float
-    __api_keys: List[str]
+    __api_keys: list[str]
     __timeout_retries: int
 
     __current_api_key_index: int
@@ -70,14 +70,14 @@ class ScopusClient:
     def __init__(
         self,
         *,
-        api_keys: List[str],
+        api_keys: list[str],
         timeout: float,
         timeout_retries: int,
     ) -> None:
         """Creates a ScopusClient.
 
         Args:
-            api_keys (List[str]): List with Scopus API keys.
+            api_keys (list[str]): List with Scopus API keys.
             timeout (float): Time in seconds to wait before assuming the request timed out.
             timeout_retries (int): Number of times to retry a timed out request in a row.
         """  # noqa: E501
@@ -113,7 +113,7 @@ class ScopusClient:
         return self.__current_query
 
     @property
-    def api_keys(self) -> List[str]:
+    def api_keys(self) -> list[str]:
         """The Scopus API keys for this client."""
         return self.__api_keys
 
@@ -142,7 +142,7 @@ class ScopusClient:
 
     async def __anext__(
         self,
-    ) -> Union[api.SuccessResponse, APIKeyExpiredResponse, TimeoutResponse,]:
+    ) -> api.SuccessResponse | APIKeyExpiredResponse | TimeoutResponse:
         """Returns the next result of the search iterator.
 
         Raises:
@@ -210,13 +210,7 @@ class ScopusClient:
     def search(
         self,
         query: str,
-    ) -> AsyncIterator[
-        Union[
-            api.SuccessResponse,
-            APIKeyExpiredResponse,
-            TimeoutResponse,
-        ]
-    ]:
+    ) -> AsyncIterator[api.SuccessResponse | APIKeyExpiredResponse | TimeoutResponse]:
         """Performs Scopus API requests in a timeout-proof, and API key expiry-prof manner.
 
         !!! note
@@ -259,7 +253,7 @@ class ScopusClient:
 
     async def get_all_api_keys_status(
         self,
-    ) -> AsyncIterator[Tuple[int, api.ParsedHeaders]]:
+    ) -> AsyncIterator[tuple[int, api.ParsedHeaders]]:
         """Gets the status of every API key.
 
         Yields:

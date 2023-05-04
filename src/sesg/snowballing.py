@@ -11,7 +11,7 @@ to perform string similarity checks.
 
 from itertools import islice
 from multiprocessing import Pool
-from typing import Iterable, Iterator, List, Tuple, TypedDict, TypeVar
+from typing import Iterable, Iterator, TypedDict, TypeVar
 
 from rapidfuzz import process
 
@@ -23,7 +23,7 @@ def _window(
     seq: Iterable[T],
     *,
     size: int,
-) -> Iterator[Tuple[T, ...]]:
+) -> Iterator[tuple[T, ...]]:
     """Creates an iterator over overlapping subslices of the given size.
 
     Args:
@@ -227,12 +227,12 @@ class SnowballingStudy:
 
 
 def backward_snowballing(
-    studies: List[SnowballingStudy],
-) -> Iterator[Tuple[SnowballingStudy, List[SnowballingStudy]]]:
+    studies: list[SnowballingStudy],
+) -> Iterator[tuple[SnowballingStudy, list[SnowballingStudy]]]:
     """Runs backward snowballing in the given list of studies.
 
     Args:
-        studies (List[SnowballingStudy]): List of studies with id, title, and text content.
+        studies (list[SnowballingStudy]): List of studies with id, title, and text content.
 
     Yields:
         Iterator of tuples, where the tuple holds a study, and the studies that are referenced.
@@ -250,7 +250,7 @@ def backward_snowballing(
     """  # noqa: E501
     for study_index, study in enumerate(studies):
         with Pool() as p:
-            func_args: List[_PooledStudyCitesTitleArgs] = [
+            func_args: list[_PooledStudyCitesTitleArgs] = [
                 {
                     # when `study_index == reference_index`, we are checking if study a cites itself,  # noqa: E501
                     # so we skip and set it as False
@@ -262,12 +262,12 @@ def backward_snowballing(
             ]
 
             # if `result[j]` is True then the current study cites title `j`
-            result: List[bool] = p.map(
+            result: list[bool] = p.map(
                 _pooled_study_cites_title,
                 func_args,
             )
 
-        references: List[SnowballingStudy] = list()
+        references: list[SnowballingStudy] = list()
 
         for result_index, is_cited in enumerate(result):
             if is_cited:
