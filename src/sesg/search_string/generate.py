@@ -289,8 +289,8 @@ def generate_search_string(
         n_words_per_topic (int): Number of words to keep in each topic.
         n_similar_words (int): Number of similar words to generate for each word in each topic.
         enrichment_text (str): The text to use to enrich each word.
-        bert_tokenizer: A BERT tokenizer.
-        bert_model: A BERT model.
+        bert_tokenizer (Any): A BERT tokenizer.
+        bert_model (Any): A BERT model.
 
     Returns:
         A search string.

@@ -119,8 +119,8 @@ def get_bert_similar_words(
     Args:
         word (str): Token to which other similar ones will be generated.
         enrichment_text (str): Text that will be used to find similar words.
-        bert_tokenizer: A BERT tokenizer.
-        bert_model: A BERT model.
+        bert_tokenizer (Any): A BERT tokenizer.
+        bert_model (Any): A BERT model.
 
     Returns:
         List of similar words. If the token has more than 1 word, of if it is no present in the enrichment text,
