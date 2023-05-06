@@ -29,6 +29,10 @@ def _join_tokens_with_operator(
 
     Returns:
         A string with the joined tokens.
+
+    Examples:
+        >>> _join_tokens_with_operator("AND", ["machine", "learning", "SLR"], use_double_quotes=True)
+        '"machine" AND "learning" AND "SLR"'
     """  # noqa: E501
     if use_double_quotes:
         tokens_list = (f'"{token}"' for token in tokens_list)
@@ -54,6 +58,10 @@ def _join_topics_without_similar_words(
 
     Returns:
         A valid search string.
+
+    Examples:
+        >>> _join_topics_without_similar_words([["machine", "learning"], ["code", "smell"]])
+        '("machine" AND "learning") OR ("code" AND "smell")'
     """  # noqa: E501
     topics_part: list[str] = list()
     for topic_words_list in topics_list:
@@ -80,6 +88,13 @@ def _join_topics_with_similar_words(
 
     Returns:
         A valid search string.
+
+    Examples:
+        >>> _join_topics_with_similar_words([
+        ...     [["machine", "computer"], ["learning", "knowledge"]],
+        ...     [["code", "software"], ["smell", "defect"]]
+        ... ])
+        '(("machine" OR "computer") AND ("learning" OR "knowledge")) OR (("code" OR "software") AND ("smell" OR "defect"))'
     """  # noqa: E501
     topics_part: list[str] = list()
     for topic in topics_list:
@@ -151,7 +166,6 @@ def generate_enrichment_text(
 
 
 def _reduce_number_of_words_per_topic(
-    *,
     topics_list: list[list[str]],
     n_words_per_topic: int,
 ) -> list[list[str]]:
@@ -163,7 +177,11 @@ def _reduce_number_of_words_per_topic(
 
     Returns:
         List with the reduced topics.
-    """
+
+    Examples:
+        >>> _reduce_number_of_words_per_topic([["machine", "learning"], ["code", "smell"]], 1)
+        [['machine'], ['code']]
+    """  # noqa: E501
     topics_list = [topic[:n_words_per_topic] for topic in topics_list]
 
     return topics_list

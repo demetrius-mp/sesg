@@ -27,6 +27,12 @@ def _strings_are_distant(
 
     Returns:
         True if the strings have at least 4 units of levenshtein distance, False otherwise.
+
+    Examples:
+        >>> _strings_are_distant("string", "string12345")
+        True
+        >>> _strings_are_distant("string", "strng")
+        False
     """  # noqa: E501
     levenshtein_distance = 4
     return Levenshtein.distance(str(s1), str(s2)) > levenshtein_distance
@@ -44,6 +50,12 @@ def _strings_are_close(
 
     Returns:
         True if the strings have at most 3 units of levenshtein distance, False otherwise.
+
+    Examples:
+        >>> _strings_are_close("string", "big string")
+        False
+        >>> _strings_are_close("string", "strng")
+        True
     """  # noqa: E501
     levenshtein_distance = 4
     return Levenshtein.distance(str(s1), str(s2)) < levenshtein_distance
