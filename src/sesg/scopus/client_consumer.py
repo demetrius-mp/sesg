@@ -142,7 +142,19 @@ class BaseScopusClientConsumer(ABC):
         """
         ...
 
-    async def __search(
+    @abstractmethod
+    def on_search_finalization(
+        self,
+        results: list[SuccessResponse],
+    ):
+        """Hook to execute when the search is finalized.
+
+        Args:
+            results (list[SuccessResponse]): List with all results.
+        """
+        ...
+
+    async def search(
         self,
         query: str,
     ):
@@ -150,7 +162,18 @@ class BaseScopusClientConsumer(ABC):
 
         Args:
             query (str): The string to search.
-        """
+
+        Raises:
+            BadRequestError: When the client raises a BadRequestError.
+            PayloadTooLargeError: When the client raises a PayloadTooLargeError.
+            ExceededTimeoutRetriesError: When the client raises a ExceededTimeoutRetriesError.
+            OutOfAPIKeysError: When the client raises a OutOfAPIKeysError.
+
+        Returns:
+            A list with all of the results for this query.
+        """  # noqa: E501
+        results: list[SuccessResponse] = list()
+
         try:
             async for data in self.client.search(query):
                 if isinstance(data, APIKeyExpiredResponse):
@@ -164,26 +187,22 @@ class BaseScopusClientConsumer(ABC):
                         self.on_first_success_response(data)
 
                     self.on_success_response(data)
+                    results.append(data)
+
+            self.on_search_finalization(results)
 
         except BadRequestError as e:
             self.on_bad_request_error(e)
+            raise e
 
         except PayloadTooLargeError as e:
             self.on_payload_too_large_error(e)
+            raise e
 
         except ExceededTimeoutRetriesError as e:
             self.on_exceeded_timeout_retries_error(e)
+            raise e
 
         except OutOfAPIKeysError as e:
             self.on_out_of_api_keys_error(e)
-
-    async def search(
-        self,
-        query: str,
-    ):
-        """Executes the search and the hooks when required.
-
-        Args:
-            query (str): The string to search.
-        """
-        await self.__search(query)
+            raise e
