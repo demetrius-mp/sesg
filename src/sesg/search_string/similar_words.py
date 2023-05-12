@@ -8,6 +8,8 @@ This module provides a way of generating similar words, and filtering them to re
 """  # noqa: E501
 
 
+from typing import Iterator
+
 from nltk.stem import LancasterStemmer
 from rapidfuzz.distance import Levenshtein
 
@@ -15,7 +17,7 @@ from rapidfuzz.distance import Levenshtein
 _lancaster = LancasterStemmer()
 
 
-def _strings_are_distant(
+def _check_strings_are_distant(
     s1: str,
     s2: str,
 ) -> bool:
@@ -29,16 +31,16 @@ def _strings_are_distant(
         True if the strings have at least 4 units of levenshtein distance, False otherwise.
 
     Examples:
-        >>> _strings_are_distant("string", "string12345")
+        >>> _check_strings_are_distant("string", "string12345")
         True
-        >>> _strings_are_distant("string", "strng")
+        >>> _check_strings_are_distant("string", "strng")
         False
     """  # noqa: E501
     levenshtein_distance = 4
     return Levenshtein.distance(str(s1), str(s2)) > levenshtein_distance
 
 
-def _strings_are_close(
+def _check_strings_are_close(
     s1: str,
     s2: str,
 ) -> bool:
@@ -52,23 +54,26 @@ def _strings_are_close(
         True if the strings have at most 3 units of levenshtein distance, False otherwise.
 
     Examples:
-        >>> _strings_are_close("string", "big string")
+        >>> _check_strings_are_close("string", "big string")
         False
-        >>> _strings_are_close("string", "strng")
+        >>> _check_strings_are_close("string", "strng")
         True
     """  # noqa: E501
     levenshtein_distance = 4
     return Levenshtein.distance(str(s1), str(s2)) < levenshtein_distance
 
 
-def _stemmed_similar_word_is_valid(
-    *,
+def _check_stemmed_similar_word_is_valid(
     stemmed_similar_word: str,
+    *,
     stemmed_word: str,
 ) -> bool:
     """Checks if the stemmed similar word is valid.
 
-    A stemmed similar word is considered valid if it is not equal to the stemmed word, and if it is distant from the stemmed word.
+    A stemmed similar word is considered valid if it complies the following criteria:
+
+    - It is not equal to the stemmed word
+    - It is distant from the stemmed word (see [_check_strings_are_distant][sesg.search_string.similar_words._check_strings_are_distant]).
 
     Args:
         stemmed_similar_word (str): The stemmed similar word.
@@ -76,16 +81,28 @@ def _stemmed_similar_word_is_valid(
 
     Returns:
         True if the strings are not equal and distant, False otherwise.
+
+    Examples:
+        >>> _check_stemmed_similar_word_is_valid(
+        ...     "string",
+        ...     stemmed_word="string"
+        ... )
+        False
+        >>> _check_stemmed_similar_word_is_valid(
+        ...     "string",
+        ...     stemmed_word="stringified"
+        ... )
+        True
     """  # noqa: E501
     not_equal = stemmed_word != stemmed_similar_word
-    distant = _strings_are_distant(stemmed_similar_word, stemmed_word)
+    distant = _check_strings_are_distant(stemmed_similar_word, stemmed_word)
 
     return not_equal and distant
 
 
-def _stemmed_similar_word_is_duplicate(
-    *,
+def _check_stemmed_similar_word_is_duplicate(
     stemmed_similar_word: str,
+    *,
     stemmed_similar_words_list: list[str],
 ) -> bool:
     """Checks if the stemmed similar word is a duplicate.
@@ -98,13 +115,90 @@ def _stemmed_similar_word_is_duplicate(
 
     Returns:
         True if the stemmed similar word is a duplicate, False otherwise.
+
+    Examples:
+        >>> _check_stemmed_similar_word_is_duplicate(
+        ...     "string",
+        ...     stemmed_similar_words_list=["other", "somewhat"],
+        ... )
+        False
+        >>> _check_stemmed_similar_word_is_duplicate(
+        ...     "string",
+        ...     stemmed_similar_words_list=["strng", "something"],
+        ... )
+        True
     """  # noqa: E501
     for word in stemmed_similar_words_list:
-        is_close = _strings_are_close(word, stemmed_similar_word)
+        is_close = _check_strings_are_close(word, stemmed_similar_word)
         if is_close:
             return True
 
     return False
+
+
+def _check_is_bert_oov_word(
+    word: str,
+) -> bool:
+    """Checks if the given word is a BERT out-of-vocabulary (OOV) word.
+
+    Args:
+        word (str): Word to check.
+
+    Returns:
+        True if it is an OOV word, False otherwise.
+
+    Examples:
+        >>> _check_is_bert_oov_word("organization")
+        False
+        >>> _check_is_bert_oov_word("##ation")
+        True
+    """
+    return word.startswith("##")
+
+
+def _check_similar_word_is_relevant(
+    similar_word: str,
+    *,
+    stemmed_word: str,
+    stemmed_similar_word: str,
+    stemmed_relevant_similar_words: list[str],
+) -> bool:
+    """Checks if the given similar word is relevant.
+
+    A similar word is considered relevant if it complies the following criteria:
+
+    - It's stemmed form is valid (see [_stemmed_similar_word_is_valid][sesg.search_string.similar_words._stemmed_similar_word_is_valid]).
+    - It's stemmed form is not a duplicate (see [_stemmed_similar_word_is_duplicate][sesg.search_string.similar_words._stemmed_similar_word_is_duplicate]).
+    - It is not a BERT out-of-vocabulary word (see [_check_is_bert_oov_word][sesg.search_string.similar_words._check_is_bert_oov_word]).
+
+    Args:
+        similar_word (str): Similar word to check if is relevant.
+        stemmed_word (str): Stemmed form of the original word.
+        stemmed_similar_word (str): Stemmed form of the similar word.
+        stemmed_relevant_similar_words (list[str]): List of stemmed relevant similar words to check for duplicate.
+
+    Returns:
+        True if the similar word is relevant, False otherwise.
+    """  # noqa: E501
+    is_valid = _check_stemmed_similar_word_is_valid(
+        stemmed_similar_word,
+        stemmed_word=stemmed_word,
+    )
+    if not is_valid:
+        return False
+
+    is_duplicate = _check_stemmed_similar_word_is_duplicate(
+        stemmed_similar_word,
+        stemmed_similar_words_list=stemmed_relevant_similar_words,
+    )
+    if is_duplicate:
+        return False
+
+    is_bert_oov_word = _check_is_bert_oov_word(similar_word)
+    if is_bert_oov_word:
+        return False
+
+    return True
 
 
 def get_bert_similar_words(
@@ -123,8 +217,7 @@ def get_bert_similar_words(
         bert_model (Any): A BERT model.
 
     Returns:
-        List of similar words. If the token has more than 1 word, of if it is no present in the enrichment text,
-        will return None.
+        List of similar words. If the token has more than 1 word, or if it is no present in the enrichment text, will return None.
     """  # noqa: E501
     import numpy as np
     import torch
@@ -210,30 +303,24 @@ def get_relevant_similar_words(
         List of words that are not close to each other.
     """
     stemmed_word: str = _lancaster.stem(word)
-    stemmed_similar_words_list: list[str] = [
-        _lancaster.stem(w) for w in bert_similar_words_list
-    ]
 
     relevant_similar_words: list[str] = list()
     stemmed_relevant_similar_words: list[str] = list()
 
+    stemmed_similar_words_list: Iterator[str] = (
+        _lancaster.stem(w) for w in bert_similar_words_list
+    )
     zipped = zip(stemmed_similar_words_list, bert_similar_words_list)
 
     for stemmed_similar_word, similar_word in zipped:
-        is_valid = _stemmed_similar_word_is_valid(
-            stemmed_similar_word=stemmed_similar_word,
+        similar_word_is_relevant = _check_similar_word_is_relevant(
+            similar_word,
             stemmed_word=stemmed_word,
-        )
-
-        if not is_valid:
-            continue
-
-        is_duplicate = _stemmed_similar_word_is_duplicate(
             stemmed_similar_word=stemmed_similar_word,
-            stemmed_similar_words_list=stemmed_relevant_similar_words,
+            stemmed_relevant_similar_words=stemmed_relevant_similar_words,
         )
 
-        if is_duplicate:
+        if not similar_word_is_relevant:
             continue
 
         relevant_similar_words.append(similar_word)

@@ -1,9 +1,9 @@
 import pytest
 from sesg.search_string.similar_words import (
-    _stemmed_similar_word_is_duplicate,
-    _stemmed_similar_word_is_valid,
-    _strings_are_close,
-    _strings_are_distant,
+    _check_stemmed_similar_word_is_duplicate,
+    _check_stemmed_similar_word_is_valid,
+    _check_strings_are_close,
+    _check_strings_are_distant,
     get_bert_similar_words,
     get_relevant_similar_words,
 )
@@ -42,7 +42,7 @@ def test_strings_are_close(
     s2,
     expected,
 ):
-    result = _strings_are_close(s1, s2)
+    result = _check_strings_are_close(s1, s2)
 
     assert result == expected
 
@@ -59,7 +59,7 @@ def test_strings_are_distant(
     s2,
     expected,
 ):
-    result = _strings_are_distant(s1, s2)
+    result = _check_strings_are_distant(s1, s2)
 
     assert result == expected
 
@@ -76,7 +76,7 @@ def test_stemmed_similar_word_is_valid(
     stemmed_word,
     expected,
 ):
-    result = _stemmed_similar_word_is_valid(
+    result = _check_stemmed_similar_word_is_valid(
         stemmed_similar_word=stemmed_similar_word,
         stemmed_word=stemmed_word,
     )
@@ -96,7 +96,7 @@ def test_stemmed_similar_word_is_duplicate(
     stemmed_similar_words_list,
     expected,
 ):
-    result = _stemmed_similar_word_is_duplicate(
+    result = _check_stemmed_similar_word_is_duplicate(
         stemmed_similar_word=stemmed_similar_word,
         stemmed_similar_words_list=stemmed_similar_words_list,
     )
@@ -192,7 +192,6 @@ def test_get_relevant_similar_words(
         "performance",
         "strategic",
         "design",
-        "##ized",
         "business",
         "research",
         "efficiency",
