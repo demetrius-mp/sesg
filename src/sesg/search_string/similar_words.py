@@ -141,6 +141,8 @@ def _check_is_bert_oov_word(
 ) -> bool:
     """Checks if the given word is a BERT out-of-vocabulary (OOV) word.
 
+    BERT represents OOV words as a string that starts with `##`.
+
     Args:
         word (str): Word to check.
 
