@@ -226,7 +226,7 @@ class SnowballingStudy:
         return self.__text_content
 
 
-def backward_snowballing(
+def fuzzy_backward_snowballing(
     studies: list[SnowballingStudy],
 ) -> Iterator[tuple[SnowballingStudy, list[SnowballingStudy]]]:
     """Runs backward snowballing in the given list of studies.
@@ -243,7 +243,7 @@ def backward_snowballing(
         ...     SnowballingStudy(id=2, title="machine learning, a SLR", text_content="... REFERENCES: other studies"),
         ... ]
         >>>
-        >>> for study, references in backward_snowballing(studies):
+        >>> for study, references in fuzzy_backward_snowballing(studies):
         ...     print((study.id, [r.id for r in references]))
         (1, [2])
         (2, [])
