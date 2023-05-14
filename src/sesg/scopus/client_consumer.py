@@ -157,7 +157,7 @@ class BaseScopusClientConsumer(ABC):
     async def search(
         self,
         query: str,
-    ):
+    ) -> None:
         """Executes the search and the hooks when required.
 
         Args:
