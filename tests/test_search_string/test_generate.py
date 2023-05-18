@@ -250,7 +250,7 @@ def test_generate_search_string_with_0_similar_words_should_return_result_of_gen
             ["process", "software", "strategic"],
         ],
         n_words_per_topic=n_words_per_topic,
-        n_similar_words=0,
+        n_similar_words_per_word=0,
         similar_words_finder=similar_words_finder,
     )
 
@@ -276,7 +276,7 @@ def test_generate_search_string_with_2_similar_words_should_return_result_of_gen
             ["process", "software", "strategic"],
         ],
         n_words_per_topic=n_words_per_topic,
-        n_similar_words=2,
+        n_similar_words_per_word=2,
         similar_words_finder=similar_words_finder,
     )
 
