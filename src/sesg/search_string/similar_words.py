@@ -402,10 +402,9 @@ class CacheProtocol(Protocol, Generic[T_KEY, T_VALUE]):
 
 @dataclass
 class SimilarWordsFinder:
-    """Composes [get_bert_similar_words][sesg.search_string.similar_words.get_bert_similar_words] and [get_bert_relevant_words][sesg.search_string.similar_words.get_bert_relevant_words].
+    """Composes [get_bert_similar_words][sesg.search_string.similar_words.get_bert_similar_words] and [get_relevant_similar_words][sesg.search_string.similar_words.get_relevant_similar_words].
 
-    Returns:
-        A callable that will check the cache before computing the similar words.
+    Returns a callable that will check the cache before computing the similar words.
     """  # noqa: E501
 
     enrichment_text: str
