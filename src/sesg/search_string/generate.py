@@ -6,7 +6,9 @@ allowing variations on the number of words per topic to use, and number of simil
 
 from typing import Iterable, Literal, TypedDict
 
-from .similar_words import get_bert_similar_words, get_relevant_similar_words
+from .similar_words import (
+    SimilarWordsFinder,
+)
 
 
 def _join_tokens_with_operator(
@@ -216,9 +218,7 @@ def _generate_search_string_with_similar_words(
     topics_list: list[list[str]],
     n_words_per_topic: int,
     n_similar_words: int,
-    enrichment_text: str,
-    bert_tokenizer,
-    bert_model,
+    similar_words_finder: SimilarWordsFinder,
 ) -> str:
     """Generates a search string with the following steps.
 
@@ -230,9 +230,7 @@ def _generate_search_string_with_similar_words(
         topics_list (list[list[str]]): List of topics to use.
         n_words_per_topic (int): Number of words to keep in each topic.
         n_similar_words (int): Number of similar words to generate for each word in each topic.
-        enrichment_text (str): The text to use to enrich each word.
-        bert_tokenizer: A BERT tokenizer.
-        bert_model: A BERT model.
+        similar_words_finder (SimilarWordsFinder): Instance of SimilarWordsFinder.
 
     Returns:
         The search string.
@@ -246,25 +244,11 @@ def _generate_search_string_with_similar_words(
     for topic in topics_list:
         topic_part: list[list[str]] = list()
         for token in topic:
-            relevant_similar_words: list[str] = [token]
+            similar_words = similar_words_finder(token)
 
-            bert_similar_words = get_bert_similar_words(
-                token,
-                enrichment_text=enrichment_text,
-                bert_model=bert_model,
-                bert_tokenizer=bert_tokenizer,
-            )
-
-            if bert_similar_words is not None:
-                r = get_relevant_similar_words(
-                    token,
-                    bert_similar_words_list=bert_similar_words,
-                )
-
-                # limiting the number of similar words
-                relevant_similar_words.extend(r[:n_similar_words])
-
-            topic_part.append(relevant_similar_words)
+            # limiting the number of similar words
+            # we add one because the word itself is included in the similar_words list
+            topic_part.append(similar_words[: n_similar_words + 1])
 
         topics_with_similar_words.append(topic_part)
 
@@ -278,9 +262,7 @@ def generate_search_string(
     topics_list: list[list[str]],
     n_words_per_topic: int,
     n_similar_words: int,
-    enrichment_text: str,
-    bert_tokenizer,
-    bert_model,
+    similar_words_finder: SimilarWordsFinder,
 ) -> str:
     """Generates a search string that will be enriched with the desired number of similar words.
 
@@ -288,9 +270,7 @@ def generate_search_string(
         topics_list (list[list[str]]): List of topics to use.
         n_words_per_topic (int): Number of words to keep in each topic.
         n_similar_words (int): Number of similar words to generate for each word in each topic.
-        enrichment_text (str): The text to use to enrich each word.
-        bert_tokenizer (Any): A BERT tokenizer.
-        bert_model (Any): A BERT model.
+        similar_words_finder (SimilarWordsFinder): Instance of SimilarWordsFinder.
 
     Returns:
         A search string.
@@ -304,8 +284,6 @@ def generate_search_string(
     return _generate_search_string_with_similar_words(
         topics_list=topics_list,
         n_words_per_topic=n_words_per_topic,
-        enrichment_text=enrichment_text,
         n_similar_words=n_similar_words,
-        bert_tokenizer=bert_tokenizer,
-        bert_model=bert_model,
+        similar_words_finder=similar_words_finder,
     )

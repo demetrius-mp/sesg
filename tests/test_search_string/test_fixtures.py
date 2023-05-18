@@ -1,22 +1,20 @@
+from dataclasses import dataclass
 from typing import Any
 
 import pytest
+from sesg.search_string import SimilarWordsFinder
+from sesg.search_string.similar_words import CacheProtocol
 from transformers import BertForMaskedLM, BertTokenizer
 
 
 @pytest.fixture(scope="package")
-def language_models():
+def similar_words_finder():
     bert_tokenizer: Any = BertTokenizer.from_pretrained("bert-base-uncased")
     bert_model: Any = BertForMaskedLM.from_pretrained("bert-base-uncased")
 
     bert_model.eval()
 
-    return bert_model, bert_tokenizer
-
-
-@pytest.fixture(scope="package")
-def enrichment_text():
-    return """A business goal-based approach to achieving systems engineering capability maturity Any process improvement program should be driven by and related to some set of business or overarching organizational needs. By considering change drivers in concert with the organization strategic objectives and "pains" one can develop a vision of the desired state, what the organization should look like and how it should behave after the desired changes are achieved. An appropriate reference model is then chosen and used in an assessment to identify improvement opportunities. Based on the assessment findings an action plan is developed and implemented which addresses both specific process changes and organization cultural issues. Finally, an appropriate set of measures is defined and implemented to help measure the effects of the various changes.
+    enrichment_text = """A business goal-based approach to achieving systems engineering capability maturity Any process improvement program should be driven by and related to some set of business or overarching organizational needs. By considering change drivers in concert with the organization strategic objectives and "pains" one can develop a vision of the desired state, what the organization should look like and how it should behave after the desired changes are achieved. An appropriate reference model is then chosen and used in an assessment to identify improvement opportunities. Based on the assessment findings an action plan is developed and implemented which addresses both specific process changes and organization cultural issues. Finally, an appropriate set of measures is defined and implemented to help measure the effects of the various changes.
 Bridging the Gap between Business Strategy and Software Development In software-intensive organizations, an organizational management system will not guarantee organizational success unless the business strategy can be translated into a set of operational software goals. The Goal Question Metric (GQM) approach has proven itself useful in a variety of industrial settings to support quantitative software project management. However, it does not address linking software measurement goals to higher-level goals of the organization in which the software is being developed. This linkage is important, as it helps to justify software measurement efforts and allows measurement data to contribute to higher-level decisions. In this paper, we propose a GQM+Strategies?measurement approach that builds on the GQM approach to plan and implement software measurement. GQM+Strategies® provides mechanisms for explicitly linking software measurement goals to higher-level goals for the software organization, and further to goals and strategies at the level of the entire business. An example application of the proposed method is illustrated in the context of an example measurement initiative.
 GQM + Strategies: A comprehensive methodology for aligning business strategies with software measurement In software-intensive organizations, an organizational management system will not guarantee organizational success unless the business strategy can be translated into a set of operational software goals. The Goal Question Metric (GQM) approach has proven itself useful in a variety of industrial settings to support quantitative software project management. However, it does not address linking software measurement goals to higher-level goals of the organization in which the software is being developed. This linkage is important, as it helps to justify software measurement efforts and allows measurement data to contribute to higher-level decisions. In this paper, we propose a GQM+Strategies(R) measurement approach that builds on the GQM approach to plan and implement software measurement. GQM+Strategies(R) provides mechanisms for explicitly linking software measurement goals to higher-level goals for the software organization, and further to goals and strategies at the level of the entire business. The proposed method is illustrated in the context of an example application of the method.
 Software Engineering Strategies: Aligning Software Process Improvement with Strategic Goals Aligning software process improvement with the business and strategic goals of an enterprise is a key success factor for process improvement. Software process improvement methods typically only provide little or generic guidance for goal centered process improvements. We provide a framework for developing software engineering strategies that are aligned with corporate strategies and goals. Strategic objects as an important part of our framework can be directly aligned with SPICE or CMMI processes. This allows that any process improvement action can be systematically aligned with strategic goals.
@@ -26,3 +24,22 @@ Aligning Software-related Strategies in Multi-Organizational Settings Aligning t
 Integration of strategic management, process improvement and quantitative measurement for managing the competitiveness of software engineering organizations Strategic management is a key discipline that permits companies to achieve their competitive goals. An effective and explicit alignment and integration of business strategy with SPI initiatives based on measurement is essential to prevent loss of income, customers and competitiveness. By integrating SPI models and measurement techniques in the strategy management process, an organization’s investments will be better aligned with strategy, optimizing the benefits obtained as a result of an SPI program. In this paper, the authors propose BOQM (Balanced Objective-Quantifiers Methodology) that integrates properly strategic management, process improvement and quantitative measurement to manage the competitiveness of software engineering organizations. Finally, this paper presents and discusses the results from implementing BOQM in a software development organization.
 Strategically Balanced Process Adoption Software processes have an important role to play in realizing organizational strategies. When a software organization is about to decide on the adoption of a new process, it should have a clear understanding of its own strategic objectives, as well as the potentials of the new method in supporting or hindering its strategic plan. From this perspective, a successful process adoption initiative is one which provides maximum support to the strategic objectives of an organization while producing a minimum of adverse effects. This paper introduces the concept of Strategically Balanced Process Adoption (SBPA) for anticipating and monitoring the strategic impacts of a new process before and after its adoption. A set of techniques are proposed for the realization of SBPA, which are based on a repository of method fragments, introduced in an earlier ICSP paper. The proposed techniques are deployed in an industrial experience, where the subject organization was about to adopt a custom-designed agile process. The proposed techniques of SBPA helped the subject organization to better design the to-be process, with improved control over its enactment.
 Applying and adjusting a software process improvement model in practice: the use of the IDEAL model in a small software enterprise Software process improvement is a demanding and complex undertaking. To support the constitution and implementation of software process improvement schemes the Software Engineering Institute (SEI) proposes a framework, the so-called IDEAL model. This model is based on experiences from large organizations. The aim of the research described here was to investigate the suitability of the model for small software enterprises. It has therefore been deployed and adjusted for successful use in a small Danish software company. The course of the project and the application of the model are presented and the case is reflected on the background of current knowledge about managing software process improvement as organizational change.""".strip()
+
+    @dataclass
+    class DictCache(CacheProtocol):
+        cache: dict[str, list[str]]
+
+        def get(self, key: str) -> list[str] | None:
+            return self.cache.get(key)
+
+        def set(self, key: str, value: list[str]):
+            self.cache[key] = value
+
+    finder = SimilarWordsFinder(
+        bert_tokenizer=bert_tokenizer,
+        bert_model=bert_model,
+        enrichment_text=enrichment_text,
+        cache=DictCache(dict()),
+    )
+
+    return finder

@@ -8,8 +8,9 @@ from sesg.search_string.generate import (
     _reduce_number_of_words_per_topic,
     generate_search_string,
 )
+from sesg.search_string.similar_words import SimilarWordsFinder
 
-from .test_fixtures import enrichment_text, language_models
+from .test_fixtures import similar_words_finder
 
 
 @pytest.mark.parametrize(
@@ -222,21 +223,16 @@ def test_generate_search_string_without_similar_words(
 
 
 def test_generate_search_string_with_similar_words(
-    enrichment_text: str,
-    language_models,
+    similar_words_finder: SimilarWordsFinder,
 ):
-    bert_model, bert_tokenizer = language_models
-
     result = _generate_search_string_with_similar_words(
         topics_list=[
             ["software", "measurement", "gqm"],
             ["process", "software", "strategic"],
         ],
-        bert_model=bert_model,
-        bert_tokenizer=bert_tokenizer,
-        enrichment_text=enrichment_text,
         n_similar_words=2,
         n_words_per_topic=2,
+        similar_words_finder=similar_words_finder,
     )
     expected = '(("software" OR "management" OR "development") AND ("measurement" OR "development" OR "design")) OR (("process" OR "software" OR "business") AND ("software" OR "management" OR "development"))'
 
@@ -244,11 +240,8 @@ def test_generate_search_string_with_similar_words(
 
 
 def test_generate_search_string_with_0_similar_words_should_return_result_of_generate_search_string_without_similar_words(
-    enrichment_text: str,
-    language_models,
+    similar_words_finder: SimilarWordsFinder,
 ):
-    bert_model, bert_tokenizer = language_models
-
     n_words_per_topic = 2
 
     result = generate_search_string(
@@ -256,11 +249,9 @@ def test_generate_search_string_with_0_similar_words_should_return_result_of_gen
             ["software", "measurement", "gqm"],
             ["process", "software", "strategic"],
         ],
-        bert_model=bert_model,
-        bert_tokenizer=bert_tokenizer,
-        enrichment_text=enrichment_text,
         n_words_per_topic=n_words_per_topic,
         n_similar_words=0,
+        similar_words_finder=similar_words_finder,
     )
 
     expected = _generate_search_string_without_similar_words(
@@ -275,11 +266,8 @@ def test_generate_search_string_with_0_similar_words_should_return_result_of_gen
 
 
 def test_generate_search_string_with_2_similar_words_should_return_result_of_generate_search_string_with_similar_words(
-    enrichment_text: str,
-    language_models,
+    similar_words_finder: SimilarWordsFinder,
 ):
-    bert_model, bert_tokenizer = language_models
-
     n_words_per_topic = 2
 
     result = generate_search_string(
@@ -287,11 +275,9 @@ def test_generate_search_string_with_2_similar_words_should_return_result_of_gen
             ["software", "measurement", "gqm"],
             ["process", "software", "strategic"],
         ],
-        bert_model=bert_model,
-        bert_tokenizer=bert_tokenizer,
-        enrichment_text=enrichment_text,
         n_words_per_topic=n_words_per_topic,
         n_similar_words=2,
+        similar_words_finder=similar_words_finder,
     )
 
     expected = _generate_search_string_with_similar_words(
@@ -299,11 +285,9 @@ def test_generate_search_string_with_2_similar_words_should_return_result_of_gen
             ["software", "measurement", "gqm"],
             ["process", "software", "strategic"],
         ],
-        bert_model=bert_model,
-        bert_tokenizer=bert_tokenizer,
-        enrichment_text=enrichment_text,
         n_similar_words=2,
-        n_words_per_topic=2,
+        n_words_per_topic=n_words_per_topic,
+        similar_words_finder=similar_words_finder,
     )
 
     assert result == expected

@@ -8,7 +8,8 @@ This module provides a way of generating similar words, and filtering them to re
 """  # noqa: E501
 
 
-from typing import Iterator
+from dataclasses import dataclass
+from typing import Generic, Iterator, Optional, Protocol, TypeVar
 
 from nltk.stem import LancasterStemmer
 from rapidfuzz.distance import Levenshtein
@@ -342,3 +343,109 @@ def get_relevant_similar_words(
         stemmed_relevant_similar_words.append(stemmed_similar_word)
 
     return relevant_similar_words
+
+
+T_KEY = TypeVar("T_KEY", contravariant=True)
+T_VALUE = TypeVar("T_VALUE")
+
+
+class CacheProtocol(Protocol, Generic[T_KEY, T_VALUE]):
+    """Interface for a cache system.
+
+    Examples:
+        >>> class DictCache(CacheProtocol):
+        ...     def __init__(self):
+        ...         self.cache: dict[str, list[str]] = dict()
+        ...
+        ...     def get(self, key: str) -> list[str] | None:
+        ...         return self.cache.get(key)
+        ...
+        ...     def set(self, key: str, value: list[str]):
+        ...         self.cache[key] = value
+        ...
+        >>> cache = DictCache()
+        >>> cache.set("key", ["value"])
+        >>> cache.get("key")
+        ['value']
+        >>> cache.get("other key") is None
+        True
+
+    """
+
+    def get(  # pragma: no cover
+        self,
+        key: T_KEY,
+    ) -> T_VALUE | None:
+        """Gets a value from the cache.
+
+        Args:
+            key (T_KEY): Key to retrieve.
+
+        Returns:
+            The value associated with the key, if it exists, None otherwise.
+        """
+        raise NotImplementedError("Not implemented")  # pragma: no cover
+
+    def set(  # pragma: no cover
+        self,
+        key: T_KEY,
+        value: T_VALUE,
+    ) -> None:
+        """Sets a value in the cache.
+
+        Args:
+            key (T_KEY): Key to set.
+            value (T_VALUE): Value to associate with the key.
+        """
+        raise NotImplementedError("Not implemented")  # pragma: no cover
+
+
+@dataclass
+class SimilarWordsFinder:
+    """Composes [get_bert_similar_words][sesg.search_string.similar_words.get_bert_similar_words] and [get_bert_relevant_words][sesg.search_string.similar_words.get_bert_relevant_words].
+
+    Returns:
+        A callable that will check the cache before computing the similar words.
+    """  # noqa: E501
+
+    enrichment_text: str
+    bert_tokenizer: ...
+    bert_model: ...
+    cache: Optional[CacheProtocol[str, list[str]]] = None
+
+    def __call__(
+        self,
+        word: str,
+    ) -> list[str]:
+        """Finds the similar words of the word passed as argument, using the cache if available.
+
+        Args:
+            word (str): The word to which look for similar ones.
+
+        Returns:
+            List of strings with the similar words. Notice that the word itself is included in the final list (as the first element).
+        """  # noqa: E501
+        if self.cache is not None and (value := self.cache.get(word)) is not None:
+            return value
+
+        similar_words_list = [word]
+
+        bert_similar_words = get_bert_similar_words(
+            word,
+            enrichment_text=self.enrichment_text,
+            bert_model=self.bert_model,
+            bert_tokenizer=self.bert_tokenizer,
+        )
+
+        if bert_similar_words is not None:
+            relevant_similar_words = get_relevant_similar_words(
+                word,
+                bert_similar_words_list=bert_similar_words,
+            )
+
+            similar_words_list.extend(relevant_similar_words)
+
+        if self.cache is not None:
+            self.cache.set(word, similar_words_list)
+
+        return similar_words_list

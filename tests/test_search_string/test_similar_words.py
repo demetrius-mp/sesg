@@ -1,5 +1,6 @@
 import pytest
 from sesg.search_string.similar_words import (
+    SimilarWordsFinder,
     _check_stemmed_similar_word_is_duplicate,
     _check_stemmed_similar_word_is_valid,
     _check_strings_are_close,
@@ -8,23 +9,20 @@ from sesg.search_string.similar_words import (
     get_relevant_similar_words,
 )
 
-from .test_fixtures import enrichment_text, language_models
+from .test_fixtures import similar_words_finder
 
 
 @pytest.fixture(scope="module")
 def bert_similar_words(
-    enrichment_text: str,
-    language_models,
+    similar_words_finder: SimilarWordsFinder,
 ):
-    bert_model, bert_tokenizer = language_models
-
     word = "software"
 
     result = get_bert_similar_words(
         "software",
-        enrichment_text=enrichment_text,
-        bert_model=bert_model,
-        bert_tokenizer=bert_tokenizer,
+        enrichment_text=similar_words_finder.enrichment_text,
+        bert_model=similar_words_finder.bert_model,
+        bert_tokenizer=similar_words_finder.bert_tokenizer,
     )
 
     return word, result
@@ -122,32 +120,26 @@ def test_get_bert_similar_words(
 
 
 def test_get_bert_similar_words_should_return_none_when_word_has_space(
-    enrichment_text: str,
-    language_models,
+    similar_words_finder: SimilarWordsFinder,
 ):
-    bert_model, bert_tokenizer = language_models
-
     result = get_bert_similar_words(
         "multi organizational",
-        enrichment_text=enrichment_text,
-        bert_model=bert_model,
-        bert_tokenizer=bert_tokenizer,
+        enrichment_text=similar_words_finder.enrichment_text,
+        bert_model=similar_words_finder.bert_model,
+        bert_tokenizer=similar_words_finder.bert_tokenizer,
     )
 
     assert result is None
 
 
 def test_get_bert_similar_words_should_return_none_when_word_is_not_in_enrichment_text(
-    enrichment_text: str,
-    language_models,
+    similar_words_finder: SimilarWordsFinder,
 ):
-    bert_model, bert_tokenizer = language_models
-
     result = get_bert_similar_words(
         "biology",
-        enrichment_text=enrichment_text,
-        bert_model=bert_model,
-        bert_tokenizer=bert_tokenizer,
+        enrichment_text=similar_words_finder.enrichment_text,
+        bert_model=similar_words_finder.bert_model,
+        bert_tokenizer=similar_words_finder.bert_tokenizer,
     )
 
     assert result is None
@@ -195,3 +187,23 @@ def test_get_relevant_similar_words_should_not_return_bert_oov_words(
     ]
 
     assert set(expected).issubset(set(result))
+
+
+def test_similar_words_finder_should_return_cached_value_when_key_was_used_previously(
+    similar_words_finder: SimilarWordsFinder,
+):
+    result = similar_words_finder("software")
+
+    if similar_words_finder.cache is None:
+        raise RuntimeError("SimilarWordsFinder instance should have a cache")
+
+    assert similar_words_finder.cache.get("software") == result
+
+
+def test_similar_words_finder_should_return_none_when_key_was_never_used(
+    similar_words_finder: SimilarWordsFinder,
+):
+    if similar_words_finder.cache is None:
+        raise RuntimeError("SimilarWordsFinder instance should have a cache")
+
+    assert similar_words_finder.cache.get("computer") is None
