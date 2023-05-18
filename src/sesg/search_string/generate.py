@@ -216,7 +216,7 @@ def _generate_search_string_with_similar_words(
     *,
     topics_list: list[list[str]],
     n_words_per_topic: int,
-    n_similar_words: int,
+    n_similar_words_per_word: int,
     similar_words_finder: SimilarWordsFinder,
 ) -> str:
     """Generates a search string with the following steps.
@@ -228,7 +228,7 @@ def _generate_search_string_with_similar_words(
     Args:
         topics_list (list[list[str]]): List of topics to use.
         n_words_per_topic (int): Number of words to keep in each topic.
-        n_similar_words (int): Number of similar words to generate for each word in each topic.
+        n_similar_words_per_word (int): Number of similar words to generate for each word in each topic.
         similar_words_finder (SimilarWordsFinder): Instance of SimilarWordsFinder.
 
     Returns:
@@ -247,7 +247,7 @@ def _generate_search_string_with_similar_words(
 
             # limiting the number of similar words
             # we add one because the word itself is included in the similar_words list
-            topic_part.append(similar_words[: n_similar_words + 1])
+            topic_part.append(similar_words[: n_similar_words_per_word + 1])
 
         topics_with_similar_words.append(topic_part)
 
@@ -260,7 +260,7 @@ def generate_search_string(
     *,
     topics_list: list[list[str]],
     n_words_per_topic: int,
-    n_similar_words: int,
+    n_similar_words_per_word: int,
     similar_words_finder: SimilarWordsFinder,
 ) -> str:
     """Generates a search string that will be enriched with the desired number of similar words.
@@ -268,13 +268,13 @@ def generate_search_string(
     Args:
         topics_list (list[list[str]]): List of topics to use.
         n_words_per_topic (int): Number of words to keep in each topic.
-        n_similar_words (int): Number of similar words to generate for each word in each topic.
+        n_similar_words_per_word (int): Number of similar words to generate for each word in each topic.
         similar_words_finder (SimilarWordsFinder): Instance of SimilarWordsFinder.
 
     Returns:
         A search string.
     """  # noqa: E501
-    if n_similar_words == 0:
+    if n_similar_words_per_word == 0:
         return _generate_search_string_without_similar_words(
             topics_list=topics_list,
             n_words_per_topic=n_words_per_topic,
@@ -283,6 +283,6 @@ def generate_search_string(
     return _generate_search_string_with_similar_words(
         topics_list=topics_list,
         n_words_per_topic=n_words_per_topic,
-        n_similar_words=n_similar_words,
+        n_similar_words_per_word=n_similar_words_per_word,
         similar_words_finder=similar_words_finder,
     )

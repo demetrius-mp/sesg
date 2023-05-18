@@ -230,7 +230,7 @@ def test_generate_search_string_with_similar_words(
             ["software", "measurement", "gqm"],
             ["process", "software", "strategic"],
         ],
-        n_similar_words=2,
+        n_similar_words_per_word=2,
         n_words_per_topic=2,
         similar_words_finder=similar_words_finder,
     )
@@ -285,7 +285,7 @@ def test_generate_search_string_with_2_similar_words_should_return_result_of_gen
             ["software", "measurement", "gqm"],
             ["process", "software", "strategic"],
         ],
-        n_similar_words=2,
+        n_similar_words_per_word=2,
         n_words_per_topic=n_words_per_topic,
         similar_words_finder=similar_words_finder,
     )
