@@ -110,14 +110,14 @@ def extract_topics_with_lda(
     docs: list[str],
     *,
     min_document_frequency: float,
-    number_of_topics: int,
+    n_topics: int,
 ) -> list[list[str]]:
     """Extracts topics from a list of documents using LDA method.
 
     Args:
         docs (list[str]): List of documents.
         min_document_frequency (float): CountVectorizer parameter - Minimum document frequency for the word to appear on the bag of words.
-        number_of_topics (int): LDA parameter - Number of topics to generate.
+        n_topics (int): LDA parameter - Number of topics to generate.
 
     Returns:
         list of topics, where a topic is a list of words.
@@ -126,7 +126,7 @@ def extract_topics_with_lda(
         >>> extract_topics_with_lda(  # doctest: +SKIP
         ...     docs=["detecting code smells with machine learning", "code smells detection tools", "error detection in Java software with machine learning"],
         ...     min_document_frequency=0.1,
-        ...     number_of_topics=2,
+        ...     n_topics=2,
         ... )
         [["word1 topic1", "word2 topic1"], ["word1 topic2", "word2 topic2"]]
     """  # noqa: E501
@@ -156,7 +156,7 @@ def extract_topics_with_lda(
 
     # Run the Latent Dirichlet Allocation (LDA) algorithm and train it.
     lda = LatentDirichletAllocation(
-        n_components=number_of_topics,
+        n_components=n_topics,
         doc_topic_prior=alpha,
         topic_word_prior=beta,
         learning_method=learning,

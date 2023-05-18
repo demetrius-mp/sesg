@@ -27,7 +27,7 @@ def lda_topics_with_min_document_frequency_04(
     topics = extract_topics_with_lda(
         docs,
         min_document_frequency=0.4,
-        number_of_topics=2,
+        n_topics=2,
     )
 
     return topics
