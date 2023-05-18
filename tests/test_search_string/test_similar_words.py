@@ -1,6 +1,7 @@
 import pytest
 from sesg.search_string.similar_words import (
     SimilarWordsFinder,
+    _check_similar_word_is_relevant,
     _check_stemmed_similar_word_is_duplicate,
     _check_stemmed_similar_word_is_valid,
     _check_strings_are_close,
@@ -207,3 +208,27 @@ def test_similar_words_finder_should_return_none_when_key_was_never_used(
         raise RuntimeError("SimilarWordsFinder instance should have a cache")
 
     assert similar_words_finder.cache.get("computer") is None
+
+
+def test_check_similar_word_is_relevant_should_return_false_when_word_is_punctuation():
+    assert (
+        _check_similar_word_is_relevant(
+            "-",
+            stemmed_word="",
+            stemmed_similar_word="",
+            stemmed_relevant_similar_words=[],
+        )
+        is False
+    )
+
+
+def test_check_similar_word_is_relevant_should_return_false_when_word_is_bert_oov_word():
+    assert (
+        _check_similar_word_is_relevant(
+            "##ization",
+            stemmed_word="",
+            stemmed_similar_word="",
+            stemmed_relevant_similar_words=[],
+        )
+        is False
+    )

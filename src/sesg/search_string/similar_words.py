@@ -9,10 +9,14 @@ This module provides a way of generating similar words, and filtering them to re
 
 
 from dataclasses import dataclass
+from string import punctuation
 from typing import Generic, Iterator, Optional, Protocol, TypeVar
 
 from nltk.stem import LancasterStemmer
 from rapidfuzz.distance import Levenshtein
+
+
+PUNCTUATION: set[str] = set(punctuation)
 
 
 _lancaster = LancasterStemmer()
@@ -137,6 +141,28 @@ def _check_stemmed_similar_word_is_duplicate(
     return False
 
 
+def _check_word_is_punctuation(
+    word: str,
+) -> bool:
+    """Checks if the given word is not punctuation.
+
+    This function uses `#!python string.punctuation` to get punctuation characters.
+
+    Args:
+        word (str): Word to check.
+
+    Returns:
+        True if the word is punctuation, False otherwise.
+
+    Examples:
+        >>> _check_word_is_punctuation("a")
+        False
+        >>> _check_word_is_punctuation(">")
+        True
+    """
+    return word in PUNCTUATION
+
+
 def _check_is_bert_oov_word(
     word: str,
 ) -> bool:
@@ -168,11 +194,12 @@ def _check_similar_word_is_relevant(
 ) -> bool:
     """Checks if the given similar word is relevant.
 
-    A similar word is considered relevant if it complies the following criteria:
+    A similar word is considered relevant if it complies the following criteria, in order:
 
+    - It is not a BERT out-of-vocabulary word (see [_check_is_bert_oov_word][sesg.search_string.similar_words._check_is_bert_oov_word]).
+    - It is not a punctuation character (see [_check_word_is_punctuation][sesg.search_string.similar_words._check_word_is_punctuation]).
     - It's stemmed form is valid (see [_stemmed_similar_word_is_valid][sesg.search_string.similar_words._stemmed_similar_word_is_valid]).
     - It's stemmed form is not a duplicate (see [_stemmed_similar_word_is_duplicate][sesg.search_string.similar_words._stemmed_similar_word_is_duplicate]).
-    - It is not a BERT out-of-vocabulary word (see [_check_is_bert_oov_word][sesg.search_string.similar_words._check_is_bert_oov_word]).
 
     Args:
         similar_word (str): Similar word to check if is relevant.
@@ -183,6 +210,14 @@ def _check_similar_word_is_relevant(
     Returns:
         True if the similar word is relevant, False otherwise.
     """  # noqa: E501
+    is_bert_oov_word = _check_is_bert_oov_word(similar_word)
+    if is_bert_oov_word:
+        return False
+
+    is_punctuation = _check_word_is_punctuation(similar_word)
+    if is_punctuation:
+        return False
+
     is_valid = _check_stemmed_similar_word_is_valid(
         stemmed_similar_word,
         stemmed_word=stemmed_word,
@@ -195,10 +230,6 @@ def _check_similar_word_is_relevant(
         stemmed_similar_words_list=stemmed_relevant_similar_words,
     )
     if is_duplicate:
-        return False
-
-    is_bert_oov_word = _check_is_bert_oov_word(similar_word)
-    if is_bert_oov_word:
         return False
 
     return True
