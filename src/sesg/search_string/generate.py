@@ -133,11 +133,10 @@ class EnrichmentStudy(TypedDict):
     abstract: str
 
 
-def generate_enrichment_text(
-    *,
+def create_enrichment_text(
     studies_list: list[EnrichmentStudy],
 ) -> str:
-    r"""Generates a piece of text that consists of the concatenation of the title and abstract of each study.
+    r"""Creates a piece of text that consists of the concatenation of the title and abstract of each study.
 
     Can be used with the [`sesg.search_string.generate_search_string`][] function.
 
@@ -153,7 +152,7 @@ def generate_enrichment_text(
         ...     EnrichmentStudy(title="title2", abstract="abstract2 \r\ntext"),
         ...     EnrichmentStudy(title="title3", abstract="abstract3"),
         ... ]
-        >>> generate_enrichment_text(studies_list=studies)
+        >>> create_enrichment_text(studies_list=studies)
         'title1 abstract1\ntitle2 abstract2 #.text\ntitle3 abstract3\n'
     """  # noqa: E501
     enrichment_text = ""
