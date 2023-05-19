@@ -524,6 +524,7 @@ class MultiClientScopusSearchAbstractClass(ABC):
             results=results_list,
             search_string_index=search_string_index,
         )
+        self.set_client_available(client_index)
 
     async def _queue_worker(
         self,
