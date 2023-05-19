@@ -17,6 +17,7 @@ from .client import (
     ScopusClient,
     TimeoutResponse,
 )
+from .multi_client import MultiClientScopusSearchAbstractClass
 
 
 __all__ = (
@@ -28,4 +29,5 @@ __all__ = (
     "ScopusClient",
     "SuccessResponse",
     "TimeoutResponse",
+    "MultiClientScopusSearchAbstractClass",
 )
