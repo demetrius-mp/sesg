@@ -5,7 +5,7 @@ we will perform operations on a correlation (or citation) graph.
 """
 
 from collections import defaultdict, deque
-from typing import Optional, TypedDict
+from typing import Optional
 
 from graphviz import Digraph
 
@@ -153,18 +153,6 @@ def serial_breadth_first_search(
 
     # set() will remove any duplicate nodes
     return list(set(reachable_nodes))
-
-
-class GraphStyle(TypedDict):
-    """How the graph should be styled.
-
-    Args:
-        search_node (str): Style of nodes that were found via search
-    """
-
-    search_node: str
-    sb_node: str
-    not_found_node: str
 
 
 def create_citation_graph(
