@@ -4,9 +4,8 @@ This module is responsible to perform graph operations. In our context,
 we will perform operations on a correlation (or citation) graph.
 """
 
-import itertools
 from collections import defaultdict, deque
-from typing import Optional
+from typing import Optional, TypedDict
 
 from graphviz import Digraph
 
@@ -156,6 +155,18 @@ def serial_breadth_first_search(
     return list(set(reachable_nodes))
 
 
+class GraphStyle(TypedDict):
+    """How the graph should be styled.
+
+    Args:
+        search_node (str): Style of nodes that were found via search
+    """
+
+    search_node: str
+    sb_node: str
+    not_found_node: str
+
+
 def create_citation_graph(
     *,
     adjacency_list: dict[int, list[int]],
@@ -192,13 +203,7 @@ def create_citation_graph(
 
     graph = Digraph(strict=True)
 
-    nodes = itertools.chain(
-        (node, *references) for node, references in adjacency_list.items()
-    )
-    nodes = itertools.chain(*nodes)
-
-    max_id = max(nodes)
-    node_padding = len(str(max_id))
+    node_padding = len(str(len(tooltips)))
 
     def format_node(node_id: int) -> str:
         return str(node_id).zfill(node_padding)
