@@ -150,7 +150,7 @@ async def main():
             client_index: int,
             data: SuccessResponse,
         ):
-            ...
+            self.progress.advance(self.clients_progress_tasks[client_index])
 
     with Progress(
         TextColumn(
