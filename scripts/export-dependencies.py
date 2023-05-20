@@ -2,7 +2,7 @@ import shutil
 import subprocess
 from multiprocessing import Pool
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 import tomli
 
@@ -45,7 +45,7 @@ def main():
         pyproject = tomli.load(f)
 
     groups = pyproject["tool"]["poetry"]["group"]
-    groups_names: List[str] = [name for name in groups]
+    groups_names: list[str] = [name for name in groups]
 
     print("Exporting dependencies by group.")
 
