@@ -4,7 +4,7 @@ repos:
   - repo: local
     hooks:
       - id: format
-        name: Formats the package using ruff, docformatter, toml-sort, and black.
+        name: Formats the package using ruff, toml-sort, and black.
         entry: poetry run poe format
         language: system
         types: [python]
