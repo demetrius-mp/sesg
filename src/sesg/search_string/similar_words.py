@@ -10,7 +10,7 @@ This module provides a way of generating similar words, and filtering them to re
 
 from dataclasses import dataclass
 from string import punctuation
-from typing import Iterator, Optional, Protocol, TypeVar
+from typing import Iterator, Optional, Protocol
 
 from nltk.stem import LancasterStemmer
 from rapidfuzz.distance import Levenshtein
@@ -374,10 +374,6 @@ def get_relevant_similar_words(
         stemmed_relevant_similar_words.append(stemmed_similar_word)
 
     return relevant_similar_words
-
-
-T_KEY = TypeVar("T_KEY", contravariant=True)
-T_VALUE = TypeVar("T_VALUE")
 
 
 class SimilarWordsFinderCacheProtocol(Protocol):
