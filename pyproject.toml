@@ -70,8 +70,6 @@ more-itertools = "^9.1.0"
 python-dotenv = "^1.0.0"
 pre-commit = "^3.2.2"
 poethepoet = "^0.19.0"
-pytest-httpx = "^0.22.0"
-pytest-asyncio = "^0.21.0"
 
 [tool.poetry.group.doc.dependencies]
 mkdocs-material = "^9.1.6"
@@ -89,6 +87,8 @@ toml-sort = "^0.23.0"
 [tool.poetry.group.test.dependencies]
 pytest = "^7.3.0"
 pytest-cov = "^4.0.0"
+pytest-httpx = "^0.22.0"
+pytest-asyncio = "^0.21.0"
 
 [tool.poetry.urls]
 Documentation = "https://sesg.readthedocs.io/en/latest/"
