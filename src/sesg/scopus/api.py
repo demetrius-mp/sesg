@@ -79,6 +79,11 @@ class APIKeyExpiredError(Exception):
 
     Attributes:
         resets_at (Optional[datetime]): Datetime object represents when the API key will be resetted.
+
+    Examples:
+        >>> error = APIKeyExpiredError()
+        >>> error.resets_at is None
+        True
     """  # noqa: E501
 
     resets_at: Optional[datetime]
@@ -127,10 +132,7 @@ def _api_key_is_expired(
     Returns:
         True if the API key is expired, False otherwise.
     """  # noqa: E501
-    if response.status_code == 429:
-        return True
-
-    return False
+    return response.status_code == 429
 
 
 def _get_api_key_reset_date(
