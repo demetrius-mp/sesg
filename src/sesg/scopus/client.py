@@ -8,13 +8,9 @@ We use [`aiometer`](https://github.com/florimondmanca/aiometer),
 and [`httpx`](https://github.com/projectdiscovery/httpx) to achieve this goal.
 """  # noqa: E501
 
-import asyncio
 from dataclasses import dataclass
 from datetime import datetime
 from typing import AsyncIterator, Optional
-
-import aiometer
-import httpx
 
 from . import api
 
@@ -250,39 +246,3 @@ class ScopusClient:
         self.__current_query = query
 
         return self.__aiter__()
-
-    async def get_all_api_keys_status(
-        self,
-    ) -> AsyncIterator[tuple[int, api.ParsedHeaders]]:
-        """Gets the status of every API key.
-
-        Yields:
-            A [ParsedHeaders][`sesg.scopus.api.ParsedHeaders`] instance.
-        """
-        client = httpx.AsyncClient()
-
-        requests = [
-            api._create_request(
-                api_key=api_key,
-                query="machine learning",
-            )
-            for api_key in self.api_keys
-        ]
-
-        async def custom_fetch(req: httpx.Request, index: int):
-            task = client.send(req)
-            response = await asyncio.wait_for(
-                fut=task,
-                timeout=self.timeout,
-            )
-
-            return index, api.parse_headers(headers=response.headers)
-
-        async with aiometer.amap(
-            lambda x: custom_fetch(x[1], x[0]),
-            list(enumerate(requests)),
-            max_per_second=7,
-            max_at_once=7,
-        ) as result:
-            async for index, headers in result:
-                yield index, headers
