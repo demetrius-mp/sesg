@@ -2,8 +2,7 @@ from dataclasses import dataclass
 from typing import Any
 
 import pytest
-from sesg.search_string import SimilarWordsFinder
-from sesg.search_string.similar_words import CacheProtocol
+from sesg.search_string import SimilarWordsFinder, SimilarWordsFinderCacheProtocol
 from transformers import BertForMaskedLM, BertTokenizer
 
 
@@ -26,7 +25,7 @@ Strategically Balanced Process Adoption Software processes have an important rol
 Applying and adjusting a software process improvement model in practice: the use of the IDEAL model in a small software enterprise Software process improvement is a demanding and complex undertaking. To support the constitution and implementation of software process improvement schemes the Software Engineering Institute (SEI) proposes a framework, the so-called IDEAL model. This model is based on experiences from large organizations. The aim of the research described here was to investigate the suitability of the model for small software enterprises. It has therefore been deployed and adjusted for successful use in a small Danish software company. The course of the project and the application of the model are presented and the case is reflected on the background of current knowledge about managing software process improvement as organizational change.""".strip()
 
     @dataclass
-    class DictCache(CacheProtocol):
+    class DictCache(SimilarWordsFinderCacheProtocol):
         cache: dict[str, list[str]]
 
         def get(self, key: str) -> list[str] | None:

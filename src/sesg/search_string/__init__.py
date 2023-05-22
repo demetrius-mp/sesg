@@ -3,13 +3,14 @@
 from typing import Optional
 
 from .generate import create_enrichment_text, generate_search_string
-from .similar_words import SimilarWordsFinder
+from .similar_words import SimilarWordsFinder, SimilarWordsFinderCacheProtocol
 
 
 __all__ = (
     "create_enrichment_text",
     "generate_search_string",
     "SimilarWordsFinder",
+    "SimilarWordsFinderCacheProtocol",
 )
 
 

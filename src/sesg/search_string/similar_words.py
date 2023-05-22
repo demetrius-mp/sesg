@@ -10,7 +10,7 @@ This module provides a way of generating similar words, and filtering them to re
 
 from dataclasses import dataclass
 from string import punctuation
-from typing import Generic, Iterator, Optional, Protocol, TypeVar
+from typing import Iterator, Optional, Protocol, TypeVar
 
 from nltk.stem import LancasterStemmer
 from rapidfuzz.distance import Levenshtein
@@ -380,11 +380,11 @@ T_KEY = TypeVar("T_KEY", contravariant=True)
 T_VALUE = TypeVar("T_VALUE")
 
 
-class CacheProtocol(Protocol, Generic[T_KEY, T_VALUE]):
-    """Interface for a cache system.
+class SimilarWordsFinderCacheProtocol(Protocol):
+    """Interface for the cache system used in [SimilarWordsFinder][sesg.search_string.similar_words.SimilarWordsFinder].
 
     Examples:
-        >>> class DictCache(CacheProtocol):
+        >>> class DictCache(SimilarWordsFinderCacheProtocol):
         ...     def __init__(self):
         ...         self.cache: dict[str, list[str]] = dict()
         ...
@@ -401,16 +401,16 @@ class CacheProtocol(Protocol, Generic[T_KEY, T_VALUE]):
         >>> cache.get("other key") is None
         True
 
-    """
+    """  # noqa: E501
 
     def get(  # pragma: no cover
         self,
-        key: T_KEY,
-    ) -> T_VALUE | None:
+        key: str,
+    ) -> list[str] | None:
         """Gets a value from the cache.
 
         Args:
-            key (T_KEY): Key to retrieve.
+            key (str): Key to retrieve.
 
         Returns:
             The value associated with the key, if it exists, None otherwise.
@@ -419,14 +419,14 @@ class CacheProtocol(Protocol, Generic[T_KEY, T_VALUE]):
 
     def set(  # pragma: no cover
         self,
-        key: T_KEY,
-        value: T_VALUE,
+        key: str,
+        value: list[str],
     ) -> None:
         """Sets a value in the cache.
 
         Args:
-            key (T_KEY): Key to set.
-            value (T_VALUE): Value to associate with the key.
+            key (str): Key to set.
+            value (list[str]): Value to associate with the key.
         """
         raise NotImplementedError("Not implemented")  # pragma: no cover
 
@@ -441,7 +441,7 @@ class SimilarWordsFinder:
     enrichment_text: str
     bert_tokenizer: ...
     bert_model: ...
-    cache: Optional[CacheProtocol[str, list[str]]] = None
+    cache: Optional[SimilarWordsFinderCacheProtocol] = None
 
     def __call__(
         self,
