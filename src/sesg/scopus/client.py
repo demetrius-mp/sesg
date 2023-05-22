@@ -176,12 +176,12 @@ class ScopusClient:
                 resets_at=e.resets_at,
             )
 
+            if self.__current_api_key_index + 1 == len(self.__api_keys):
+                raise OutOfAPIKeysError()
+
             self.__current_timeout_retry = 0
             self.__current_api_key_index += 1
             self.__iterator = self.__restart_iterator_with_current_state()
-
-            if self.__current_api_key_index == len(self.__api_keys):
-                raise OutOfAPIKeysError()
 
             return response
 
