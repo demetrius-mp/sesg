@@ -29,6 +29,3 @@ jobs:
         uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-
-      - name: Exports package requirements by groups.
-        run: poetry run poe export-dependencies
