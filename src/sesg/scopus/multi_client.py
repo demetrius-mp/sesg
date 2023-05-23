@@ -187,10 +187,6 @@ from .client import (
 )
 
 
-timeout = 10
-timeout_retries = 10
-
-
 class NoClientsAvailableError(Exception):
     """Raised when all clients are being used."""
 
@@ -198,12 +194,16 @@ class NoClientsAvailableError(Exception):
 def create_clients_list(
     api_keys_list: list[str],
     n_clients: int,
+    timeout: float,
+    timeout_retries: int,
 ) -> list[ScopusClient]:
     """Creates a list of clients, where each client has a disjoint set of API keys.
 
     Args:
         api_keys_list (list[str]): List of Scopus API keys.
         n_clients (int): Number of clients to create.
+        timeout (float): Time in seconds to wait before assuming the request timed out.
+        timeout_retries (int): Number of times to retry a timed out request in a row.
 
     Returns:
         List of Scopus Clients instances.
