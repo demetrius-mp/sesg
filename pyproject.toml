@@ -65,6 +65,7 @@ numpy = "1.23.5"
 umap-learn = "^0.5.3"
 rapidfuzz = "^3.0.0"
 more-itertools = "^9.1.0"
+requests = "^2.31.0"
 
 [tool.poetry.group.dev.dependencies]
 python-dotenv = "^1.0.0"
