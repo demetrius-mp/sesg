@@ -191,6 +191,10 @@ timeout = 10
 timeout_retries = 10
 
 
+class NoClientsAvailableError(Exception):
+    """Raised when all clients are being used."""
+
+
 def create_clients_list(
     api_keys_list: list[str],
     n_clients: int,
@@ -418,7 +422,7 @@ class MultiClientScopusSearchAbstractClass(ABC):
         """Verifies which client is available, and return it.
 
         Raises:
-            RuntimeError: If all clients are being used (none is available).
+            NoClientsAvailableError: If all clients are being used (none is available).
 
         Returns:
             - the index of the client (useful for maintaining, for example, a progress bar)
@@ -430,7 +434,7 @@ class MultiClientScopusSearchAbstractClass(ABC):
 
                 return i, self.clients_list[i]
 
-        raise RuntimeError("All clients being used")
+        raise NoClientsAvailableError()
 
     def set_client_available(
         self,
