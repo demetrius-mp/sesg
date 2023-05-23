@@ -267,7 +267,7 @@ def fuzzy_backward_snowballing(
                 func_args,
             )
 
-        references: list[SnowballingStudy] = list()
+        references: list[SnowballingStudy] = []
 
         for result_index, is_cited in enumerate(result):
             if is_cited:

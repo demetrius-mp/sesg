@@ -458,7 +458,7 @@ class MultiClientScopusSearchAbstractClass(ABC):
         """
         client_index, client = self.get_available_client()
         search_string = self.search_strings_list[search_string_index]
-        results_list: list[SuccessResponse.Entry] = list()
+        results_list: list[SuccessResponse.Entry] = []
 
         self.on_search_initialize(
             client_index=client_index,

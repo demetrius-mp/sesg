@@ -105,7 +105,8 @@ extend-select = [
   # isort
   "I001",
   # https://www.pydocstyle.org/en/stable/error_codes.html
-  "D"
+  "D",
+  "C"
 ]
 unfixable = ["F841"]
 exclude = [".venv"]

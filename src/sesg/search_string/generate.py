@@ -65,7 +65,7 @@ def _join_topics_without_similar_words(
         >>> _join_topics_without_similar_words([["machine", "learning"], ["code", "smell"]])
         '("machine" AND "learning") OR ("code" AND "smell")'
     """  # noqa: E501
-    topics_part: list[str] = list()
+    topics_part: list[str] = []
     for topic_words_list in topics_list:
         s = _join_tokens_with_operator("AND", topic_words_list, use_double_quotes=True)
         topics_part.append(s)
@@ -98,9 +98,9 @@ def _join_topics_with_similar_words(
         ... ])
         '(("machine" OR "computer") AND ("learning" OR "knowledge")) OR (("code" OR "software") AND ("smell" OR "defect"))'
     """  # noqa: E501
-    topics_part: list[str] = list()
+    topics_part: list[str] = []
     for topic in topics_list:
-        similar_words_part: list[str] = list()
+        similar_words_part: list[str] = []
         for similar_words in topic:
             s = _join_tokens_with_operator("OR", similar_words, use_double_quotes=True)
             similar_words_part.append(s)
@@ -239,9 +239,9 @@ def _generate_search_string_with_similar_words(
         n_words_per_topic=n_words_per_topic,
     )
 
-    topics_with_similar_words: list[list[list[str]]] = list()
+    topics_with_similar_words: list[list[list[str]]] = []
     for topic in topics_list:
-        topic_part: list[list[str]] = list()
+        topic_part: list[list[str]] = []
         for token in topic:
             similar_words = similar_words_finder(token)
 

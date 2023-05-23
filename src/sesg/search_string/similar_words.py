@@ -351,8 +351,8 @@ def get_relevant_similar_words(
     """
     stemmed_word: str = _lancaster.stem(word)
 
-    relevant_similar_words: list[str] = list()
-    stemmed_relevant_similar_words: list[str] = list()
+    relevant_similar_words: list[str] = []
+    stemmed_relevant_similar_words: list[str] = []
 
     stemmed_similar_words_list: Iterator[str] = (
         _lancaster.stem(w) for w in bert_similar_words_list

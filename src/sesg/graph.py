@@ -187,7 +187,7 @@ def create_citation_graph(
         ... )
     """  # noqa: E501
     if results_list is None:
-        results_list = list()
+        results_list = []
 
     graph = Digraph(strict=True)
 
