@@ -18,3 +18,7 @@ You can install with `pip`, `poetry`, or any other package manager:
 ```bash
 poetry add sesg
 ```
+
+## Usage
+
+To a complete usage example, please refer to [this repo](https://github.com/demetrius-mp/sesg-cli).
