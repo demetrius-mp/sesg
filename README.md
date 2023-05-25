@@ -11,7 +11,7 @@
 [![Docstring Style](https://img.shields.io/badge/%20style-google-3666d6.svg)](https://google.github.io/styleguide/pyguide.html#s3.8-comments-and-docstrings)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
-SeSG is a tool developed to help Systematic Literature Review researchers, specifically at the step of building a search string.
+SeSG is a tool developed to help Systematic Literature Review researchers, specifically at the step of building a search string. This is a continuation of [Leo Fuchs'](https://github.com/LeoFuchs/SeSG) work.
 
 ## Installation
 
