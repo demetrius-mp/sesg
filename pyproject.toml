@@ -3,12 +3,13 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poe.tasks]
-# code style
+# code quality and style
 ruff = {cmd = "ruff src/", help = "Lints the project, fixing errors."}
 black = {cmd = "black src/", help = "Formats the code."}
 toml-sort = {cmd = "toml-sort pyproject.toml", help = "Sorts pyproject.toml file."}
 # packaging
 export-dependencies = {script = "scripts.export-dependencies:main", help = "Exports dependencies to a requirements.txt format, one file for each group of depencies."}
+publish-package = {script = "scripts.publish-package:main", help = "Builds the package and publishes to PyPI."}
 
 [tool.poe.tasks.docs]
 help = "Starts mkdocs development server."
@@ -20,13 +21,6 @@ sequence = [
 [tool.poe.tasks.format]
 help = "Formats the package with toml-sort, ruff, and black."
 sequence = ["toml-sort", "ruff", "black"]
-
-[tool.poe.tasks.publish-package]
-help = "Builds the package and publishes to PyPI."
-sequence = [
-  {ref = "export-dependencies"},
-  {script = "scripts.publish-package:main"}
-]
 
 [tool.poe.tasks.test]
 help = "Run tests against the package."

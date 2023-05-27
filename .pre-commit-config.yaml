@@ -10,23 +10,3 @@ repos:
         types: [python]
         pass_filenames: false
         stages: [push]
-
-  - repo: local
-    hooks:
-      - id: export-dependencies
-        name: Exports package dependencies by groups.
-        entry: poetry run poe export-dependencies
-        language: system
-        types: [python]
-        pass_filenames: false
-        stages: [push]
-
-  - repo: local
-    hooks:
-      - id: tests
-        name: Executes the test suite.
-        entry: poetry run poe test
-        language: system
-        types: [python]
-        pass_filenames: false
-        stages: [push]
