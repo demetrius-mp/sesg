@@ -1,248 +1,421 @@
-"""Scopus Client module.
+"""This module provides a Scopus client that efficiently uses your API keys.
 
-This module is responsible to provide an efficient, and error proof client for the Scopus API.
-The client is optimized to scrape the maximum number of pages that are available from Scopus API,
-which is 5000, for normal users, at the maximum speed possible.
+It is highly recommended to use [`trio`](https://trio.readthedocs.io/) to manage the async functions
+as it is much faster.
 
-We use [`aiometer`](https://github.com/florimondmanca/aiometer),
-and [`httpx`](https://github.com/projectdiscovery/httpx) to achieve this goal.
+## Usage example
+
+```python
+import trio
+from rich.progress import BarColumn, Progress, TaskProgressColumn, TextColumn
+
+KEYS: list[str] = [...]  # list of API keys
+
+async def main():
+    client = ScopusClient(KEYS)
+
+    with Progress(
+        TextColumn(
+            "[progress.description]{task.description}: {task.completed} of {task.total}"
+        ),
+        BarColumn(),
+        TaskProgressColumn(),
+    ) as progress:
+        for string in ["code smell", "machine learning", "covid"]:
+            task = progress.add_task(
+                "Searching",
+            )
+
+            results: list[SuccessResponse.Entry] = []
+
+            try:
+                async for page in client.search(string):
+                    progress.update(
+                        task,
+                        advance=1,
+                        total=page.n_pages,
+                        refresh=True,
+                    )
+
+                    results.extend(page.entries)
+
+            except InvalidStringError:
+                print("The following string raised an InvalidStringError")
+                print(string)
+
+            progress.remove_task(task)
+            # save to database or whatever
+
+
+
+trio.run(main)
+```
 """  # noqa: E501
 
+import math
 from dataclasses import dataclass
-from datetime import datetime
-from typing import AsyncIterator, Optional
+from functools import partial
+from typing import Any, AsyncIterable
 
-from . import api
+import aiometer
+import httpx
+from typing_extensions import TypedDict
+
+from .mutable_cycle import MutableCycle
+
+
+SCOPUS_API_URL = "https://api.elsevier.com/content/search/scopus"
+
+
+@dataclass(frozen=True)
+class SuccessResponse:
+    """A successfull Scopus Response.
+
+    Args:
+        number_of_results (int): Number of results for this query. Notice that even if it displays more than 5000 results, Scopus will limit to retrieve only 5000.
+        number_of_pages (int): Number of pages that needs to be fetched to get all results. Limited to 200 due to Scopus API 5000 entries limit.
+        current_page (int): Current page being fetched. Starts at 1, being at most 200.
+        entries (list[Entry]): Studies returned from the API.
+    """  # noqa: E501
+
+    @dataclass
+    class Entry:
+        """A study entry returned from the API.
+
+        Args:
+            scopus_id (str): The ID of the study determined by Scopus.
+            title (str): The title of the study.
+            cited_by_count (Optional[int]): How many studies cites this one.
+        """
+
+        scopus_id: str
+        title: str
+        cited_by_count: int | None
+        _rest: Any
+
+    n_results: int
+    n_pages: int
+    current_page: int
+    entries: list[Entry]
+
+
+def parse_response(
+    response: httpx.Response,
+) -> SuccessResponse:
+    """Parses a Scopus API response.
+
+    Args:
+        response (httpx.Response): A Scopus API response.
+
+    Returns:
+        A SuccessResponse instance.
+    """  # noqa: E501
+    json = response.json()
+
+    number_of_results = int(json["search-results"]["opensearch:totalResults"])
+    start_index = int(json["search-results"]["opensearch:startIndex"])
+    current_page = math.floor(start_index / 25) + 1
+    number_of_pages = min(math.ceil(number_of_results / 25), 200)
+
+    entries = [
+        SuccessResponse.Entry(
+            title=entry["dc:title"],
+            scopus_id=entry["dc:identifier"],
+            cited_by_count=entry.get("citedby-count", None),
+            _rest=entry,
+        )
+        for entry in json["search-results"]["entry"]
+        if "dc:title" in entry
+    ]
+
+    return SuccessResponse(
+        n_results=number_of_results,
+        n_pages=number_of_pages,
+        current_page=current_page,
+        entries=entries,
+    )
+
+
+def check_api_key_is_expired(
+    response: httpx.Response,
+) -> bool:
+    """Checks if the given response indicates that the API key is expired.
+
+    An API key is expired if the response status code is 429.
+
+    Args:
+        response (httpx.Response): Response to check.
+
+    Returns:
+        True if the API key is expired, False otherwise.
+    """
+    return response.status_code == 429
+
+
+def create_clients_list(
+    api_keys_list: list[str],
+) -> list[httpx.AsyncClient]:
+    """Creates a list of async httpx clients that can be used for Scopus queries.
+
+    Args:
+        api_keys_list (list[str]): List with the API keys to be used. Each client will use one API Key.
+
+    Returns:
+        List of async clients.
+    """  # noqa: E501
+    return [
+        httpx.AsyncClient(
+            base_url=SCOPUS_API_URL,
+            params={
+                "apiKey": api_key,
+            },
+            timeout=None,
+        )
+        for api_key in api_keys_list
+    ]
+
+
+class ScopusParams(TypedDict):
+    """Data container for the required Scopus Params.
+
+    Attributes:
+        query (str): Query to be searched.
+        start (int): Paginator parameter.
+
+    Examples:
+        >>> p: ScopusParams = {"query": "machine learning", "start": 0}
+        >>> p["query"] == "machine learning"
+        True
+        >>> p["start"] == 0
+        True
+    """
+
+    query: str
+    start: int
+
+
+def create_params_pagination(
+    query: str,
+    n_results: int,
+) -> list[ScopusParams]:
+    """Creates a list of ScopusParams for pagination.
+
+    Args:
+        query (str): Query to be searched.
+        n_results (int): Number of results returned by Scopus.
+
+    Returns:
+        List of ScopusParams.
+    """  # noqa: E501
+    limited_results = min(5000, n_results)
+
+    paginator = range(1 * 25, limited_results, 25)
+    params_list: list[ScopusParams] = [
+        {
+            "query": query,
+            "start": page,
+        }
+        for page in paginator
+    ]
+
+    return params_list
+
+
+class InvalidStringError(Exception):
+    """The response has a status code of 413 or 400. The search string might be too long."""  # noqa: E501
 
 
 class OutOfAPIKeysError(Exception):
-    """Used all API keys available."""
-
-
-class ExceededTimeoutRetriesError(Exception):
-    """Exceeded the number of timeout retries in a row."""
-
-
-@dataclass
-class APIKeyExpiredResponse:
-    """Represents an API key expired response from the [`ScopusClient`][sesg.scopus.client.ScopusClient].
-
-    Args:
-        api_key (str): The expired API key.
-        api_key_index (int): The index of the expired API key on the list of API keys passed to [`ScopusClient`][sesg.scopus.client.ScopusClient].
-        resets_at (Optional[datetime]): Datetime object represents when the API key will be resetted.
-    """  # noqa: E501
-
-    api_key: str
-    api_key_index: int
-    resets_at: Optional[datetime]
-
-
-@dataclass
-class TimeoutResponse:
-    """Represents a timed out response from the [`ScopusClient`][sesg.scopus.client.ScopusClient].
-
-    Args:
-        timed_out_page (int): The page where the timeout occured.
-        timeout_retry (int): The current timeout retry attempt for a same request.
-    """  # noqa: E501
-
-    timed_out_page: int
-    timeout_retry: int
+    """All API keys available are expired."""
 
 
 class ScopusClient:
-    """A Scopus API Client with automatic retry on timeout, and automatic API key swapping on expiry."""  # noqa: E501
+    """Creates a client that cycles through the available keys to perform efficient searches.
 
-    __timeout: float
-    __api_keys: list[str]
-    __timeout_retries: int
+    Attributes:
+        DUMMY_QUERY (str): Used when a dummy query is needed. This value is used, for example, to check if the API key is expired.
 
-    __current_api_key_index: int
-    __current_timeout_retry: int
-    __current_page: int
-    __current_query: str
+    !!!note
+        You can purge the expired API keys with the `purge_expired_keys` method.
+    """  # noqa: E501
+
+    DUMMY_QUERY = "test"
 
     def __init__(
         self,
-        *,
-        api_keys: list[str],
-        timeout: float,
-        timeout_retries: int,
+        api_keys_list: list[str],
     ) -> None:
-        """Creates a ScopusClient.
+        """Initializes the instance.
 
         Args:
-            api_keys (list[str]): List with Scopus API keys.
-            timeout (float): Time in seconds to wait before assuming the request timed out.
-            timeout_retries (int): Number of times to retry a timed out request in a row.
+            api_keys_list (list[str]): List with API keys.
         """  # noqa: E501
-        self.__timeout = timeout
-        self.__api_keys = api_keys
-        self.__timeout_retries = timeout_retries
+        self.clients_list = MutableCycle(create_clients_list(api_keys_list))
 
-        self.__current_api_key_index = 0
-        self.__current_timeout_retry = 0
-        self.__current_page = 0
-
-    @property
-    def current_api_key(self) -> str:
-        """Current API key being used."""
-        return self.__api_keys[self.__current_api_key_index]
-
-    @property
-    def current_api_key_index(self) -> int:
-        """Index on the list of the current API key being used."""
-        return self.__current_api_key_index
-
-    @property
-    def current_page(self) -> int:
-        """Current page being fetched.
-
-        Starts at 1, being at most 200.
-        """
-        return self.__current_page
-
-    @property
-    def current_query(self) -> str:
-        """Current query being used."""
-        return self.__current_query
-
-    @property
-    def api_keys(self) -> list[str]:
-        """The Scopus API keys for this client."""
-        return self.__api_keys
-
-    @property
-    def current_timeout_retry(self) -> int:
-        """The current retry for the same timed out request."""
-        return self.__current_timeout_retry
-
-    @property
-    def timeout(self) -> float:
-        """The `timeout` parameter."""
-        return self.__timeout
-
-    @property
-    def timeout_retries(self) -> float:
-        """The `timeout_retries` parameter."""
-        return self.__timeout_retries
-
-    def __restart_iterator_with_current_state(self):
-        return api.search(
-            api_key=self.current_api_key,
-            query=self.__current_query,
-            timeout=self.__timeout,
-            page=self.__current_page,
-        )
-
-    async def __anext__(
+    def delete_client(
         self,
-    ) -> api.SuccessResponse | APIKeyExpiredResponse | TimeoutResponse:
-        """Returns the next result of the search iterator.
+        client: httpx.AsyncClient,
+    ) -> None:
+        """Deletes a client from the list of clients.
+
+        Used when the client's API key is expired.
+
+        Args:
+            client (httpx.AsyncClient): Client to be deleted.
+        """
+        self.clients_list.delete_item(client)
+
+    async def fetch(
+        self,
+        params: ScopusParams,
+    ) -> httpx.Response:
+        """Sends a request with the given params, if a client is available and returns the response.
+
+        Will recursively retry if the response's status code is 429.
+
+        Args:
+            params (ScopusParams): Dictionary with the fetch parameters.
 
         Raises:
-            ExceededTimeoutRetriesError: If exceeds the number of timeout retries in a row.
-            OutOfAPIKeysError: If used al API keys available.
-            PayloadTooLargeError: If the response status code is 413. Probably indicates that the search string is too large.
-            BadRequestError: If the response status code is 400. Probably indicates that the search string is malformed.
+            OutOfAPIKeys: If all API keys are expired.
+            InvalidStringError: If the string is too long, meaning the response's status code is either 413, 429.
 
         Returns:
-            One of the below:
-
-                - A succesfull response
-                - An API key expired response
-                - A Timed out response
+            The response obtained.
         """  # noqa: E501
         try:
-            response = await self.__iterator.__anext__()
+            client = next(self.clients_list)
+        except StopIteration:
+            raise OutOfAPIKeysError()
 
-            self.__current_page += 1
-            self.__current_timeout_retry = 0
+        response = await client.get("", params=params)  # type: ignore
 
-            return response
+        if response.status_code in (400, 413):
+            raise InvalidStringError()
 
-        except (api.PayloadTooLargeError, api.BadRequestError) as e:
-            raise e
+        if response.status_code == 429:
+            self.delete_client(client)
 
-        except api.APIKeyExpiredError as e:
-            response = APIKeyExpiredResponse(
-                api_key=self.current_api_key,
-                api_key_index=self.current_api_key_index,
-                resets_at=e.resets_at,
-            )
+            return await self.fetch(params)
 
-            if self.__current_api_key_index + 1 == len(self.__api_keys):
-                raise OutOfAPIKeysError()
+        return response
 
-            self.__current_timeout_retry = 0
-            self.__current_api_key_index += 1
-            self.__iterator = self.__restart_iterator_with_current_state()
-
-            return response
-
-        except api.TimeoutError:
-            if self.__current_timeout_retry == self.__timeout_retries - 1:
-                raise ExceededTimeoutRetriesError()
-
-            response = TimeoutResponse(
-                timed_out_page=self.current_page,
-                timeout_retry=self.current_timeout_retry,
-            )
-
-            self.__current_timeout_retry += 1
-            self.__iterator = self.__restart_iterator_with_current_state()
-
-            return response
-
-    def __aiter__(self):
-        """Returns an async iterator over the results of the current query."""
-        self.__current_page = 0
-        self.__current_timeout_retry = 0
-        self.__iterator = self.__restart_iterator_with_current_state()
-
-        return self
-
-    def search(
+    async def fetch_first_page(
         self,
         query: str,
-    ) -> AsyncIterator[api.SuccessResponse | APIKeyExpiredResponse | TimeoutResponse]:
-        """Performs Scopus API requests in a timeout-proof, and API key expiry-prof manner.
+    ):
+        """Requests for the first page of a query using the given client.
 
-        !!! note
+        Args:
+            client (httpx.AsyncClient): Client with an API key.
+            query (str): Query to request for the first page.
+        """
+        params: ScopusParams = {
+            "query": query,
+            "start": 0,
+        }
 
-            Notice that the exceptions on the **Raises**
-            section occurs during iteration time, not at function call time.
+        res = await self.fetch_and_parse(params)
+
+        paginator = range(1 * 25, min(5000, res.n_results), 25)
+        params_list: list[ScopusParams] = [
+            {
+                "query": query,
+                "start": page,
+            }
+            for page in paginator
+        ]
+
+        return res, params_list
+
+    async def fetch_and_parse(
+        self,
+        params: ScopusParams,
+    ) -> SuccessResponse:
+        """Makes a request using the given parameters, and parses the response.
+
+        Args:
+            params (ScopusParams): Parameters of the request.
+
+        Raises:
+            InvalidStringError: If the response has a status code of 400 or 413.
+
+        Returns:
+            A parsed response, meaning an instance of SuccessResponse.
+        """  # noqa: E501
+        # params, client = args
+
+        response = await self.fetch(params)
+
+        return parse_response(response)
+
+    async def search(
+        self,
+        query: str,
+    ) -> AsyncIterable[SuccessResponse]:
+        """Performs concurrent requests to all of the pages of the given query.
 
         Args:
             query (str): The query to search for.
 
-        Raises:
-            ExceededTimeoutRetriesError: If exceeds the number of timeout retries in a row.
-            OutOfAPIKeysError: If used al API keys available.
-            PayloadTooLargeError: If the response status code is 413. Probably indicates that the search string is too large.
-            BadRequestError: If the response status code is 400. Probably indicates that the search string is malformed.
+        Yields:
+            A SuccessResponse instance.
+        """
+        first_page, params_list = await self.fetch_first_page(
+            query,
+        )
 
-        Returns:
-            An AsyncIterator that yields one of the below:
+        yield first_page
 
-                - A succesfull response
-                - An API key expired response
-                - A Timed out response
+        async with aiometer.amap(
+            self.fetch_and_parse,
+            params_list,
+            max_at_once=len(self.clients_list) * 12,
+            max_per_second=len(self.clients_list) * 8,
+        ) as next_pages:
+            async for page in next_pages:
+                yield page
 
-        Examples:
-            >>> client = ScopusClient(api_keys=[], timeout=7, timeout_retries=10)
-            >>> async for data in client.search("machine"):  # doctest: +SKIP
-            ...     if isinstance(data, TimeoutResponse):
-            ...         print(f"Timed out on page {client.current_page}")
-            ...
-            ...     elif isinstance(data, APIKeyExpiredResponse):
-            ...         print(f"API Key {client.current_api_key_index + 1} of {len(client.api_keys)} is expired.")
-            ...
-            ...     else:
-            ...         # here data is of type `SuccessResponse`
-            ...         print(data.entries)
-        """  # noqa: E501
-        self.__current_query = query
+    async def get_expired_clients(self) -> list[httpx.AsyncClient]:
+        """Verifies which clients have expired API keys.
 
-        return self.__aiter__()
+        Yield:
+            Clients with expired API keys.
+        """
+        params: ScopusParams = {
+            "query": ScopusClient.DUMMY_QUERY,
+            "start": 0,
+        }
+
+        fns = [
+            partial(
+                client.get,
+                "",
+                params=params,  # type: ignore
+            )
+            for client in self.clients_list.items
+        ]
+
+        responses = await aiometer.run_all(
+            fns,
+            max_at_once=len(self.clients_list),
+            max_per_second=len(self.clients_list),
+        )
+
+        expired_clients: list[httpx.AsyncClient] = []
+
+        for client, response in zip(
+            self.clients_list.items,
+            responses,
+        ):
+            if check_api_key_is_expired(response):
+                expired_clients.append(client)
+
+        return expired_clients
+
+    async def purge_expired_clients(self):
+        """Removes all clients with expired API keys from the list of clients."""
+        expired_clients = await self.get_expired_clients()
+
+        for client in expired_clients:
+            self.delete_client(client)

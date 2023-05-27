@@ -5,30 +5,11 @@ efficient client that can fetch as much data as it can, as fast as
 possible.
 """
 
-from .api import (
-    BadRequestError,
-    PayloadTooLargeError,
-    SuccessResponse,
-)
-from .client import (
-    APIKeyExpiredResponse,
-    ExceededTimeoutRetriesError,
-    OutOfAPIKeysError,
-    ScopusClient,
-    TimeoutResponse,
-)
-from .multi_client import MultiClientScopusSearchAbstractClass, create_clients_list
+from .client import OutOfAPIKeysError, ScopusClient, SuccessResponse
 
 
-__all__ = (
-    "APIKeyExpiredResponse",
-    "BadRequestError",
-    "ExceededTimeoutRetriesError",
-    "OutOfAPIKeysError",
-    "PayloadTooLargeError",
+__all__ = [
     "ScopusClient",
+    "OutOfAPIKeysError",
     "SuccessResponse",
-    "TimeoutResponse",
-    "MultiClientScopusSearchAbstractClass",
-    "create_clients_list",
-)
+]
