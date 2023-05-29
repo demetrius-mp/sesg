@@ -43,34 +43,6 @@ def edges_to_adjacency_list(
     return dict(adjacency_list)
 
 
-def directed_adjacency_list_to_undirected(
-    adjacency_list: dict[int, list[int]],
-) -> dict[int, list[int]]:
-    """Converts a directed adjacency list to an undirected adjacency list.
-
-    Args:
-        adjacency_list (dict[int, list[int]]): A dict mapping node IDs to their list of neighbors.
-
-    Returns:
-        A mapping of node IDs to their list of neighbors in an undirected graph.
-
-    Examples:
-        >>> directed_adjacency_list_to_undirected({1: [2, 3], 2: [3, 4], 3: [4]})
-        {1: [2, 3], 2: [1, 3, 4], 3: [1, 2, 4], 4: [2, 3]}
-
-        >>> directed_adjacency_list_to_undirected({2: [1], 3: [1, 2], 4: [2, 3]})
-        {2: [1, 3, 4], 1: [2, 3], 3: [1, 2, 4], 4: [2, 3]}
-    """  # noqa: E501
-    undirected_adjacency_list: dict[int, list[int]] = defaultdict(list)
-
-    for node, neighbors in adjacency_list.items():
-        for neighbor in neighbors:
-            undirected_adjacency_list[node].append(neighbor)
-            undirected_adjacency_list[neighbor].append(node)
-
-    return dict(undirected_adjacency_list)
-
-
 def _breadth_first_search(
     *,
     adjacency_list: dict[int, list[int]],
