@@ -61,7 +61,7 @@ import aiometer
 import httpx
 from typing_extensions import TypedDict
 
-from .mutable_cycle import MutableCycle
+from ._mutable_cycle import MutableCycle
 
 
 SCOPUS_API_URL = "https://api.elsevier.com/content/search/scopus"
@@ -72,8 +72,8 @@ class SuccessResponse:
     """A successfull Scopus Response.
 
     Args:
-        number_of_results (int): Number of results for this query. Notice that even if it displays more than 5000 results, Scopus will limit to retrieve only 5000.
-        number_of_pages (int): Number of pages that needs to be fetched to get all results. Limited to 200 due to Scopus API 5000 entries limit.
+        n_results (int): Number of results for this query. Notice that even if it displays more than 5000 results, Scopus will limit to retrieve only 5000.
+        n_pages (int): Number of pages that needs to be fetched to get all results. Limited to 200 due to Scopus API 5000 entries limit.
         current_page (int): Current page being fetched. Starts at 1, being at most 200.
         entries (list[Entry]): Studies returned from the API.
     """  # noqa: E501
@@ -150,6 +150,22 @@ def check_api_key_is_expired(
         True if the API key is expired, False otherwise.
     """
     return response.status_code == 429
+
+
+def check_string_is_invalid(
+    response: httpx.Response,
+) -> bool:
+    """Checks if the given response indicates that the string is invalid.
+
+    A string is invalid if the response status code is 400 or 413.
+
+    Args:
+        response (httpx.Response): Response to check.
+
+    Returns:
+        True if the string is invalid, False otherwise.
+    """
+    return response.status_code in (400, 413)
 
 
 def create_clients_list(
@@ -290,10 +306,10 @@ class ScopusClient:
 
         response = await client.get("", params=params)  # type: ignore
 
-        if response.status_code in (400, 413):
+        if check_string_is_invalid(response):
             raise InvalidStringError()
 
-        if response.status_code == 429:
+        if check_api_key_is_expired(response):
             self.delete_client(client)
 
             return await self.fetch(params)
@@ -307,7 +323,6 @@ class ScopusClient:
         """Requests for the first page of a query using the given client.
 
         Args:
-            client (httpx.AsyncClient): Client with an API key.
             query (str): Query to request for the first page.
         """
         params: ScopusParams = {
@@ -317,14 +332,7 @@ class ScopusClient:
 
         res = await self.fetch_and_parse(params)
 
-        paginator = range(1 * 25, min(5000, res.n_results), 25)
-        params_list: list[ScopusParams] = [
-            {
-                "query": query,
-                "start": page,
-            }
-            for page in paginator
-        ]
+        params_list = create_params_pagination(query, res.n_results)
 
         return res, params_list
 
@@ -379,8 +387,8 @@ class ScopusClient:
     async def get_expired_clients(self) -> list[httpx.AsyncClient]:
         """Verifies which clients have expired API keys.
 
-        Yield:
-            Clients with expired API keys.
+        Returns:
+            List of clients with expired API keys.
         """
         params: ScopusParams = {
             "query": ScopusClient.DUMMY_QUERY,

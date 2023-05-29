@@ -29,10 +29,22 @@ def test_parse_response_should_return_response_with_2_pages():
     assert len(parsed.entries) == 25
 
 
-def test_check_api_key_is_expired_should_return_true_when_the_response_has_status_code_429():
+def test_check_api_key_is_expired_should_return_true_when_response_has_status_code_429():
     response = httpx.Response(429)
 
     assert client_module.check_api_key_is_expired(response) is True
+
+
+def test_check_string_is_invalid_should_return_true_when_response_has_status_code_400():
+    response = httpx.Response(400)
+
+    assert client_module.check_string_is_invalid(response) is True
+
+
+def test_check_string_is_invalid_should_return_true_when_response_has_status_code_413():
+    response = httpx.Response(413)
+
+    assert client_module.check_string_is_invalid(response) is True
 
 
 def test_create_clients_list_should_create_4_clients():
