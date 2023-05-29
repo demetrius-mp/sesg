@@ -3,7 +3,7 @@
 It is highly recommended to use [`trio`](https://trio.readthedocs.io/) to manage the async functions
 as it is much faster.
 
-## Usage example
+# Usage example
 
 ```python
 import trio
@@ -72,7 +72,7 @@ MAX_REQUESTS_PER_SECOND_PER_API_KEY = 8
 
 
 @dataclass(frozen=True)
-class SuccessResponse:
+class Page:
     """A successfull Scopus Response.
 
     Args:
@@ -103,9 +103,9 @@ class SuccessResponse:
     entries: list[Entry]
 
 
-def parse_response(
+def _parse_response(
     response: httpx.Response,
-) -> SuccessResponse:
+) -> Page:
     """Parses a Scopus API response.
 
     Args:
@@ -122,7 +122,7 @@ def parse_response(
     number_of_pages = min(math.ceil(number_of_results / 25), 200)
 
     entries = [
-        SuccessResponse.Entry(
+        Page.Entry(
             title=entry["dc:title"],
             scopus_id=entry["dc:identifier"],
             cited_by_count=entry.get("citedby-count", None),
@@ -132,7 +132,7 @@ def parse_response(
         if "dc:title" in entry
     ]
 
-    return SuccessResponse(
+    return Page(
         n_results=number_of_results,
         n_pages=number_of_pages,
         current_page=current_page,
@@ -140,7 +140,7 @@ def parse_response(
     )
 
 
-def check_api_key_is_expired(
+def _check_api_key_is_expired(
     response: httpx.Response,
 ) -> bool:
     """Checks if the given response indicates that the API key is expired.
@@ -156,7 +156,7 @@ def check_api_key_is_expired(
     return response.status_code == 429
 
 
-def check_string_is_invalid(
+def _check_string_is_invalid(
     response: httpx.Response,
 ) -> bool:
     """Checks if the given response indicates that the string is invalid.
@@ -172,7 +172,7 @@ def check_string_is_invalid(
     return response.status_code in (400, 413)
 
 
-def create_clients_list(
+def _create_clients_list(
     api_keys_list: list[str],
 ) -> list[httpx.AsyncClient]:
     """Creates a list of async httpx clients that can be used for Scopus queries.
@@ -195,7 +195,7 @@ def create_clients_list(
     ]
 
 
-class ScopusParams(TypedDict):
+class _ScopusParams(TypedDict):
     """Data container for the required Scopus Params.
 
     Attributes:
@@ -203,7 +203,7 @@ class ScopusParams(TypedDict):
         start (int): Paginator parameter.
 
     Examples:
-        >>> p: ScopusParams = {"query": "machine learning", "start": 0}
+        >>> p: _ScopusParams = {"query": "machine learning", "start": 0}
         >>> p["query"] == "machine learning"
         True
         >>> p["start"] == 0
@@ -214,10 +214,10 @@ class ScopusParams(TypedDict):
     start: int
 
 
-def create_params_pagination(
+def _create_params_pagination(
     query: str,
     n_results: int,
-) -> list[ScopusParams]:
+) -> list[_ScopusParams]:
     """Creates a list of ScopusParams for pagination.
 
     Args:
@@ -230,7 +230,7 @@ def create_params_pagination(
     limited_results = min(5000, n_results)
 
     paginator = range(1 * 25, limited_results, 25)
-    params_list: list[ScopusParams] = [
+    params_list: list[_ScopusParams] = [
         {
             "query": query,
             "start": page,
@@ -270,9 +270,9 @@ class ScopusClient:
         Args:
             api_keys_list (list[str]): List with API keys.
         """  # noqa: E501
-        self.clients_list = MutableCycle(create_clients_list(api_keys_list))
+        self.clients_list = MutableCycle(_create_clients_list(api_keys_list))
 
-    def delete_client(
+    def _delete_client(
         self,
         client: httpx.AsyncClient,
     ) -> None:
@@ -285,9 +285,9 @@ class ScopusClient:
         """
         self.clients_list.delete_item(client)
 
-    async def fetch(
+    async def _fetch(
         self,
-        params: ScopusParams,
+        params: _ScopusParams,
     ) -> httpx.Response:
         """Sends a request with the given params, if a client is available and returns the response.
 
@@ -310,20 +310,20 @@ class ScopusClient:
 
         response = await client.get("", params=params)  # type: ignore
 
-        if check_string_is_invalid(response):
+        if _check_string_is_invalid(response):
             raise InvalidStringError()
 
-        if check_api_key_is_expired(response):
-            self.delete_client(client)
+        if _check_api_key_is_expired(response):
+            self._delete_client(client)
 
-            return await self.fetch(params)
+            return await self._fetch(params)
 
         return response
 
-    async def fetch_first_page(
+    async def _fetch_first_page(
         self,
         query: str,
-    ) -> tuple[SuccessResponse, list[ScopusParams]]:
+    ) -> tuple[Page, list[_ScopusParams]]:
         """Requests for the first page of a query.
 
         Args:
@@ -332,21 +332,21 @@ class ScopusClient:
         Returns:
             A tuple with the parsed response and a list of ScopusParams for pagination.
         """
-        params: ScopusParams = {
+        params: _ScopusParams = {
             "query": query,
             "start": 0,
         }
 
-        res = await self.fetch_and_parse(params)
+        res = await self._fetch_and_parse(params)
 
-        params_list = create_params_pagination(query, res.n_results)
+        params_list = _create_params_pagination(query, res.n_results)
 
         return res, params_list
 
-    async def fetch_and_parse(
+    async def _fetch_and_parse(
         self,
-        params: ScopusParams,
-    ) -> SuccessResponse:
+        params: _ScopusParams,
+    ) -> Page:
         """Makes a request using the given parameters, and parses the response.
 
         Args:
@@ -360,15 +360,15 @@ class ScopusClient:
         """  # noqa: E501
         # params, client = args
 
-        response = await self.fetch(params)
+        response = await self._fetch(params)
 
-        return parse_response(response)
+        return _parse_response(response)
 
     async def search(
         self,
         query: str,
         max_concurrent_tasks: int | None = None,
-    ) -> AsyncIterable[SuccessResponse]:
+    ) -> AsyncIterable[Page]:
         """Performs concurrent requests to all of the pages of the given query.
 
         Args:
@@ -378,7 +378,7 @@ class ScopusClient:
         Yields:
             A SuccessResponse instance.
         """  # noqa: E501
-        first_page, params_list = await self.fetch_first_page(query)
+        first_page, params_list = await self._fetch_first_page(query)
 
         yield first_page
 
@@ -386,7 +386,7 @@ class ScopusClient:
             max_concurrent_tasks = len(params_list)
 
         async with aiometer.amap(
-            self.fetch_and_parse,
+            self._fetch_and_parse,
             params_list,
             max_at_once=max_concurrent_tasks,
             max_per_second=len(self.clients_list) * MAX_REQUESTS_PER_SECOND_PER_API_KEY,
@@ -394,13 +394,13 @@ class ScopusClient:
             async for page in next_pages:
                 yield page
 
-    async def get_expired_clients(self) -> list[httpx.AsyncClient]:
+    async def _get_expired_clients(self) -> list[httpx.AsyncClient]:
         """Verifies which clients have expired API keys.
 
         Returns:
             List of clients with expired API keys.
         """
-        params: ScopusParams = {
+        params: _ScopusParams = {
             "query": ScopusClient.DUMMY_QUERY,
             "start": 0,
         }
@@ -426,14 +426,14 @@ class ScopusClient:
             self.clients_list.items,
             responses,
         ):
-            if check_api_key_is_expired(response):
+            if _check_api_key_is_expired(response):
                 expired_clients.append(client)
 
         return expired_clients
 
     async def purge_expired_clients(self):
         """Removes all clients with expired API keys from the list of clients."""
-        expired_clients = await self.get_expired_clients()
+        expired_clients = await self._get_expired_clients()
 
         for client in expired_clients:
-            self.delete_client(client)
+            self._delete_client(client)

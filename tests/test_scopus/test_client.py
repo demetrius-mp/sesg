@@ -22,7 +22,7 @@ def test_parse_response_should_return_response_with_2_pages():
         },
     )
 
-    parsed = client_module.parse_response(response)
+    parsed = client_module._parse_response(response)
 
     assert parsed.n_results == 27
     assert parsed.n_pages == 2
@@ -32,25 +32,25 @@ def test_parse_response_should_return_response_with_2_pages():
 def test_check_api_key_is_expired_should_return_true_when_response_has_status_code_429():
     response = httpx.Response(429)
 
-    assert client_module.check_api_key_is_expired(response) is True
+    assert client_module._check_api_key_is_expired(response) is True
 
 
 def test_check_string_is_invalid_should_return_true_when_response_has_status_code_400():
     response = httpx.Response(400)
 
-    assert client_module.check_string_is_invalid(response) is True
+    assert client_module._check_string_is_invalid(response) is True
 
 
 def test_check_string_is_invalid_should_return_true_when_response_has_status_code_413():
     response = httpx.Response(413)
 
-    assert client_module.check_string_is_invalid(response) is True
+    assert client_module._check_string_is_invalid(response) is True
 
 
 def test_create_clients_list_should_create_4_clients():
     api_keys_list = ["k1", "k2", "k3", "k4"]
 
-    clients_list = client_module.create_clients_list(api_keys_list)
+    clients_list = client_module._create_clients_list(api_keys_list)
 
     assert len(clients_list) == 4
 
@@ -58,7 +58,7 @@ def test_create_clients_list_should_create_4_clients():
 def test_create_clients_list_should_return_list_of_httpx_async_clients():
     api_keys_list = ["k1", "k2", "k3", "k4"]
 
-    clients_list = client_module.create_clients_list(api_keys_list)
+    clients_list = client_module._create_clients_list(api_keys_list)
 
     assert all(isinstance(client, httpx.AsyncClient) for client in clients_list)
 
@@ -66,14 +66,14 @@ def test_create_clients_list_should_return_list_of_httpx_async_clients():
 def test_create_clients_list_should_assign_api_keys_to_clients():
     api_keys_list = ["k1", "k2", "k3", "k4"]
 
-    clients_list = client_module.create_clients_list(api_keys_list)
+    clients_list = client_module._create_clients_list(api_keys_list)
 
     for client, key in zip(clients_list, api_keys_list):
         assert client.params.get("apiKey") == key
 
 
 def test_create_params_pagination_should_create_2_params():
-    params = client_module.create_params_pagination(
+    params = client_module._create_params_pagination(
         query="",
         n_results=54,
     )
@@ -84,7 +84,7 @@ def test_create_params_pagination_should_create_2_params():
 def test_create_params_pagination_should_create_all_params_with_same_query():
     query = "code smell"
 
-    params = client_module.create_params_pagination(
+    params = client_module._create_params_pagination(
         query=query,
         n_results=54,
     )
@@ -93,7 +93,7 @@ def test_create_params_pagination_should_create_all_params_with_same_query():
 
 
 def test_create_params_pagination_should_return_first_param_with_start_value_25():
-    params = client_module.create_params_pagination(
+    params = client_module._create_params_pagination(
         query="",
         n_results=54,
     )
@@ -102,7 +102,7 @@ def test_create_params_pagination_should_return_first_param_with_start_value_25(
 
 
 def test_create_params_pagination_should_increment_start_value_by_25():
-    params = client_module.create_params_pagination(
+    params = client_module._create_params_pagination(
         query="",
         n_results=54,
     )
@@ -112,7 +112,7 @@ def test_create_params_pagination_should_increment_start_value_by_25():
 
 
 def test_create_params_pagination_should_limit_to_199_pages():
-    params = client_module.create_params_pagination(
+    params = client_module._create_params_pagination(
         query="",
         n_results=10000,
     )
@@ -137,7 +137,7 @@ def test_scopus_client_delete_client_should_remove_client_from_clients_list():
 
     first_client = next(scopus_client.clients_list)
 
-    scopus_client.delete_client(first_client)
+    scopus_client._delete_client(first_client)
 
     assert all(client != first_client for client in scopus_client.clients_list.items)
 
@@ -239,14 +239,14 @@ async def test_scopus_search_fetch_should_return_parseable_response(
 
     client = client_module.ScopusClient(["k1", "k2"])
 
-    response = await client.fetch(
+    response = await client._fetch(
         {
             "query": "code",
             "start": 0,
         }
     )
 
-    parsed = client_module.parse_response(response)
+    parsed = client_module._parse_response(response)
 
     assert parsed.n_pages == 1
 
@@ -273,7 +273,7 @@ async def test_scopus_search_search_should_yield_2_pages(
 
     client = client_module.ScopusClient(["k1", "k2"])
 
-    pages_list: list[client_module.SuccessResponse] = []
+    pages_list: list[client_module.Page] = []
     async for page in client.search("code"):
         pages_list.append(page)
 
@@ -345,7 +345,7 @@ async def test_scopus_search_search_should_yield_3_pages_even_if_one_key_expired
 
     client = client_module.ScopusClient(["k1", "k2"])
 
-    pages_list: list[client_module.SuccessResponse] = []
+    pages_list: list[client_module.Page] = []
     seen_pages = [False] * 3
 
     async for page in client.search("code"):
@@ -379,7 +379,7 @@ async def test_scopus_search_get_expired_clients_should_return_2_clients(
 
     client = client_module.ScopusClient(["k1", "k2", "k3"])
 
-    expired_clients = await client.get_expired_clients()
+    expired_clients = await client._get_expired_clients()
     for client in expired_clients:
         assert client.params.get("apiKey") != "k2"
 
