@@ -3,14 +3,14 @@ from sesg import graph
 
 def test_edges_to_adjacency_list_should_return_empty_dict_when_edges_list_is_empty():
     result = graph.edges_to_adjacency_list([])
-    expected = dict()
+    expected = {}
 
     assert result == expected
 
 
 def test_breadth_first_search_should_return_list_with_only_starting_node_when_adjacency_list_is_an_empty_dict():
     result = graph._breadth_first_search(
-        adjacency_list=dict(),
+        adjacency_list={},
         starting_node=1,
     )
     expected = [1]
