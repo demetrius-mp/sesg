@@ -66,6 +66,10 @@ from ._mutable_cycle import MutableCycle
 
 SCOPUS_API_URL = "https://api.elsevier.com/content/search/scopus"
 
+# it is actually 9 (https://dev.elsevier.com/api_key_settings.html)
+# but we are using 8 to be safe
+MAX_REQUESTS_PER_SECOND_PER_API_KEY = 8
+
 
 @dataclass(frozen=True)
 class SuccessResponse:
@@ -320,7 +324,7 @@ class ScopusClient:
         self,
         query: str,
     ) -> tuple[SuccessResponse, list[ScopusParams]]:
-        """Requests for the first page of a query using the given client.
+        """Requests for the first page of a query.
 
         Args:
             query (str): Query to request for the first page.
@@ -363,24 +367,29 @@ class ScopusClient:
     async def search(
         self,
         query: str,
+        max_concurrent_tasks: int | None = None,
     ) -> AsyncIterable[SuccessResponse]:
         """Performs concurrent requests to all of the pages of the given query.
 
         Args:
             query (str): The query to search for.
+            max_concurrent_tasks (Optional[int]): The maximum number of concurrently running tasks. If None, will set to the number of pages of the query.
 
         Yields:
             A SuccessResponse instance.
-        """
+        """  # noqa: E501
         first_page, params_list = await self.fetch_first_page(query)
 
         yield first_page
 
+        if max_concurrent_tasks is None:
+            max_concurrent_tasks = len(params_list)
+
         async with aiometer.amap(
             self.fetch_and_parse,
             params_list,
-            max_at_once=len(self.clients_list) * 12,
-            max_per_second=len(self.clients_list) * 8,
+            max_at_once=max_concurrent_tasks,
+            max_per_second=len(self.clients_list) * MAX_REQUESTS_PER_SECOND_PER_API_KEY,
         ) as next_pages:
             async for page in next_pages:
                 yield page
