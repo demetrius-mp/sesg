@@ -287,13 +287,13 @@ class ScopusClient:
     ) -> httpx.Response:
         """Sends a request with the given params, if a client is available and returns the response.
 
-        Will recursively retry if the response's status code is 429.
+        Will recursively retry with another API key if the response's status code is 429.
 
         Args:
             params (ScopusParams): Dictionary with the fetch parameters.
 
         Raises:
-            OutOfAPIKeys: If all API keys are expired.
+            OutOfAPIKeysError: If all API keys are expired.
             InvalidStringError: If the string is too long, meaning the response's status code is either 413, 429.
 
         Returns:
@@ -319,11 +319,14 @@ class ScopusClient:
     async def fetch_first_page(
         self,
         query: str,
-    ):
+    ) -> tuple[SuccessResponse, list[ScopusParams]]:
         """Requests for the first page of a query using the given client.
 
         Args:
             query (str): Query to request for the first page.
+
+        Returns:
+            A tuple with the parsed response and a list of ScopusParams for pagination.
         """
         params: ScopusParams = {
             "query": query,
@@ -369,9 +372,7 @@ class ScopusClient:
         Yields:
             A SuccessResponse instance.
         """
-        first_page, params_list = await self.fetch_first_page(
-            query,
-        )
+        first_page, params_list = await self.fetch_first_page(query)
 
         yield first_page
 
