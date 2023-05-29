@@ -6,8 +6,8 @@ from sesg.search_string.similar_words import (
     _check_stemmed_similar_word_is_valid,
     _check_strings_are_close,
     _check_strings_are_distant,
-    get_bert_similar_words,
-    get_relevant_similar_words,
+    _get_bert_similar_words,
+    _get_relevant_similar_words,
 )
 
 from .test_fixtures import similar_words_finder
@@ -19,7 +19,7 @@ def bert_similar_words(
 ):
     word = "software"
 
-    result = get_bert_similar_words(
+    result = _get_bert_similar_words(
         "software",
         enrichment_text=similar_words_finder.enrichment_text,
         bert_model=similar_words_finder.bert_model,
@@ -123,7 +123,7 @@ def test_get_bert_similar_words(
 def test_get_bert_similar_words_should_return_none_when_word_has_space(
     similar_words_finder: SimilarWordsFinder,
 ):
-    result = get_bert_similar_words(
+    result = _get_bert_similar_words(
         "multi organizational",
         enrichment_text=similar_words_finder.enrichment_text,
         bert_model=similar_words_finder.bert_model,
@@ -136,7 +136,7 @@ def test_get_bert_similar_words_should_return_none_when_word_has_space(
 def test_get_bert_similar_words_should_return_none_when_word_is_not_in_enrichment_text(
     similar_words_finder: SimilarWordsFinder,
 ):
-    result = get_bert_similar_words(
+    result = _get_bert_similar_words(
         "biology",
         enrichment_text=similar_words_finder.enrichment_text,
         bert_model=similar_words_finder.bert_model,
@@ -151,7 +151,7 @@ def test_get_relevant_similar_words(
 ):
     word, bert_similar_words_list = bert_similar_words
 
-    result = get_relevant_similar_words(
+    result = _get_relevant_similar_words(
         word,
         bert_similar_words_list=bert_similar_words_list,
     )
@@ -173,7 +173,7 @@ def test_get_relevant_similar_words_should_not_return_bert_oov_words(
 ):
     word, bert_similar_words_list = bert_similar_words
 
-    result = get_relevant_similar_words(
+    result = _get_relevant_similar_words(
         word,
         bert_similar_words_list=bert_similar_words_list,
     )

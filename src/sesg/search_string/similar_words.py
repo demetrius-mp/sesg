@@ -235,7 +235,7 @@ def _check_similar_word_is_relevant(
     return True
 
 
-def get_bert_similar_words(
+def _get_bert_similar_words(
     word: str,
     *,
     enrichment_text: str,
@@ -335,7 +335,7 @@ def get_bert_similar_words(
     return predicted_tokens
 
 
-def get_relevant_similar_words(
+def _get_relevant_similar_words(
     word: str,
     *,
     bert_similar_words_list: list[str],
@@ -429,9 +429,20 @@ class SimilarWordsFinderCacheProtocol(Protocol):
 
 @dataclass
 class SimilarWordsFinder:
-    """Composes [get_bert_similar_words][sesg.search_string.similar_words.get_bert_similar_words] and [get_relevant_similar_words][sesg.search_string.similar_words.get_relevant_similar_words].
+    """Composes the steps to find the similar words of a given word.
+
+    The steps are:
+
+    1. extract the similar words from the enrichment text
+    2. filter out the similar words that are not relevant
 
     Returns a callable that will check the cache before computing the similar words.
+
+    Args:
+        enrichment_text (str): Text from which the similar words will be extracted.
+        bert_tokenizer (Any): BERT tokenizer.
+        bert_model (Any): BERT model.
+        cache (Optional[SimilarWordsFinderCacheProtocol]): Cache to avoid computing the similar words twice. Defaults to None.
     """  # noqa: E501
 
     enrichment_text: str
@@ -456,7 +467,7 @@ class SimilarWordsFinder:
 
         similar_words_list = [word]
 
-        bert_similar_words = get_bert_similar_words(
+        bert_similar_words = _get_bert_similar_words(
             word,
             enrichment_text=self.enrichment_text,
             bert_model=self.bert_model,
@@ -464,7 +475,7 @@ class SimilarWordsFinder:
         )
 
         if bert_similar_words is not None:
-            relevant_similar_words = get_relevant_similar_words(
+            relevant_similar_words = _get_relevant_similar_words(
                 word,
                 bert_similar_words_list=bert_similar_words,
             )
