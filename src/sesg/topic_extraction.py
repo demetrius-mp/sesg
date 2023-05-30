@@ -203,7 +203,7 @@ def extract_topics_with_bertopic(
 
     Args:
         docs (list[str]): List of documents.
-        kmeans_n_clusters (int): The number of clusters to form as well as the number of centroids to generate.
+        kmeans_n_clusters (int): The number of clusters to form as well as the number of centroids to generate. This is equivalent to setting the number of topics.
         umap_n_neighbors (int): Number of neighboring sample points used when making the manifold approximation. Increasing this value typically results in a more global view of the embedding structure whilst smaller values result in a more local view. Increasing this value often results in larger clusters being created.
 
     Returns:
