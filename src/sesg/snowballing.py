@@ -235,7 +235,7 @@ def fuzzy_backward_snowballing(
         studies (list[SnowballingStudy]): List of studies with id, title, and text content.
 
     Yields:
-        Iterator of tuples, where the tuple holds a study, and the studies that are referenced.
+        A tuple holding a study, and it's references.
 
     Examples:
         >>> studies: list[SnowballingStudy] = [
@@ -261,17 +261,12 @@ def fuzzy_backward_snowballing(
                 for reference_index, reference in enumerate(studies)
             ]
 
-            # if `result[j]` is True then the current study cites title `j`
-            result: list[bool] = p.map(
+            # if `is_cited_list[j]` is True then the current study cites title `j`
+            is_cited_list: list[bool] = p.map(
                 _pooled_study_cites_title,
                 func_args,
             )
 
-        references: list[SnowballingStudy] = []
-
-        for result_index, is_cited in enumerate(result):
-            if is_cited:
-                referenced_study = studies[result_index]
-                references.append(referenced_study)
+        references = [ref for ref, is_cited in zip(studies, is_cited_list) if is_cited]
 
         yield study, references
