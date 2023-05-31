@@ -357,6 +357,37 @@ async def test_scopus_search_search_should_yield_3_pages_even_if_one_key_expired
 
 
 @pytest.mark.asyncio
+async def test_scopus_search_search_should_return_one_page_when_scopus_finds_only_one_page(
+    httpx_mock: HTTPXMock,
+):
+    httpx_mock.add_response(
+        200,
+        url="https://api.elsevier.com/content/search/scopus/?apiKey=k1&query=code&start=0",
+        json={
+            "search-results": {
+                "opensearch:totalResults": 13,
+                "opensearch:startIndex": 0,
+                "entry": [
+                    {
+                        "dc:title": "third page",
+                        "dc:identifier": "third page",
+                    },
+                ]
+                * 13,
+            }
+        },
+    )
+
+    client = client_module.ScopusClient(["k1", "k2"])
+    pages_list: list[client_module.Page] = []
+
+    async for page in client.search("code"):
+        pages_list.append(page)
+
+    assert len(pages_list) == 1
+
+
+@pytest.mark.asyncio
 async def test_scopus_search_get_expired_clients_should_return_2_clients(
     httpx_mock: HTTPXMock,
 ):
