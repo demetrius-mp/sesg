@@ -383,7 +383,7 @@ class ScopusClient:
         yield first_page
 
         if max_concurrent_tasks is None:
-            max_concurrent_tasks = len(params_list)
+            max_concurrent_tasks = max(len(params_list), 1)
 
         async with aiometer.amap(
             self._fetch_and_parse,
