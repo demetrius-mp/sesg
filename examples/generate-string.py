@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from random import sample
 
 from sesg.search_string import (
     SimilarWordsFinder,
@@ -17,7 +18,8 @@ class Study:
     keywords: str
 
 
-studies: list[Study] = []
+GS: list[Study] = []
+QGS: list[Study] = sample(GS, len(GS) // 3)
 
 
 def main():
@@ -28,7 +30,7 @@ def main():
                 "abstract": s.abstract,
                 "keywords": s.keywords,
             }
-            for s in studies
+            for s in QGS
         ]
     )
 
@@ -38,7 +40,7 @@ def main():
                 "title": s.title,
                 "abstract": s.abstract,
             }
-            for s in studies
+            for s in QGS
         ]
     )
 
