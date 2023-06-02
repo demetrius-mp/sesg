@@ -1,55 +1,7 @@
 """This module provides a Scopus client that efficiently uses your API keys.
 
-It is highly recommended to use [`trio`](https://trio.readthedocs.io/) to manage the async functions
-as it is much faster.
-
-# Usage example
-
-```python
-import trio
-from rich.progress import BarColumn, Progress, TaskProgressColumn, TextColumn
-
-KEYS: list[str] = [...]  # list of API keys
-
-async def main():
-    client = ScopusClient(KEYS)
-
-    with Progress(
-        TextColumn(
-            "[progress.description]{task.description}: {task.completed} of {task.total}"
-        ),
-        BarColumn(),
-        TaskProgressColumn(),
-    ) as progress:
-        for string in ["code smell", "machine learning", "covid"]:
-            task = progress.add_task(
-                "Searching",
-            )
-
-            results: list[SuccessResponse.Entry] = []
-
-            try:
-                async for page in client.search(string):
-                    progress.update(
-                        task,
-                        advance=1,
-                        total=page.n_pages,
-                        refresh=True,
-                    )
-
-                    results.extend(page.entries)
-
-            except InvalidStringError:
-                print("The following string raised an InvalidStringError")
-                print(string)
-
-            progress.remove_task(task)
-            # save to database or whatever
-
-
-
-trio.run(main)
-```
+It is highly recommended to use [`trio`](https://trio.readthedocs.io/) to run async functions
+as it was much faster on our tests.
 """  # noqa: E501
 
 import math
