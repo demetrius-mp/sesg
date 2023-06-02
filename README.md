@@ -11,7 +11,7 @@
 [![Docstring Style](https://img.shields.io/badge/%20style-google-3666d6.svg)](https://google.github.io/styleguide/pyguide.html#s3.8-comments-and-docstrings)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
-SeSG is a tool developed to help Systematic Literature Review researchers, specifically at the step of building a search string. This is a continuation of [Leo Fuchs'](https://github.com/LeoFuchs/SeSG) work.
+SeSG is a tool developed to help Systematic Literature Review researchers, specifically at the step of building a search string.
 
 ## Installation
 
@@ -23,7 +23,7 @@ poetry add sesg
 
 ## Usage
 
-> For a more extensive usage example, please refer to [this repo](https://github.com/demetrius-mp/sesg-cli).
+> For a more extensive example, please refer to [this repository](https://github.com/demetrius-mp/sesg-cli).
 
 ### Generating a search string
 
@@ -140,3 +140,27 @@ async def main():
 if __name__ == "__main__":
     trio.run(main)
 ```
+
+## Credits
+
+This project is a continuation of [Leo Fuchs'](https://github.com/LeoFuchs/SeSG) work. Most of my work in this project consisted in refactoring the codebase, adding tests, improving the documentation and optimizing the performance, along with the addition of some new features.
+
+## Highlights
+
+Below you can find the major improvements over the original project:
+
+- Added [**BERTopic**](https://github.com/MaartenGr/BERTopic) as a topic extraction strategy.
+- Improved **snowballing** performance by 100x~120x (thanks to [rapidfuzz](https://github.com/maxbachmann/RapidFuzz) and [multiprocessing](https://docs.python.org/3.10/library/multiprocessing.html)).
+- Improved **scopus search** performance by 30x~40x (thanks to [httpx](https://github.com/encode/httpx/) and [Eduardo Mendes'](https://github.com/dunossauro) help).
+- Improved **search string generation** performance by ~1.5x (thanks to a caching system).
+- Improved **code quality** by adopting the use of [lint](https://github.com/charliermarsh/ruff) and [formatting](https://github.com/psf/black) tools. Also, added [type hints](https://docs.python.org/3/library/typing.html) to try to catch errors before runtime.
+- Added **tests** to prevent bugs when refactoring or adding new features.
+- Added [**docs**](https://sesg.readthedocs.io/en/latest/) to help users and contributors.
+
+## Contributing
+
+You can contribute in many ways, such as [creating issues](https://github.com/demetrius-mp/sesg/issues) and [submitting pull requests](https://github.com/demetrius-mp/sesg/pulls). If you wish to contribute with code, please read the [contributor guide](https://sesg.readthedocs.io/en/latest/contributor-guide/).
+
+## License
+
+This project is licensed under the terms of the [GPL-3.0-only license](https://spdx.org/licenses/GPL-3.0-only.html).
