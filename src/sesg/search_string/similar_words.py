@@ -10,9 +10,9 @@ This module provides a way of generating similar words, and filtering them to re
 
 from dataclasses import dataclass
 from string import punctuation
-from typing import Iterator, Optional, Protocol
+from typing import Any, Iterator, Optional, Protocol
 
-from nltk.stem import LancasterStemmer
+from nltk.stem import LancasterStemmer  # type: ignore
 from rapidfuzz.distance import Levenshtein
 
 
@@ -446,8 +446,8 @@ class SimilarWordsFinder:
     """  # noqa: E501
 
     enrichment_text: str
-    bert_tokenizer: ...
-    bert_model: ...
+    bert_tokenizer: Any
+    bert_model: Any
     cache: Optional[SimilarWordsFinderCacheProtocol] = None
 
     def __call__(

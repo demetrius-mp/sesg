@@ -8,9 +8,9 @@ and [BERTopic](https://arxiv.org/abs/2203.05794).
 """  # noqa: E501
 
 from enum import Enum
-from typing import Any, TypedDict
+from typing import TypedDict
 
-from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import CountVectorizer  # type: ignore
 
 
 class TopicExtractionStrategy(str, Enum):
@@ -130,11 +130,7 @@ def extract_topics_with_lda(
         ... )
         [["word1 topic1", "word2 topic1"], ["word1 topic2", "word2 topic2"]]
     """  # noqa: E501
-    from sklearn.decomposition import LatentDirichletAllocation
-
-    # without this "Any typings", pylance takes too long to analyze the sklearn files
-    # remove this line once sklearn has developed stubs for the package
-    LatentDirichletAllocation: Any
+    from sklearn.decomposition import LatentDirichletAllocation  # type: ignore
 
     vectorizer = CountVectorizer(
         min_df=min_document_frequency,
@@ -215,9 +211,9 @@ def extract_topics_with_bertopic(
         ... )
         [["word1 topic1", "word2 topic1"], ["word1 topic2", "word2 topic2"]]
     """  # noqa: E501
-    from bertopic import BERTopic
-    from sklearn.cluster import KMeans
-    from umap import UMAP
+    from bertopic import BERTopic  # type: ignore
+    from sklearn.cluster import KMeans  # type: ignore
+    from umap import UMAP  # type: ignore
 
     vectorizer_model = CountVectorizer(
         stop_words="english",

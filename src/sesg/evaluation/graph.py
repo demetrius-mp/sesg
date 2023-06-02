@@ -7,7 +7,7 @@ we will perform operations on a correlation (or citation) graph.
 from collections import defaultdict, deque
 from typing import Optional
 
-from graphviz import Digraph
+from graphviz import Digraph  # type: ignore
 
 
 def directed_adjacency_list_to_undirected(

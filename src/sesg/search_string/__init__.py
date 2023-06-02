@@ -38,16 +38,13 @@ def set_pub_year_boundaries(
         >>> set_pub_year_boundaries(string='title("machine" and "learning")', max_year=2018)
         'title("machine" and "learning") AND PUBYEAR < 2018'
     """  # noqa: E501
-    has_min_year = min_year is not None
-    has_max_year = max_year is not None
-
-    if has_min_year and has_max_year and min_year >= max_year:
+    if min_year is not None and max_year is not None and min_year >= max_year:
         raise InvalidPubyearBoundariesError("Max year must be greater than min year")
 
-    if has_min_year:
+    if min_year is not None:
         string += f" AND PUBYEAR > {min_year}"
 
-    if has_max_year:
+    if max_year is not None:
         string += f" AND PUBYEAR < {max_year}"
 
     return string
