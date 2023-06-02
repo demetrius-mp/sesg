@@ -257,8 +257,8 @@ def _generate_search_string_with_similar_words(
 
 
 def generate_search_string(
-    *,
     topics_list: list[list[str]],
+    *,
     n_words_per_topic: int,
     n_similar_words_per_word: int,
     similar_words_finder: SimilarWordsFinder,
