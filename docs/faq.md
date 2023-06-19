@@ -1,3 +1,8 @@
+---
+hide:
+  - navigation
+---
+
 # FAQ
 
 ## Why do I get too many duplicate search strings?

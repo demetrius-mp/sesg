@@ -1,3 +1,8 @@
+---
+hide:
+  - navigation
+---
+
 # Contributor guide
 
 In this section you will find information on how to contribute to this package.

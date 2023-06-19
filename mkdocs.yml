@@ -1,4 +1,6 @@
 site_name: SeSG
+site_description: SeSG is a tool developed to help Systematic Literature Review researchers, specifically at the step of building a search string.
+site_author: Demetrius M. Panovitch
 repo_url: https://github.com/demetrius-mp/sesg
 repo_name: demetrius-mp/sesg
 edit_uri: tree/main/docs
@@ -8,6 +10,10 @@ watch:
   - docs
 
 theme:
+  features:
+    - navigation.tabs
+    - navigation.expand
+    - navigation.top
   name: material
   palette:
     - scheme: default
@@ -40,6 +46,7 @@ extra_javascript:
 
 nav:
   - Home: index.md
+  - The algorithm: the-algorithm.md
   - FAQ: faq.md
   - Contributor Guide: contributor-guide.md
   - Code Reference: reference/

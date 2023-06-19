@@ -1,3 +1,8 @@
+---
+hide:
+  - navigation
+---
+
 # SeSG
 
 > SeSG (Search String Generator) documentation.

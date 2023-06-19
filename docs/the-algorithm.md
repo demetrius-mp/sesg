@@ -1,0 +1,6 @@
+---
+hide:
+  - navigation
+---
+
+# The algorithm
