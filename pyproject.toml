@@ -106,7 +106,7 @@ extend-select = [
   "C"
 ]
 unfixable = ["F841"]
-exclude = [".venv"]
+exclude = [".venv", "~/.pyenv/"]
 ignore-init-module-imports = true
 fix = true
 
