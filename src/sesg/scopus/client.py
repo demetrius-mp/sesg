@@ -209,7 +209,7 @@ class OutOfAPIKeysError(Exception):
     """All API keys available are expired."""
 
 
-def raise_too_many_json_decode_errors() -> NoReturn:
+def _raise_too_many_json_decode_errors() -> NoReturn:
     """Raises a TooManyJSONDecodeErrors exception."""
     raise TooManyJSONDecodeErrors()
 
@@ -311,7 +311,7 @@ class ScopusClient:
     @retry(
         stop=stop_after_attempt(MAX_ATTEMPTS_ON_JSON_DECODE_ERROR),
         retry=retry_if_exception_type(JSONDecodeError),
-        retry_error_callback=lambda _: raise_too_many_json_decode_errors(),
+        retry_error_callback=lambda _: _raise_too_many_json_decode_errors(),
     )
     async def _fetch_and_parse(
         self,
