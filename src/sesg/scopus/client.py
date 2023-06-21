@@ -7,10 +7,12 @@ as it was much faster on our tests.
 import math
 from dataclasses import dataclass
 from functools import partial
-from typing import Any, AsyncIterable
+from json.decoder import JSONDecodeError
+from typing import Any, AsyncIterable, NoReturn
 
 import aiometer
 import httpx
+from tenacity import retry, retry_if_exception_type, stop_after_attempt
 from typing_extensions import TypedDict
 
 from ._mutable_cycle import MutableCycle
@@ -21,6 +23,8 @@ SCOPUS_API_URL = "https://api.elsevier.com/content/search/scopus"
 # it is actually 9 (https://dev.elsevier.com/api_key_settings.html)
 # but we are using 8 to be safe
 MAX_REQUESTS_PER_SECOND_PER_API_KEY = 8
+
+MAX_ATTEMPTS_ON_JSON_DECODE_ERROR = 5
 
 
 @dataclass(frozen=True)
@@ -193,12 +197,21 @@ def _create_params_pagination(
     return params_list
 
 
+class TooManyJSONDecodeErrors(Exception):
+    """Reached the maximum number of attempts on JSONDecodeError."""
+
+
 class InvalidStringError(Exception):
     """The response has a status code of 413 or 400. The search string might be too long."""  # noqa: E501
 
 
 class OutOfAPIKeysError(Exception):
     """All API keys available are expired."""
+
+
+def raise_too_many_json_decode_errors() -> NoReturn:
+    """Raises a TooManyJSONDecodeErrors exception."""
+    raise TooManyJSONDecodeErrors()
 
 
 class ScopusClient:
@@ -295,6 +308,11 @@ class ScopusClient:
 
         return res, params_list
 
+    @retry(
+        stop=stop_after_attempt(MAX_ATTEMPTS_ON_JSON_DECODE_ERROR),
+        retry=retry_if_exception_type(JSONDecodeError),
+        retry_error_callback=lambda _: raise_too_many_json_decode_errors(),
+    )
     async def _fetch_and_parse(
         self,
         params: _ScopusParams,
