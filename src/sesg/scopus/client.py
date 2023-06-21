@@ -324,6 +324,8 @@ class ScopusClient:
 
         Raises:
             InvalidStringError: If the response has a status code of 400 or 413.
+            TooManyJSONDecodeErrors: If the maximum number of attempts on JSONDecodeError is reached.
+            OutOfAPIKeysError: If all API keys are expired.
 
         Returns:
             A parsed response, meaning [`Page`][sesg.scopus.client.Page] instance.
@@ -344,6 +346,11 @@ class ScopusClient:
         Args:
             query (str): The query to search for.
             max_concurrent_tasks (Optional[int]): The maximum number of concurrently running tasks. If None, will set to the number of pages of the query.
+
+        Raises:
+            InvalidStringError: If the response has a status code of 400 or 413.
+            TooManyJSONDecodeErrors: If the maximum number of attempts on JSONDecodeError is reached.
+            OutOfAPIKeysError: If all API keys are expired.
 
         Yields:
             A [`Page`][sesg.scopus.client.Page] instance.
