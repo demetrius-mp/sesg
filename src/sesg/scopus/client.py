@@ -68,7 +68,7 @@ def _parse_response(
         response (httpx.Response): A Scopus API response.
 
     Returns:
-        A SuccessResponse instance.
+        A [`Page`][sesg.scopus.client.Page] instance.
     """  # noqa: E501
     json = response.json()
 
@@ -326,7 +326,7 @@ class ScopusClient:
             InvalidStringError: If the response has a status code of 400 or 413.
 
         Returns:
-            A parsed response, meaning an instance of SuccessResponse.
+            A parsed response, meaning [`Page`][sesg.scopus.client.Page] instance.
         """  # noqa: E501
         # params, client = args
 
@@ -346,7 +346,7 @@ class ScopusClient:
             max_concurrent_tasks (Optional[int]): The maximum number of concurrently running tasks. If None, will set to the number of pages of the query.
 
         Yields:
-            A SuccessResponse instance.
+            A [`Page`][sesg.scopus.client.Page] instance.
         """  # noqa: E501
         first_page, params_list = await self._fetch_first_page(query)
 
