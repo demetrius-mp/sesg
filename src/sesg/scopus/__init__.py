@@ -5,7 +5,13 @@ efficient client that can fetch as much data as it can, as fast as
 possible.
 """
 
-from .client import InvalidStringError, OutOfAPIKeysError, Page, ScopusClient
+from .client import (
+    InvalidStringError,
+    OutOfAPIKeysError,
+    Page,
+    ScopusClient,
+    TooManyJSONDecodeErrors,
+)
 
 
 __all__ = [
@@ -13,4 +19,5 @@ __all__ = [
     "OutOfAPIKeysError",
     "Page",
     "InvalidStringError",
+    "TooManyJSONDecodeErrors",
 ]
