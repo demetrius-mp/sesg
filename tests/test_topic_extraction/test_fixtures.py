@@ -1,8 +1,7 @@
 import pytest
-from sesg.topic_extraction import extract_topics_with_bertopic, extract_topics_with_lda
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="package")
 def docs():
     docs = [
         'A business goal-based approach to achieving systems engineering capability maturity\nAny process improvement program should be driven by and related to some set of business or overarching organizational needs. By considering change drivers in concert with the organization strategic objectives and "pains" one can develop a vision of the desired state, what the organization should look like and how it should behave after the desired changes are achieved. An appropriate reference model is then chosen and used in an assessment to identify improvement opportunities. Based on the assessment findings an action plan is developed and implemented which addresses both specific process changes and organization cultural issues. Finally, an appropriate set of measures is defined and implemented to help measure the effects of the various changes.\nSystems engineering and theory, Costs, Capability maturity model, Pain, Personnel, Companies, Scheduling, Productivity, Time to market',
@@ -18,62 +17,3 @@ def docs():
     ]
 
     return docs
-
-
-@pytest.fixture(scope="module")
-def lda_topics_with_min_document_frequency_04(
-    docs: list[str],
-):
-    topics = extract_topics_with_lda(
-        docs,
-        min_document_frequency=0.4,
-        n_topics=2,
-    )
-
-    return topics
-
-
-@pytest.fixture(scope="module")
-def bertopic_topics_with_2_clusters(
-    docs: list[str],
-):
-    topics = extract_topics_with_bertopic(
-        docs,
-        umap_n_neighbors=3,
-        kmeans_n_clusters=2,
-    )
-
-    return topics
-
-
-def test_lda_topics_should_have_2_topics(
-    lda_topics_with_min_document_frequency_04: list[list[str]],
-):
-    assert len(lda_topics_with_min_document_frequency_04) == 2
-
-
-def test_each_lda_topic_should_have_at_least_10_entries(
-    lda_topics_with_min_document_frequency_04: list[list[str]],
-):
-    for topic in lda_topics_with_min_document_frequency_04:
-        assert len(topic) >= 10
-
-
-def test_each_lda_topic_should_have_at_least_10_entries_even_with_high_document_frequency(
-    lda_topics_with_min_document_frequency_04: list[list[str]],
-):
-    for topic in lda_topics_with_min_document_frequency_04:
-        assert len(topic) >= 10
-
-
-def test_bertopic_topics_should_have_2_topics(
-    bertopic_topics_with_2_clusters: list[list[str]],
-):
-    assert len(bertopic_topics_with_2_clusters) == 2
-
-
-def test_each_bertopic_topic_should_have_at_least_10_entries(
-    bertopic_topics_with_2_clusters: list[list[str]],
-):
-    for topic in bertopic_topics_with_2_clusters:
-        assert len(topic) >= 10
