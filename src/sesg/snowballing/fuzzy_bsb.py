@@ -1,10 +1,6 @@
-"""Snowballing module.
+"""Fuzzy backward snowballing module.
 
-This module is responsible to perform the snowballing method on a set of studies.
-In details, given a set of studies with titles, and text contents, for each study,
-we try to find out whether the study cited another given study or not.
-
-To achieve this goal, we use
+Performs backward snowballing using fuzzy matching with 
 [`rapidfuzz`](https://github.com/maxbachmann/RapidFuzz)
 to perform string similarity checks.
 """  # noqa: E501
@@ -19,7 +15,7 @@ from rapidfuzz import process
 T = TypeVar("T")
 
 
-def _window(
+def window(
     seq: Iterable[T],
     *,
     size: int,
@@ -35,7 +31,7 @@ def _window(
 
     Examples:
         >>> elements = [1, 2, 3, 4, 5, 6]
-        >>> for subslice in _window(elements, size=3):
+        >>> for subslice in window(elements, size=3):
         ...     print(subslice)
         (1, 2, 3)
         (2, 3, 4)
@@ -53,29 +49,29 @@ def _window(
         yield result
 
 
-def _study_cites_title(
+def check_title_is_in_text(
     *,
-    study: str,
     title: str,
+    text: str,
 ) -> bool:
-    """Uses `thefuzz.process.extractOne` to determine if a study cites a title.
+    """Uses `thefuzz.process.extractOne` to determine if a title is in a piece of text.
 
     Args:
-        study (str): Text of the study.
         title (str): Title to search for.
+        text (str): Text of the study.
 
     Returns:
-        True if the study cites the title, False otherwise.
+        True if the title is in the text, False otherwise.
 
     Examples:
-        >>> _study_cites_title(
-        ...     study="long text here very long REFERENCES: regression tests for machine learning models: a systematic literature review",
+        >>> check_title_is_in_text(
+        ...     text="long text here very long REFERENCES: regression tests for machine learning models: a systematic literature review",
         ...     title="regression tests for machine learning models: a systematic literature review",
         ... )
         True
     """  # noqa: E501
     window_size = len(title)
-    options = ["".join(x) for x in _window(study, size=window_size)]
+    options = ["".join(x) for x in window(text, size=window_size)]
 
     result = process.extractOne(title, options)
 
@@ -85,48 +81,48 @@ def _study_cites_title(
     return False
 
 
-class _PooledStudyCitesTitleArgs(TypedDict):
-    """Data container for the `_pooled_study_cites_title` function, with the goal of improving type safety.
+class PooledTitleIsInTextArgs(TypedDict):
+    """Data container for the arguments of the [`pooled_study_cites_title`][sesg.snowballing.fuzy_bsb.pooled_check_title_is_in_text] function.
 
     Args:
         title (str): Title to search for
-        study (str): Text of the study.
+        text (str): Text of the study.
         skip (bool): Indicates if should skip the execution and return False.
     """  # noqa: E501
 
     title: str
-    study: str
+    text: str
     skip: bool
 
 
-def _pooled_study_cites_title(
-    args: _PooledStudyCitesTitleArgs,
+def pooled_check_title_is_in_text(
+    args: PooledTitleIsInTextArgs,
 ) -> bool:
-    """Replicates `_study_cites_title` behaviour, with slight modifications to work well with `multiprocessing.Pool`.
+    """Replicates [`check_title_is_in_text`][sesg.snowballing.fuzy_bsb.check_title_is_in_text] behaviour, with slight modifications to work well with `multiprocessing.Pool`.
 
     Args:
-        args (_PooledStudyCitesTitleArgs): args of this function.
+        args (PooledTitleIsInTextArgs): args of this function.
 
     Returns:
-        False if skip is True, the result of `_study_cites_title(args["title"], args["study"])` otherwise.
+        False if skip is True, the result of `check_title_is_in_text(args["title"], args["study"])` otherwise.
 
     Examples:
-        >>> _pooled_study_cites_title(
-        ...     _PooledStudyCitesTitleArgs(
-        ...         title="regression tests for machine learning models: a systematic literature review",
-        ...         study="TITLE: regression tests for machine learning models: a systematic literature review. Abstract: abstract here",
-        ...         skip=True,
-        ...     )
+        >>> pooled_check_title_is_in_text(
+        ...     {
+        ...         "title": "regression tests for machine learning models: a systematic literature review",
+        ...         "text": "TITLE: regression tests for machine learning models: a systematic literature review. Abstract: abstract here",
+        ...         "skip": True,
+        ...     }
         ... )
         False
     """  # noqa: E501
     if args["skip"]:
         return False
 
-    return _study_cites_title(study=args["study"], title=args["title"])
+    return check_title_is_in_text(text=args["text"], title=args["title"])
 
 
-def _preprocess_title(
+def preprocess_title(
     title: str,
 ) -> str:
     """Processes the title in the following manner.
@@ -142,14 +138,14 @@ def _preprocess_title(
         Preprocessed title.
 
     Examples:
-        >>> _preprocess_title(" title. HERE ")
+        >>> preprocess_title(" title. HERE ")
         'titlehere'
     """
     return title.strip().lower().replace(" ", "").replace(".", "")
 
 
-def _preprocess_study(
-    study: str,
+def preprocess_text(
+    text: str,
 ) -> str:
     r"""Processes the study in the following manner.
 
@@ -158,17 +154,17 @@ def _preprocess_study(
     1. Removes line breaks, line carriages, spaces, and dots
 
     Args:
-        study (str): Study's text to preprocess
+        text (str): Study's text to preprocess
 
     Returns:
-        Preprocessed study.
+        Preprocessed text.
 
     Examples:
-        >>> _preprocess_study(" text. \n \r\n HERE ")
+        >>> preprocess_text(" text. \n \r\n HERE ")
         'texthere'
     """
     return (
-        study.strip()
+        text.strip()
         .lower()
         .replace("\n", "")
         .replace("\r", "")
@@ -177,13 +173,13 @@ def _preprocess_study(
     )
 
 
-class SnowballingStudy:
+class FuzzyBackwardSnowballingStudy:
     r"""Represents a study that will be included in backward snowballing.
 
     The constructor will preprocess the title and text content to the correct format.
 
     Examples:
-        >>> s = SnowballingStudy(id=1, title=" title. HERE ", text_content=" text. \n \r\n HERE ")
+        >>> s = FuzzyBackwardSnowballingStudy(id=1, title=" title. HERE ", text_content=" text. \n \r\n HERE ")
         >>> s.title == "titlehere", s.text_content == "texthere"
         (True, True)
     """  # noqa: E501
@@ -207,8 +203,8 @@ class SnowballingStudy:
             text_content (str): Content of the study. Could be extracted from a PDF with CERMINE.
         """  # noqa: E501
         self.__id = id
-        self.__title = _preprocess_title(title)
-        self.__text_content = _preprocess_study(text_content)
+        self.__title = preprocess_title(title)
+        self.__text_content = preprocess_text(text_content)
 
     @property
     def id(self) -> int:
@@ -227,8 +223,10 @@ class SnowballingStudy:
 
 
 def fuzzy_backward_snowballing(
-    studies: list[SnowballingStudy],
-) -> Iterator[tuple[SnowballingStudy, list[SnowballingStudy]]]:
+    studies: list[FuzzyBackwardSnowballingStudy],
+) -> Iterator[
+    tuple[FuzzyBackwardSnowballingStudy, list[FuzzyBackwardSnowballingStudy]]
+]:
     """Runs backward snowballing in the given list of studies.
 
     Args:
@@ -238,9 +236,9 @@ def fuzzy_backward_snowballing(
         A tuple holding a study, and it's references.
 
     Examples:
-        >>> studies: list[SnowballingStudy] = [
-        ...     SnowballingStudy(id=1, title="title 1", text_content="... REFERENCES: machine learning, a SLR"),
-        ...     SnowballingStudy(id=2, title="machine learning, a SLR", text_content="... REFERENCES: other studies"),
+        >>> studies: list[FuzzyBackwardSnowballingStudy] = [
+        ...     FuzzyBackwardSnowballingStudy(id=1, title="title 1", text_content="... REFERENCES: machine learning, a SLR"),
+        ...     FuzzyBackwardSnowballingStudy(id=2, title="machine learning, a SLR", text_content="... REFERENCES: other studies"),
         ... ]
         >>>
         >>> for study, references in fuzzy_backward_snowballing(studies):
@@ -250,12 +248,12 @@ def fuzzy_backward_snowballing(
     """  # noqa: E501
     for study_index, study in enumerate(studies):
         with Pool() as p:
-            func_args: list[_PooledStudyCitesTitleArgs] = [
+            func_args: list[PooledTitleIsInTextArgs] = [
                 {
                     # when `study_index == reference_index`, we are checking if study a cites itself,  # noqa: E501
                     # so we skip and set it as False
                     "skip": study_index == reference_index,
-                    "study": study.text_content,
+                    "text": study.text_content,
                     "title": reference.title,
                 }
                 for reference_index, reference in enumerate(studies)
@@ -263,7 +261,7 @@ def fuzzy_backward_snowballing(
 
             # if `is_cited_list[j]` is True then the current study cites title `j`
             is_cited_list: list[bool] = p.map(
-                _pooled_study_cites_title,
+                pooled_check_title_is_in_text,
                 func_args,
             )
 
