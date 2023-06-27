@@ -525,3 +525,87 @@ async def test_scopus_search_should_retry_at_most_3_times_when_json_decode_error
                 "start": 0,
             }
         )
+
+
+@pytest.mark.asyncio
+async def test_scopus_search_should_retry_fetch_when_key_error_error_occurs(
+    httpx_mock: HTTPXMock,
+):
+    httpx_mock.add_response(
+        200,
+        url="https://api.elsevier.com/content/search/scopus/?apiKey=k1&query=test&start=0",
+        json={"not-search-results": {}},
+    )
+
+    httpx_mock.add_response(
+        200,
+        url="https://api.elsevier.com/content/search/scopus/?apiKey=k2&query=test&start=0",
+        json={
+            "search-results": {
+                "opensearch:totalResults": 13,
+                "opensearch:startIndex": 0,
+                "entry": [
+                    {
+                        "dc:title": "",
+                        "dc:identifier": "",
+                    },
+                ]
+                * 13,
+            }
+        },
+    )
+
+    client = client_module.ScopusClient(["k1", "k2", "k3"])
+
+    await client._fetch_and_parse(
+        {
+            "query": "test",
+            "start": 0,
+        }
+    )
+
+
+@pytest.mark.asyncio
+async def test_scopus_search_should_retry_at_most_5_times_when_key_error_occurs(
+    httpx_mock: HTTPXMock,
+):
+    for i in range(1, 6):
+        httpx_mock.add_response(
+            200,
+            url=f"https://api.elsevier.com/content/search/scopus/?apiKey=k{i}&query=test&start=0",
+            json={"not-search-results": {}},
+        )
+
+    client = client_module.ScopusClient(["k1", "k2", "k3", "k4", "k5"])
+
+    with pytest.raises(client_module.TooManyKeyErrors):
+        await client._fetch_and_parse(
+            {
+                "query": "test",
+                "start": 0,
+            }
+        )
+
+
+@pytest.mark.asyncio
+async def test_scopus_search_should_retry_at_most_3_times_when_key_error_occurs(
+    httpx_mock: HTTPXMock,
+):
+    client_module.MAX_ATTEMPTS_ON_KEY_ERROR = 3
+
+    for i in range(1, 4):
+        httpx_mock.add_response(
+            200,
+            url=f"https://api.elsevier.com/content/search/scopus/?apiKey=k{i}&query=test&start=0",
+            json={"not-search-results": {}},
+        )
+
+    client = client_module.ScopusClient(["k1", "k2", "k3"])
+
+    with pytest.raises(client_module.TooManyKeyErrors):
+        await client._fetch_and_parse(
+            {
+                "query": "test",
+                "start": 0,
+            }
+        )

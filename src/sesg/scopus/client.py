@@ -25,6 +25,7 @@ SCOPUS_API_URL = "https://api.elsevier.com/content/search/scopus"
 MAX_REQUESTS_PER_SECOND_PER_API_KEY = 8
 
 MAX_ATTEMPTS_ON_JSON_DECODE_ERROR = 5
+MAX_ATTEMPTS_ON_KEY_ERROR = 5
 
 
 @dataclass(frozen=True)
@@ -201,6 +202,10 @@ class TooManyJSONDecodeErrors(Exception):
     """Reached the maximum number of attempts on JSONDecodeError."""
 
 
+class TooManyKeyErrors(Exception):
+    """Reached the maximum number of attempts on KeyError."""
+
+
 class InvalidStringError(Exception):
     """The response has a status code of 413 or 400. The search string might be too long."""  # noqa: E501
 
@@ -212,6 +217,11 @@ class OutOfAPIKeysError(Exception):
 def _raise_too_many_json_decode_errors() -> NoReturn:
     """Raises a TooManyJSONDecodeErrors exception."""
     raise TooManyJSONDecodeErrors()
+
+
+def _raise_too_many_key_errors() -> NoReturn:
+    """Raises a TooManyKeyErrors exception."""
+    raise TooManyKeyErrors()
 
 
 class ScopusClient:
@@ -309,6 +319,11 @@ class ScopusClient:
         return res, params_list
 
     @retry(
+        stop=stop_after_attempt(MAX_ATTEMPTS_ON_KEY_ERROR),
+        retry=retry_if_exception_type(KeyError),
+        retry_error_callback=lambda _: _raise_too_many_key_errors(),
+    )
+    @retry(
         stop=stop_after_attempt(MAX_ATTEMPTS_ON_JSON_DECODE_ERROR),
         retry=retry_if_exception_type(JSONDecodeError),
         retry_error_callback=lambda _: _raise_too_many_json_decode_errors(),
@@ -325,6 +340,7 @@ class ScopusClient:
         Raises:
             InvalidStringError: If the response has a status code of 400 or 413.
             TooManyJSONDecodeErrors: If the maximum number of attempts on JSONDecodeError is reached.
+            TooManyKeyErrors: If the maximum number of attempts on KeyError is reached.
             OutOfAPIKeysError: If all API keys are expired.
 
         Returns:
@@ -350,6 +366,7 @@ class ScopusClient:
         Raises:
             InvalidStringError: If the response has a status code of 400 or 413.
             TooManyJSONDecodeErrors: If the maximum number of attempts on JSONDecodeError is reached.
+            TooManyKeyErrors: If the maximum number of attempts on KeyError is reached.
             OutOfAPIKeysError: If all API keys are expired.
 
         Yields:
