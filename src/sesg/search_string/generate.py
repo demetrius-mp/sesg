@@ -11,7 +11,7 @@ from .similar_words import (
 )
 
 
-def _join_tokens_with_operator(
+def join_tokens_with_operator(
     operator: Literal["AND", "OR"],
     tokens_list: Iterable[str],
     *,
@@ -33,7 +33,7 @@ def _join_tokens_with_operator(
         A string with the joined tokens.
 
     Examples:
-        >>> _join_tokens_with_operator("AND", ["machine", "learning", "SLR"], use_double_quotes=True)
+        >>> join_tokens_with_operator("AND", ["machine", "learning", "SLR"], use_double_quotes=True)
         '"machine" AND "learning" AND "SLR"'
     """  # noqa: E501
     if use_double_quotes:
@@ -45,12 +45,12 @@ def _join_tokens_with_operator(
     return f" {operator} ".join(tokens_list)
 
 
-def _join_topics_without_similar_words(
+def join_topics_without_similar_words(
     topics_list: list[list[str]],
 ) -> str:
     """Joins the topics in the list, creating a search string.
 
-    Specialization of [sesg.search_string._join_tokens_with_operator][] to join a list of
+    Specialization of [sesg.search_string.join_tokens_with_operator][] to join a list of
     topics that does not have similar words included.
 
     Each topic is a list of words (or tokens).
@@ -62,25 +62,25 @@ def _join_topics_without_similar_words(
         A valid search string.
 
     Examples:
-        >>> _join_topics_without_similar_words([["machine", "learning"], ["code", "smell"]])
+        >>> join_topics_without_similar_words([["machine", "learning"], ["code", "smell"]])
         '("machine" AND "learning") OR ("code" AND "smell")'
     """  # noqa: E501
     topics_part: list[str] = []
     for topic_words_list in topics_list:
-        s = _join_tokens_with_operator("AND", topic_words_list, use_double_quotes=True)
+        s = join_tokens_with_operator("AND", topic_words_list, use_double_quotes=True)
         topics_part.append(s)
 
-    string = _join_tokens_with_operator("OR", topics_part, use_parenthesis=True)
+    string = join_tokens_with_operator("OR", topics_part, use_parenthesis=True)
 
     return string
 
 
-def _join_topics_with_similar_words(
+def join_topics_with_similar_words(
     topics_list: list[list[list[str]]],
 ) -> str:
     """Joins the topics in the list, creating a search string.
 
-    Specialization of [sesg.search_string._join_tokens_with_operator][] to join a list of
+    Specialization of [sesg.search_string.join_tokens_with_operator][] to join a list of
     topics that includes similar words.
 
     Each topic is a list of words that are considered similar.
@@ -92,7 +92,7 @@ def _join_topics_with_similar_words(
         A valid search string.
 
     Examples:
-        >>> _join_topics_with_similar_words([
+        >>> join_topics_with_similar_words([
         ...     [["machine", "computer"], ["learning", "knowledge"]],
         ...     [["code", "software"], ["smell", "defect"]]
         ... ])
@@ -102,13 +102,13 @@ def _join_topics_with_similar_words(
     for topic in topics_list:
         similar_words_part: list[str] = []
         for similar_words in topic:
-            s = _join_tokens_with_operator("OR", similar_words, use_double_quotes=True)
+            s = join_tokens_with_operator("OR", similar_words, use_double_quotes=True)
             similar_words_part.append(s)
 
-        s = _join_tokens_with_operator("AND", similar_words_part, use_parenthesis=True)
+        s = join_tokens_with_operator("AND", similar_words_part, use_parenthesis=True)
         topics_part.append(s)
 
-    string = _join_tokens_with_operator("OR", topics_part, use_parenthesis=True)
+    string = join_tokens_with_operator("OR", topics_part, use_parenthesis=True)
 
     return string
 
@@ -166,7 +166,7 @@ def create_enrichment_text(
     return enrichment_text
 
 
-def _reduce_number_of_words_per_topic(
+def reduce_number_of_words_per_topic(
     topics_list: list[list[str]],
     n_words_per_topic: int,
 ) -> list[list[str]]:
@@ -180,7 +180,7 @@ def _reduce_number_of_words_per_topic(
         List with the reduced topics.
 
     Examples:
-        >>> _reduce_number_of_words_per_topic([["machine", "learning"], ["code", "smell"]], 1)
+        >>> reduce_number_of_words_per_topic([["machine", "learning"], ["code", "smell"]], 1)
         [['machine'], ['code']]
     """  # noqa: E501
     topics_list = [topic[:n_words_per_topic] for topic in topics_list]
@@ -188,7 +188,7 @@ def _reduce_number_of_words_per_topic(
     return topics_list
 
 
-def _generate_search_string_without_similar_words(
+def generate_search_string_without_similar_words(
     *,
     topics_list: list[list[str]],
     n_words_per_topic: int,
@@ -202,17 +202,17 @@ def _generate_search_string_without_similar_words(
     Returns:
         The search string.
     """  # noqa: E501
-    topics_list = _reduce_number_of_words_per_topic(
+    topics_list = reduce_number_of_words_per_topic(
         topics_list=topics_list,
         n_words_per_topic=n_words_per_topic,
     )
 
-    string = _join_topics_without_similar_words(topics_list)
+    string = join_topics_without_similar_words(topics_list)
 
     return string
 
 
-def _generate_search_string_with_similar_words(
+def generate_search_string_with_similar_words(
     *,
     topics_list: list[list[str]],
     n_words_per_topic: int,
@@ -234,7 +234,7 @@ def _generate_search_string_with_similar_words(
     Returns:
         The search string.
     """  # noqa: E501
-    topics_list = _reduce_number_of_words_per_topic(
+    topics_list = reduce_number_of_words_per_topic(
         topics_list=topics_list,
         n_words_per_topic=n_words_per_topic,
     )
@@ -251,7 +251,7 @@ def _generate_search_string_with_similar_words(
 
         topics_with_similar_words.append(topic_part)
 
-    string = _join_topics_with_similar_words(topics_with_similar_words)
+    string = join_topics_with_similar_words(topics_with_similar_words)
 
     return string
 
@@ -275,12 +275,12 @@ def generate_search_string(
         A search string.
     """  # noqa: E501
     if n_similar_words_per_word == 0:
-        return _generate_search_string_without_similar_words(
+        return generate_search_string_without_similar_words(
             topics_list=topics_list,
             n_words_per_topic=n_words_per_topic,
         )
 
-    return _generate_search_string_with_similar_words(
+    return generate_search_string_with_similar_words(
         topics_list=topics_list,
         n_words_per_topic=n_words_per_topic,
         n_similar_words_per_word=n_similar_words_per_word,

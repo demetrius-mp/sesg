@@ -1,13 +1,13 @@
 import pytest
 from sesg.search_string.similar_words import (
     SimilarWordsFinder,
-    _check_similar_word_is_relevant,
-    _check_stemmed_similar_word_is_duplicate,
-    _check_stemmed_similar_word_is_valid,
-    _check_strings_are_close,
-    _check_strings_are_distant,
-    _get_bert_similar_words,
-    _get_relevant_similar_words,
+    check_similar_word_is_relevant,
+    check_stemmed_similar_word_is_duplicate,
+    check_stemmed_similar_word_is_valid,
+    check_strings_are_close,
+    check_strings_are_distant,
+    get_bert_similar_words,
+    get_relevant_similar_words,
 )
 
 from .test_fixtures import similar_words_finder
@@ -19,7 +19,7 @@ def bert_similar_words(
 ):
     word = "software"
 
-    result = _get_bert_similar_words(
+    result = get_bert_similar_words(
         "software",
         enrichment_text=similar_words_finder.enrichment_text,
         bert_model=similar_words_finder.bert_model,
@@ -41,7 +41,7 @@ def test_strings_are_close(
     s2,
     expected,
 ):
-    result = _check_strings_are_close(s1, s2)
+    result = check_strings_are_close(s1, s2)
 
     assert result == expected
 
@@ -58,7 +58,7 @@ def test_strings_are_distant(
     s2,
     expected,
 ):
-    result = _check_strings_are_distant(s1, s2)
+    result = check_strings_are_distant(s1, s2)
 
     assert result == expected
 
@@ -75,7 +75,7 @@ def test_stemmed_similar_word_is_valid(
     stemmed_word,
     expected,
 ):
-    result = _check_stemmed_similar_word_is_valid(
+    result = check_stemmed_similar_word_is_valid(
         stemmed_similar_word=stemmed_similar_word,
         stemmed_word=stemmed_word,
     )
@@ -95,7 +95,7 @@ def test_stemmed_similar_word_is_duplicate(
     stemmed_similar_words_list,
     expected,
 ):
-    result = _check_stemmed_similar_word_is_duplicate(
+    result = check_stemmed_similar_word_is_duplicate(
         stemmed_similar_word=stemmed_similar_word,
         stemmed_similar_words_list=stemmed_similar_words_list,
     )
@@ -123,7 +123,7 @@ def test_get_bert_similar_words(
 def test_get_bert_similar_words_should_return_none_when_word_has_space(
     similar_words_finder: SimilarWordsFinder,
 ):
-    result = _get_bert_similar_words(
+    result = get_bert_similar_words(
         "multi organizational",
         enrichment_text=similar_words_finder.enrichment_text,
         bert_model=similar_words_finder.bert_model,
@@ -136,7 +136,7 @@ def test_get_bert_similar_words_should_return_none_when_word_has_space(
 def test_get_bert_similar_words_should_return_none_when_word_is_not_in_enrichment_text(
     similar_words_finder: SimilarWordsFinder,
 ):
-    result = _get_bert_similar_words(
+    result = get_bert_similar_words(
         "biology",
         enrichment_text=similar_words_finder.enrichment_text,
         bert_model=similar_words_finder.bert_model,
@@ -151,7 +151,7 @@ def test_get_relevant_similar_words(
 ):
     word, bert_similar_words_list = bert_similar_words
 
-    result = _get_relevant_similar_words(
+    result = get_relevant_similar_words(
         word,
         bert_similar_words_list=bert_similar_words_list,
     )
@@ -173,7 +173,7 @@ def test_get_relevant_similar_words_should_not_return_bert_oov_words(
 ):
     word, bert_similar_words_list = bert_similar_words
 
-    result = _get_relevant_similar_words(
+    result = get_relevant_similar_words(
         word,
         bert_similar_words_list=bert_similar_words_list,
     )
@@ -212,7 +212,7 @@ def test_similar_words_finder_should_return_none_when_key_was_never_used(
 
 def test_check_similar_word_is_relevant_should_return_false_when_word_is_punctuation():
     assert (
-        _check_similar_word_is_relevant(
+        check_similar_word_is_relevant(
             "-",
             stemmed_word="",
             stemmed_similar_word="",
@@ -224,7 +224,7 @@ def test_check_similar_word_is_relevant_should_return_false_when_word_is_punctua
 
 def test_check_similar_word_is_relevant_should_return_false_when_word_is_bert_oov_word():
     assert (
-        _check_similar_word_is_relevant(
+        check_similar_word_is_relevant(
             "##ization",
             stemmed_word="",
             stemmed_similar_word="",

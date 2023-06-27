@@ -1,12 +1,12 @@
 import pytest
 from sesg.search_string.generate import (
-    _generate_search_string_with_similar_words,
-    _generate_search_string_without_similar_words,
-    _join_tokens_with_operator,
-    _join_topics_with_similar_words,
-    _join_topics_without_similar_words,
-    _reduce_number_of_words_per_topic,
     generate_search_string,
+    generate_search_string_with_similar_words,
+    generate_search_string_without_similar_words,
+    join_tokens_with_operator,
+    join_topics_with_similar_words,
+    join_topics_without_similar_words,
+    reduce_number_of_words_per_topic,
 )
 from sesg.search_string.similar_words import SimilarWordsFinder
 
@@ -60,7 +60,7 @@ def test_join_tokens_with_operator(
     use_parenthesis,
     expected,
 ):
-    result = _join_tokens_with_operator(
+    result = join_tokens_with_operator(
         operator,
         tokens_list,
         use_double_quotes=use_double_quotes,
@@ -117,7 +117,7 @@ def test_join_token_with_operator_should_return_only_token_when_list_has_one_ele
     use_parenthesis,
     expected,
 ):
-    result = _join_tokens_with_operator(
+    result = join_tokens_with_operator(
         operator,
         tokens_list,
         use_double_quotes=use_double_quotes,
@@ -140,7 +140,7 @@ def test_join_topics_without_similar_words(
     topics_list,
     expected,
 ):
-    result = _join_topics_without_similar_words(topics_list)
+    result = join_topics_without_similar_words(topics_list)
 
     assert result == expected
 
@@ -161,7 +161,7 @@ def test_join_topics_with_similar_words(
     topics_list,
     expected,
 ):
-    result = _join_topics_with_similar_words(topics_list)
+    result = join_topics_with_similar_words(topics_list)
 
     assert result == expected
 
@@ -186,7 +186,7 @@ def test_reduce_number_of_words_per_topic(
     n_words_per_topic,
     expected,
 ):
-    result = _reduce_number_of_words_per_topic(
+    result = reduce_number_of_words_per_topic(
         topics_list=topics_list,
         n_words_per_topic=n_words_per_topic,
     )
@@ -214,7 +214,7 @@ def test_generate_search_string_without_similar_words(
     n_words_per_topic,
     expected,
 ):
-    result = _generate_search_string_without_similar_words(
+    result = generate_search_string_without_similar_words(
         topics_list=topics_list,
         n_words_per_topic=n_words_per_topic,
     )
@@ -225,7 +225,7 @@ def test_generate_search_string_without_similar_words(
 def test_generate_search_string_with_similar_words(
     similar_words_finder: SimilarWordsFinder,
 ):
-    result = _generate_search_string_with_similar_words(
+    result = generate_search_string_with_similar_words(
         topics_list=[
             ["software", "measurement", "gqm"],
             ["process", "software", "strategic"],
@@ -254,7 +254,7 @@ def test_generate_search_string_with_0_similar_words_should_return_result_of_gen
         similar_words_finder=similar_words_finder,
     )
 
-    expected = _generate_search_string_without_similar_words(
+    expected = generate_search_string_without_similar_words(
         topics_list=[
             ["software", "measurement", "gqm"],
             ["process", "software", "strategic"],
@@ -280,7 +280,7 @@ def test_generate_search_string_with_2_similar_words_should_return_result_of_gen
         similar_words_finder=similar_words_finder,
     )
 
-    expected = _generate_search_string_with_similar_words(
+    expected = generate_search_string_with_similar_words(
         topics_list=[
             ["software", "measurement", "gqm"],
             ["process", "software", "strategic"],
