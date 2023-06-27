@@ -82,9 +82,9 @@ def check_title_is_in_text(
 
 
 class PooledTitleIsInTextArgs(TypedDict):
-    """Data container for the arguments of the [`pooled_study_cites_title`][sesg.snowballing.fuzy_bsb.pooled_check_title_is_in_text] function.
+    """Data container for the arguments of the [`pooled_study_cites_title`][sesg.snowballing.fuzzy_bsb.pooled_check_title_is_in_text] function.
 
-    Args:
+    Attributes:
         title (str): Title to search for
         text (str): Text of the study.
         skip (bool): Indicates if should skip the execution and return False.
@@ -98,7 +98,7 @@ class PooledTitleIsInTextArgs(TypedDict):
 def pooled_check_title_is_in_text(
     args: PooledTitleIsInTextArgs,
 ) -> bool:
-    """Replicates [`check_title_is_in_text`][sesg.snowballing.fuzy_bsb.check_title_is_in_text] behaviour, with slight modifications to work well with `multiprocessing.Pool`.
+    """Replicates [`check_title_is_in_text`][sesg.snowballing.fuzzy_bsb.check_title_is_in_text] behaviour, with slight modifications to work well with `multiprocessing.Pool`.
 
     Args:
         args (PooledTitleIsInTextArgs): args of this function.

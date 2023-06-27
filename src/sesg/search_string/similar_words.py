@@ -198,8 +198,8 @@ def check_similar_word_is_relevant(
 
     - It is not a BERT out-of-vocabulary word (see [check_is_bert_oov_word][sesg.search_string.similar_words.check_is_bert_oov_word]).
     - It is not a punctuation character (see [check_word_is_punctuation][sesg.search_string.similar_words.check_word_is_punctuation]).
-    - It's stemmed form is valid (see [_stemmed_similar_word_is_valid][sesg.search_string.similar_words._stemmed_similar_word_is_valid]).
-    - It's stemmed form is not a duplicate (see [_stemmed_similar_word_is_duplicate][sesg.search_string.similar_words._stemmed_similar_word_is_duplicate]).
+    - It's stemmed form is valid (see [check_stemmed_similar_word_is_valid][sesg.search_string.similar_words.check_stemmed_similar_word_is_valid]).
+    - It's stemmed form is not a duplicate (see [check_stemmed_similar_word_is_duplicate][sesg.search_string.similar_words.check_stemmed_similar_word_is_duplicate]).
 
     Args:
         similar_word (str): Similar word to check if is relevant.

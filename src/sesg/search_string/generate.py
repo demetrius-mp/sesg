@@ -50,7 +50,7 @@ def join_topics_without_similar_words(
 ) -> str:
     """Joins the topics in the list, creating a search string.
 
-    Specialization of [sesg.search_string.join_tokens_with_operator][] to join a list of
+    Specialization of [sesg.search_string.generate.join_tokens_with_operator][] to join a list of
     topics that does not have similar words included.
 
     Each topic is a list of words (or tokens).
@@ -80,7 +80,7 @@ def join_topics_with_similar_words(
 ) -> str:
     """Joins the topics in the list, creating a search string.
 
-    Specialization of [sesg.search_string.join_tokens_with_operator][] to join a list of
+    Specialization of [sesg.search_string.generate.join_tokens_with_operator][] to join a list of
     topics that includes similar words.
 
     Each topic is a list of words that are considered similar.
