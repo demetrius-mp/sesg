@@ -1,5 +1,5 @@
 import pytest
-from sesg.scopus._mutable_cycle import MutableCycle
+from sesg.scopus.mutable_cycle import MutableCycle
 
 
 def test_mutable_cycle_successive_next_calls_should_restart_from_first_item():

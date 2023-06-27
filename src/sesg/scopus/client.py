@@ -15,7 +15,7 @@ import httpx
 from tenacity import retry, retry_if_exception_type, stop_after_attempt
 from typing_extensions import TypedDict
 
-from ._mutable_cycle import MutableCycle
+from .mutable_cycle import MutableCycle
 
 
 SCOPUS_API_URL = "https://api.elsevier.com/content/search/scopus"
@@ -60,7 +60,7 @@ class Page:
     entries: list[Entry]
 
 
-def _parse_response(
+def parse_response(
     response: httpx.Response,
 ) -> Page:
     """Parses a Scopus API response.
@@ -97,7 +97,7 @@ def _parse_response(
     )
 
 
-def _check_api_key_is_expired(
+def check_api_key_is_expired(
     response: httpx.Response,
 ) -> bool:
     """Checks if the given response indicates that the API key is expired.
@@ -113,7 +113,7 @@ def _check_api_key_is_expired(
     return response.status_code == 429
 
 
-def _check_string_is_invalid(
+def check_string_is_invalid(
     response: httpx.Response,
 ) -> bool:
     """Checks if the given response indicates that the string is invalid.
@@ -129,7 +129,7 @@ def _check_string_is_invalid(
     return response.status_code in (400, 413)
 
 
-def _create_clients_list(
+def create_clients_list(
     api_keys_list: list[str],
 ) -> list[httpx.AsyncClient]:
     """Creates a list of async httpx clients that can be used for Scopus queries.
@@ -152,7 +152,7 @@ def _create_clients_list(
     ]
 
 
-class _ScopusParams(TypedDict):
+class ScopusParams(TypedDict):
     """Data container for the required Scopus Params.
 
     Attributes:
@@ -160,7 +160,7 @@ class _ScopusParams(TypedDict):
         start (int): Paginator parameter.
 
     Examples:
-        >>> p: _ScopusParams = {"query": "machine learning", "start": 0}
+        >>> p: ScopusParams = {"query": "machine learning", "start": 0}
         >>> p["query"] == "machine learning"
         True
         >>> p["start"] == 0
@@ -171,10 +171,10 @@ class _ScopusParams(TypedDict):
     start: int
 
 
-def _create_params_pagination(
+def create_params_pagination(
     query: str,
     n_results: int,
-) -> list[_ScopusParams]:
+) -> list[ScopusParams]:
     """Creates a list of ScopusParams for pagination.
 
     Args:
@@ -187,7 +187,7 @@ def _create_params_pagination(
     limited_results = min(5000, n_results)
 
     paginator = range(1 * 25, limited_results, 25)
-    params_list: list[_ScopusParams] = [
+    params_list: list[ScopusParams] = [
         {
             "query": query,
             "start": page,
@@ -214,12 +214,12 @@ class OutOfAPIKeysError(Exception):
     """All API keys available are expired."""
 
 
-def _raise_too_many_json_decode_errors() -> NoReturn:
+def raise_too_many_json_decode_errors() -> NoReturn:
     """Raises a TooManyJSONDecodeErrors exception."""
     raise TooManyJSONDecodeErrors()
 
 
-def _raise_too_many_key_errors() -> NoReturn:
+def raise_too_many_key_errors() -> NoReturn:
     """Raises a TooManyKeyErrors exception."""
     raise TooManyKeyErrors()
 
@@ -229,6 +229,8 @@ class ScopusClient:
 
     Attributes:
         DUMMY_QUERY (str): Used when a dummy query is needed. This value is used, for example, to check if the API key is expired.
+
+    To perform a search, use the [`search`][sesg.scopus.client.ScopusClient.search] method.
 
     !!!note
         You can purge the expired API keys with the `purge_expired_keys` method.
@@ -245,9 +247,9 @@ class ScopusClient:
         Args:
             api_keys_list (list[str]): List with API keys.
         """  # noqa: E501
-        self.clients_list = MutableCycle(_create_clients_list(api_keys_list))
+        self.clients_list = MutableCycle(create_clients_list(api_keys_list))
 
-    def _delete_client(
+    def delete_client(
         self,
         client: httpx.AsyncClient,
     ) -> None:
@@ -260,9 +262,9 @@ class ScopusClient:
         """
         self.clients_list.delete_item(client)
 
-    async def _fetch(
+    async def fetch(
         self,
-        params: _ScopusParams,
+        params: ScopusParams,
     ) -> httpx.Response:
         """Sends a request with the given params, if a client is available and returns the response.
 
@@ -285,20 +287,20 @@ class ScopusClient:
 
         response = await client.get("", params=params)  # type: ignore
 
-        if _check_string_is_invalid(response):
+        if check_string_is_invalid(response):
             raise InvalidStringError()
 
-        if _check_api_key_is_expired(response):
-            self._delete_client(client)
+        if check_api_key_is_expired(response):
+            self.delete_client(client)
 
-            return await self._fetch(params)
+            return await self.fetch(params)
 
         return response
 
-    async def _fetch_first_page(
+    async def fetch_first_page(
         self,
         query: str,
-    ) -> tuple[Page, list[_ScopusParams]]:
+    ) -> tuple[Page, list[ScopusParams]]:
         """Requests for the first page of a query.
 
         Args:
@@ -307,30 +309,30 @@ class ScopusClient:
         Returns:
             A tuple with the parsed response and a list of ScopusParams for pagination.
         """
-        params: _ScopusParams = {
+        params: ScopusParams = {
             "query": query,
             "start": 0,
         }
 
-        res = await self._fetch_and_parse(params)
+        res = await self.fetch_and_parse(params)
 
-        params_list = _create_params_pagination(query, res.n_results)
+        params_list = create_params_pagination(query, res.n_results)
 
         return res, params_list
 
     @retry(
         stop=stop_after_attempt(MAX_ATTEMPTS_ON_KEY_ERROR),
         retry=retry_if_exception_type(KeyError),
-        retry_error_callback=lambda _: _raise_too_many_key_errors(),
+        retry_error_callback=lambda _: raise_too_many_key_errors(),
     )
     @retry(
         stop=stop_after_attempt(MAX_ATTEMPTS_ON_JSON_DECODE_ERROR),
         retry=retry_if_exception_type(JSONDecodeError),
-        retry_error_callback=lambda _: _raise_too_many_json_decode_errors(),
+        retry_error_callback=lambda _: raise_too_many_json_decode_errors(),
     )
-    async def _fetch_and_parse(
+    async def fetch_and_parse(
         self,
-        params: _ScopusParams,
+        params: ScopusParams,
     ) -> Page:
         """Makes a request using the given parameters, and parses the response.
 
@@ -344,13 +346,13 @@ class ScopusClient:
             OutOfAPIKeysError: If all API keys are expired.
 
         Returns:
-            A parsed response, meaning [`Page`][sesg.scopus.client.Page] instance.
+            A parsed response, meaning a [`Page`][sesg.scopus.client.Page] instance.
         """  # noqa: E501
         # params, client = args
 
-        response = await self._fetch(params)
+        response = await self.fetch(params)
 
-        return _parse_response(response)
+        return parse_response(response)
 
     async def search(
         self,
@@ -372,15 +374,14 @@ class ScopusClient:
         Yields:
             A [`Page`][sesg.scopus.client.Page] instance.
         """  # noqa: E501
-        first_page, params_list = await self._fetch_first_page(query)
+        first_page, params_list = await self.fetch_first_page(query)
 
         yield first_page
 
-        if max_concurrent_tasks is None:
-            max_concurrent_tasks = max(len(params_list), 1)
+        max_concurrent_tasks = max_concurrent_tasks or max(len(params_list), 1)
 
         async with aiometer.amap(
-            self._fetch_and_parse,
+            self.fetch_and_parse,
             params_list,
             max_at_once=max_concurrent_tasks,
             max_per_second=len(self.clients_list) * MAX_REQUESTS_PER_SECOND_PER_API_KEY,
@@ -388,13 +389,13 @@ class ScopusClient:
             async for page in next_pages:
                 yield page
 
-    async def _get_expired_clients(self) -> list[httpx.AsyncClient]:
+    async def get_expired_clients(self) -> list[httpx.AsyncClient]:
         """Verifies which clients have expired API keys.
 
         Returns:
             List of clients with expired API keys.
         """
-        params: _ScopusParams = {
+        params: ScopusParams = {
             "query": ScopusClient.DUMMY_QUERY,
             "start": 0,
         }
@@ -420,14 +421,14 @@ class ScopusClient:
             self.clients_list.items,
             responses,
         ):
-            if _check_api_key_is_expired(response):
+            if check_api_key_is_expired(response):
                 expired_clients.append(client)
 
         return expired_clients
 
     async def purge_expired_clients(self):
         """Removes all clients with expired API keys from the list of clients."""
-        expired_clients = await self._get_expired_clients()
+        expired_clients = await self.get_expired_clients()
 
         for client in expired_clients:
-            self._delete_client(client)
+            self.delete_client(client)
