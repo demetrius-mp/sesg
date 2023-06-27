@@ -11,6 +11,7 @@ from .client import (
     Page,
     ScopusClient,
     TooManyJSONDecodeErrors,
+    TooManyKeyErrors,
 )
 
 
@@ -20,4 +21,5 @@ __all__ = [
     "Page",
     "InvalidStringError",
     "TooManyJSONDecodeErrors",
+    "TooManyKeyErrors",
 ]
