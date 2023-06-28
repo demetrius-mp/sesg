@@ -72,7 +72,7 @@ def check_stemmed_similar_word_is_valid(
     A stemmed similar word is considered valid if it complies the following criteria:
 
     - It is not equal to the stemmed word
-    - It is distant from the stemmed word (see [check_strings_are_distant][sesg.search_string.similar_words.check_strings_are_distant]).
+    - It is distant from the stemmed word (see [check_strings_are_distant][sesg.similar_words.stemming_filter.check_strings_are_distant]).
 
     Args:
         stemmed_similar_word (str): The stemmed similar word.

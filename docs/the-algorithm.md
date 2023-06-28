@@ -38,7 +38,7 @@ This step consists of finding "similar words" of a given word, provided a contex
 !!! note "What are similar words?"
     Similar words are words that are contextually similar, not with similar characters.
 
-This package provides a BERT-based word enrichment strategy: [BERT][sesg.search_string.SimilarWordsFinder].
+This package provides a BERT-based word enrichment strategy: [BERT][sesg.similar_words.bert_strategy.BertSimilarWordsGenerator].
 
 Below you will find details on the implementation of the strategy.
 
