@@ -1,7 +1,7 @@
 from typing import Any
 
 import pytest
-from sesg.refactored_search_string.generation import (
+from sesg.search_string.generation import (
     generate_search_string,
     generate_search_string_with_similar_words,
     generate_search_string_without_similar_words,

@@ -3,9 +3,9 @@ from sesg.evaluation.evaluation_factory import (
     Evaluation,
     EvaluationFactory,
     Study,
-    _get_directed_adjacency_list_from_gs,
-    _process_title,
-    _similarity_score,
+    get_directed_adjacency_list_from_gs,
+    process_title,
+    similarity_score,
 )
 
 
@@ -14,10 +14,10 @@ def test_similarity_score():
     other_set = ["Databases, an introduction", "Machine Learning", "Search String"]
     expected_result = [(0, 1), (2, 2)]
 
-    preprocessed_small_set = [_process_title(s) for s in small_set]
-    preprocessed_other_set = [_process_title(s) for s in other_set]
+    preprocessed_small_set = [process_title(s) for s in small_set]
+    preprocessed_other_set = [process_title(s) for s in other_set]
 
-    result = _similarity_score(preprocessed_small_set, preprocessed_other_set)
+    result = similarity_score(preprocessed_small_set, preprocessed_other_set)
     assert result == expected_result
 
 
@@ -26,7 +26,7 @@ def test_similarity_score_empty_sets():
     other_set = []
     expected_result = []
 
-    result = _similarity_score(small_set, other_set)
+    result = similarity_score(small_set, other_set)
     assert result == expected_result
 
 
@@ -35,10 +35,10 @@ def test_similarity_score_single_set():
     other_set = ["Databases, an introduction", "Machine Learning", "Search String"]
     expected_result = [(0, 1)]
 
-    preprocessed_small_set = [_process_title(s) for s in small_set]
-    preprocessed_other_set = [_process_title(s) for s in other_set]
+    preprocessed_small_set = [process_title(s) for s in small_set]
+    preprocessed_other_set = [process_title(s) for s in other_set]
 
-    result = _similarity_score(preprocessed_small_set, preprocessed_other_set)
+    result = similarity_score(preprocessed_small_set, preprocessed_other_set)
     assert result == expected_result
 
 
@@ -46,21 +46,21 @@ def test_process_title():
     string = " A string Here.  \n"
     expected_result = "a string here."
 
-    assert _process_title(string) == expected_result
+    assert process_title(string) == expected_result
 
 
 def test_process_title_empty_string():
     string = ""
     expected_result = ""
 
-    assert _process_title(string) == expected_result
+    assert process_title(string) == expected_result
 
 
 def test_process_title_whitespace_string():
     string = "   "
     expected_result = ""
 
-    assert _process_title(string) == expected_result
+    assert process_title(string) == expected_result
 
 
 def test_get_directed_adjacency_list_from_gs():
@@ -73,7 +73,7 @@ def test_get_directed_adjacency_list_from_gs():
 
     gs = [study1, study2, study3]
 
-    adjacency_list = _get_directed_adjacency_list_from_gs(gs)
+    adjacency_list = get_directed_adjacency_list_from_gs(gs)
 
     expected_adjacency_list = {
         1: [],
@@ -88,14 +88,14 @@ def test_study_processed_title():
     study = Study(1, " A Study Title ")
     expected_result = "a study title"
 
-    assert study._processed_title == expected_result
+    assert study.processed_title == expected_result
 
 
 def test_study_processed_title_empty():
     study = Study(1, "")
     expected_result = ""
 
-    assert study._processed_title == expected_result
+    assert study.processed_title == expected_result
 
 
 def test_study_references_default_factory():

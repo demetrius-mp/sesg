@@ -1,50 +1,11 @@
-"""Search string module."""
+"""Search string generation and formulation module."""
 
-from typing import Optional
-
-from .generate import create_enrichment_text, generate_search_string
-from .similar_words import SimilarWordsFinder, SimilarWordsFinderCacheProtocol
+from .formulation import InvalidPubyearBoundariesError, set_pub_year_boundaries
+from .generation import generate_search_string
 
 
 __all__ = (
-    "create_enrichment_text",
     "generate_search_string",
-    "SimilarWordsFinder",
-    "SimilarWordsFinderCacheProtocol",
+    "set_pub_year_boundaries",
+    "InvalidPubyearBoundariesError",
 )
-
-
-class InvalidPubyearBoundariesError(ValueError):
-    """The provided pubyear boundaries are invalid."""
-
-
-def set_pub_year_boundaries(
-    string: str,
-    *,
-    min_year: Optional[int] = None,
-    max_year: Optional[int] = None,
-) -> str:
-    """Given a search string, will append `PUBYEAR >` and `PUBYEAR <` boundaries as needed.
-
-    Args:
-        string (str): A search string.
-        min_year (Optional[int], optional): Minimum year of publication. Defaults to None.
-        max_year (Optional[int], optional): Maximum year of publication. Defaults to None.
-
-    Returns:
-        A search string with PUBYEAR boundaries.
-
-    Examples:
-        >>> set_pub_year_boundaries(string='title("machine" and "learning")', max_year=2018)
-        'title("machine" and "learning") AND PUBYEAR < 2018'
-    """  # noqa: E501
-    if min_year is not None and max_year is not None and min_year >= max_year:
-        raise InvalidPubyearBoundariesError("Max year must be greater than min year")
-
-    if min_year is not None:
-        string += f" AND PUBYEAR > {min_year}"
-
-    if max_year is not None:
-        string += f" AND PUBYEAR < {max_year}"
-
-    return string
