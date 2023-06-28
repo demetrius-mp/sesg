@@ -132,7 +132,7 @@ def test_check_similar_word_is_relevant_should_return_false_when_stemmed_word_is
 def test_check_similar_word_is_relevant_should_return_false_when_stemmed_word_is_duplicate():
     result = check_similar_word_is_relevant(
         "organization",
-        stemmed_word="organ",
+        stemmed_word="",
         stemmed_similar_word="organ",
         stemmed_relevant_similar_words=["organ"],
     )

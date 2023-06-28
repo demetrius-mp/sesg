@@ -149,3 +149,16 @@ def test_generate_search_string_with_2_similar_words_should_return_result_of_gen
     )
 
     assert result == expected
+
+
+def test_generate_search_string_should_raise_value_error_when_n_similar_words_per_word_is_greate_than_0_and_similar_words_generator_is_none():
+    with pytest.raises(ValueError):
+        generate_search_string(
+            topics=[
+                ["software", "measurement", "gqm"],
+                ["process", "software", "strategic"],
+            ],
+            n_words_per_topic=2,
+            n_similar_words_per_word=2,
+            similar_words_generator=None,
+        )
