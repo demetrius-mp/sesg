@@ -1,5 +1,13 @@
 """Generate similar words using BERT."""
 
+from dataclasses import dataclass
+from typing import Any
+
+import numpy as np
+import torch
+
+from .protocol import SimilarWordsGenerator
+
 
 def check_is_bert_oov_word(
     word: str,
@@ -23,100 +31,106 @@ def check_is_bert_oov_word(
     return word.startswith("##")
 
 
-def get_similar_words_with_bert(
-    word: str,
-    *,
-    enrichment_text: str,
-    bert_tokenizer,
-    bert_model,
-) -> list[str]:
-    """Tries to find words that are similar to the target word using the enrichment text.
+@dataclass
+class BertSimilarWordsGenerator(SimilarWordsGenerator):
+    """Generate similar words using BERT.
 
-    Args:
-        word (str): Token to which other similar ones will be generated.
+    Attributes:
         enrichment_text (str): Text that will be used to find similar words.
         bert_tokenizer (Any): A BERT tokenizer. For example, `BertTokenizer.from_pretrained("bert-base-uncased")`.
         bert_model (Any): A BERT model. For example, `BertForMaskedLM.from_pretrained("bert-base-uncased")`.
-
-    Returns:
-        List of similar words. If the token has more than 1 word, or if it is not present in the enrichment text, will return None.
     """  # noqa: E501
-    import numpy as np
-    import torch
 
-    if " " in word:
-        return []
+    enrichment_text: str
+    bert_tokenizer: Any
+    bert_model: Any
 
-    selected_sentences: list[str] = []
+    def __call__(self, word: str) -> list[str]:
+        """Generate similar words using BERT.
 
-    # Treatment for if the selected sentence is the last sentence of the text (return only one sentence).  # noqa: E501
-    for sentence in enrichment_text.split("."):
-        if word in sentence or word in sentence.lower():
-            selected_sentences.append(sentence + ".")
-            break
+        Args:
+            word (str): Word from which to find similar words.
 
-    formated_sentences = "[CLS] "
-    for sentence in selected_sentences:
-        formated_sentences += sentence.lower() + " [SEP] "
+        Returns:
+            List of similar words.
+        """
+        if " " in word:
+            return []
 
-    tokenized_text = bert_tokenizer.tokenize(formated_sentences)
+        selected_sentences: list[str] = []
 
-    # Defining the masked index equal to the word of the input.
-    masked_index = 0
-    word_is_in_tokens = False
+        # Treatment for if the selected sentence is the last sentence of the text (return only one sentence).  # noqa: E501
+        for sentence in self.enrichment_text.split("."):
+            if word in sentence or word in sentence.lower():
+                selected_sentences.append(sentence + ".")
+                break
 
-    for count, token in enumerate(tokenized_text):
-        if word in token.lower():
-            masked_index = count
-            tokenized_text[masked_index] = "[MASK]"
+        formated_sentences = "[CLS] "
+        for sentence in selected_sentences:
+            formated_sentences += sentence.lower() + " [SEP] "
 
-            word_is_in_tokens = True
+        tokenized_text = self.bert_tokenizer.tokenize(formated_sentences)
 
-    if not word_is_in_tokens:
-        return []
+        # Defining the masked index equal to the word of the input.
+        masked_index = 0
+        word_is_in_tokens = False
 
-    # Convert token to vocabulary indices.
-    indexed_tokens = bert_tokenizer.convert_tokens_to_ids(tokenized_text)
+        for count, token in enumerate(tokenized_text):
+            if word in token.lower():
+                masked_index = count
+                tokenized_text[masked_index] = "[MASK]"
 
-    # Define sentence A and B indices associated to first and second sentences.
-    len_first = tokenized_text.index("[SEP]")
-    len_first = len_first + 1
-    segments_ids = [0] * len_first + [1] * (len(tokenized_text) - len_first)
+                word_is_in_tokens = True
 
-    # Convert the inputs to PyTorch tensors.
-    tokens_tensor = torch.tensor([indexed_tokens])
-    segments_tensors = torch.tensor([segments_ids])
+        if not word_is_in_tokens:
+            return []
 
-    # Predict all tokens.
-    with torch.no_grad():
-        outputs = bert_model(tokens_tensor, token_type_ids=segments_tensors)
-        predictions = outputs[0]
+        # Convert token to vocabulary indices.
+        indexed_tokens = self.bert_tokenizer.convert_tokens_to_ids(tokenized_text)
 
-    # Get top thirty possibilities for the masked word.
-    predicted_index = torch.topk(predictions[0, masked_index], 30)[1]
-    predicted_index = list(np.array(predicted_index))
+        # Define sentence A and B indices associated to first and second sentences.
+        len_first = tokenized_text.index("[SEP]")
+        len_first = len_first + 1
+        segments_ids = [0] * len_first + [1] * (len(tokenized_text) - len_first)
 
-    # ???????????????????????????????????????
-    # ???????????????????????????????????????
-    # ???????????????????????????????????????
-    #
-    # # Remove the \2022 ascii error index.
-    # for index in predicted_index:
-    #     # doesn't make sense, since predicted_index has type `list[int]`
-    #     if index == "1528":
-    #         predicted_index.remove("1528")
+        # Convert the inputs to PyTorch tensors.
+        tokens_tensor = torch.tensor([indexed_tokens])
+        segments_tensors = torch.tensor([segments_ids])
 
-    # for index in predicted_index:
-    #     # what is wrong with token id 1000?
-    #     # hard to track since the token may vary accordingly to the
-    #     # `enrichment_text` and `word` params
-    #     if index == 1000:
-    #         predicted_index.remove(1000)
-    #
-    # ???????????????????????????????????????
-    # ???????????????????????????????????????
-    # ???????????????????????????????????????
+        # Predict all tokens.
+        with torch.no_grad():
+            outputs = self.bert_model(tokens_tensor, token_type_ids=segments_tensors)
+            predictions = outputs[0]
 
-    predicted_tokens: list[str] = bert_tokenizer.convert_ids_to_tokens(predicted_index)
+        # Get top thirty possibilities for the masked word.
+        predicted_index = torch.topk(predictions[0, masked_index], 30)[1]
+        predicted_index = list(np.array(predicted_index))
 
-    return [token for token in predicted_tokens if not check_is_bert_oov_word(token)]
+        # ???????????????????????????????????????
+        # ???????????????????????????????????????
+        # ???????????????????????????????????????
+        #
+        # # Remove the \2022 ascii error index.
+        # for index in predicted_index:
+        #     # doesn't make sense, since predicted_index has type `list[int]`
+        #     if index == "1528":
+        #         predicted_index.remove("1528")
+
+        # for index in predicted_index:
+        #     # what is wrong with token id 1000?
+        #     # hard to track since the token may vary accordingly to the
+        #     # `enrichment_text` and `word` params
+        #     if index == 1000:
+        #         predicted_index.remove(1000)
+        #
+        # ???????????????????????????????????????
+        # ???????????????????????????????????????
+        # ???????????????????????????????????????
+
+        predicted_tokens: list[str] = self.bert_tokenizer.convert_ids_to_tokens(
+            predicted_index
+        )
+
+        return [
+            token for token in predicted_tokens if not check_is_bert_oov_word(token)
+        ]

@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Any
 
 import pytest
-from sesg.similar_words import get_similar_words_with_bert
+from sesg.similar_words import BertSimilarWordsGenerator
 from transformers import BertForMaskedLM, BertTokenizer  # type: ignore
 
 
@@ -39,14 +39,15 @@ def bert_similar_words(
 ):
     bert_tokenizer, bert_model = bert_models
 
-    word = "software"
-
-    bert_similar_words = get_similar_words_with_bert(
-        word,
-        enrichment_text=enrichment_text,
+    generate_similar_words = BertSimilarWordsGenerator(
         bert_model=bert_model,
         bert_tokenizer=bert_tokenizer,
+        enrichment_text=enrichment_text,
     )
+
+    word = "software"
+
+    bert_similar_words = generate_similar_words(word)
 
     return bert_similar_words
 
@@ -57,14 +58,15 @@ def test_get_bert_similar_words_should_return_empty_list_when_word_does_not_appe
 ):
     bert_tokenizer, bert_model = bert_models
 
-    word = "biology"
-
-    bert_similar_words = get_similar_words_with_bert(
-        word,
-        enrichment_text=enrichment_text,
+    generate_similar_words = BertSimilarWordsGenerator(
         bert_model=bert_model,
         bert_tokenizer=bert_tokenizer,
+        enrichment_text=enrichment_text,
     )
+
+    word = "biology"
+
+    bert_similar_words = generate_similar_words(word)
 
     assert bert_similar_words == []
 
@@ -75,14 +77,15 @@ def test_get_bert_similar_words_should_return_empty_list_when_word_has_space(
 ):
     bert_tokenizer, bert_model = bert_models
 
-    word = "goal based"
-
-    bert_similar_words = get_similar_words_with_bert(
-        word,
-        enrichment_text=enrichment_text,
+    generate_similar_words = BertSimilarWordsGenerator(
         bert_model=bert_model,
         bert_tokenizer=bert_tokenizer,
+        enrichment_text=enrichment_text,
     )
+
+    word = "goal based"
+
+    bert_similar_words = generate_similar_words(word)
 
     assert bert_similar_words == []
 
