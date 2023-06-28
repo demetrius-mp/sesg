@@ -41,7 +41,7 @@ def generate_search_string_with_similar_words(
     n_words_per_topic: int,
     n_similar_words_per_word: int,
     similar_words_generator: SimilarWordsGenerator,
-):
+) -> str:
     """Generates a search string with the following steps.
 
     1. Reduces the number of words per topic.
