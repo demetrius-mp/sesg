@@ -26,6 +26,7 @@ MAX_REQUESTS_PER_SECOND_PER_API_KEY = 8
 
 MAX_ATTEMPTS_ON_JSON_DECODE_ERROR = 5
 MAX_ATTEMPTS_ON_KEY_ERROR = 5
+MAX_ATTEMPTS_ON_SCOPUS_INTERNAL_ERROR = 5
 
 
 @dataclass(frozen=True)
@@ -206,6 +207,14 @@ class TooManyKeyErrors(Exception):
     """Reached the maximum number of attempts on KeyError."""
 
 
+class TooManyScopusInternalErrors(Exception):
+    """Reached the maximum number of attempts on ScopusInternalError."""
+
+
+class ScopusInternalError(Exception):
+    """The response has a status code of 500."""
+
+
 class InvalidStringError(Exception):
     """The response has a status code of 413 or 400. The search string might be too long."""  # noqa: E501
 
@@ -222,6 +231,11 @@ def raise_too_many_json_decode_errors() -> NoReturn:
 def raise_too_many_key_errors() -> NoReturn:
     """Raises a TooManyKeyErrors exception."""
     raise TooManyKeyErrors()
+
+
+def raise_too_many_scopus_internal_errors() -> NoReturn:
+    """Raises a TooManyScopusInternalErrors exception."""
+    raise TooManyScopusInternalErrors()
 
 
 class ScopusClient:
@@ -330,6 +344,11 @@ class ScopusClient:
         retry=retry_if_exception_type(JSONDecodeError),
         retry_error_callback=lambda _: raise_too_many_json_decode_errors(),
     )
+    @retry(
+        stop=stop_after_attempt(MAX_ATTEMPTS_ON_SCOPUS_INTERNAL_ERROR),
+        retry=retry_if_exception_type(ScopusInternalError),
+        retry_error_callback=lambda _: raise_too_many_scopus_internal_errors(),
+    )
     async def fetch_and_parse(
         self,
         params: ScopusParams,
@@ -348,9 +367,10 @@ class ScopusClient:
         Returns:
             A parsed response, meaning a [`Page`][sesg.scopus.client.Page] instance.
         """  # noqa: E501
-        # params, client = args
-
         response = await self.fetch(params)
+
+        if response.status_code == 500:
+            raise ScopusInternalError()
 
         return parse_response(response)
 
