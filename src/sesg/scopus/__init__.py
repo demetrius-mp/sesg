@@ -12,6 +12,7 @@ from .client import (
     ScopusClient,
     TooManyJSONDecodeErrors,
     TooManyKeyErrors,
+    TooManyScopusInternalErrors,
 )
 
 
@@ -22,4 +23,5 @@ __all__ = [
     "InvalidStringError",
     "TooManyJSONDecodeErrors",
     "TooManyKeyErrors",
+    "TooManyScopusInternalErrors",
 ]
