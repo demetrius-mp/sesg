@@ -8,6 +8,7 @@ import math
 from dataclasses import dataclass
 from functools import partial
 from json.decoder import JSONDecodeError
+from ssl import SSLError
 from typing import Any, AsyncIterable, NoReturn
 
 import aiometer
@@ -27,6 +28,7 @@ MAX_REQUESTS_PER_SECOND_PER_API_KEY = 8
 MAX_ATTEMPTS_ON_JSON_DECODE_ERROR = 5
 MAX_ATTEMPTS_ON_KEY_ERROR = 5
 MAX_ATTEMPTS_ON_SCOPUS_INTERNAL_ERROR = 5
+MAX_ATTEMPTS_ON_SSL_ERROR = 5
 
 
 @dataclass(frozen=True)
@@ -211,6 +213,10 @@ class TooManyScopusInternalErrors(Exception):
     """Reached the maximum number of attempts on ScopusInternalError."""
 
 
+class TooManySSLErrors(Exception):
+    """Reached the maximum number of attempts on SSLError."""
+
+
 class ScopusInternalError(Exception):
     """The response has a status code of 500."""
 
@@ -236,6 +242,11 @@ def raise_too_many_key_errors() -> NoReturn:
 def raise_too_many_scopus_internal_errors() -> NoReturn:
     """Raises a TooManyScopusInternalErrors exception."""
     raise TooManyScopusInternalErrors()
+
+
+def raise_too_many_ssl_errors() -> NoReturn:
+    """Raises a TooManySSLErrors exception."""
+    raise TooManySSLErrors()
 
 
 class ScopusClient:
@@ -349,6 +360,11 @@ class ScopusClient:
         retry=retry_if_exception_type(ScopusInternalError),
         retry_error_callback=lambda _: raise_too_many_scopus_internal_errors(),
     )
+    @retry(
+        stop=stop_after_attempt(MAX_ATTEMPTS_ON_SSL_ERROR),
+        retry=retry_if_exception_type(SSLError),
+        retry_error_callback=lambda _: raise_too_many_ssl_errors(),
+    )
     async def fetch_and_parse(
         self,
         params: ScopusParams,
@@ -362,6 +378,7 @@ class ScopusClient:
             InvalidStringError: If the response has a status code of 400 or 413.
             TooManyJSONDecodeErrors: If the maximum number of attempts on JSONDecodeError is reached.
             TooManyKeyErrors: If the maximum number of attempts on KeyError is reached.
+            TooManySSLSErrors: If the maximum number of attempts on SSLError is reached.
             OutOfAPIKeysError: If all API keys are expired.
 
         Returns:
