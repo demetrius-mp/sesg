@@ -2,6 +2,7 @@
 
 
 from sesg.similar_words.protocol import SimilarWordsGenerator
+from sesg.similar_words.stemming_filter import filter_with_stemming
 
 from .formulation import (
     join_topics_with_similar_words,
@@ -67,6 +68,10 @@ def generate_search_string_with_similar_words(
         topic_part: list[list[str]] = []
         for token in topic:
             similar_words = similar_words_generator(token)
+            similar_words = filter_with_stemming(
+                token,
+                similar_words_list=similar_words,
+            )
 
             # limiting the number of similar words
             # we add one because the word itself is included in the similar_words list
